@@ -1,0 +1,398 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+const testimonials = [
+  { name: "Siti Aminah", text: "Pelayanannya cepat dan cucian selalu bersih! Servis excelente!", rating: 5 },
+  { name: "Budi Santoso", text: "Layanan Antar Jemput beneran membantu. Recomended!", rating: 5 },
+  { name: "Dewi Lestari", text: "Sudah 2 tahun langganan, tidak pernah kecewa.", rating: 5 },
+];
+
+const allServices = [
+  { icon: "👕", name: "Cuci Kiloan", price: "Rp 6.000/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian" },
+  { icon: "👔", name: "Cuci Satuan", price: "Rp 15.000/pcs", waktu: "12 jam", desc: "Cuci per item, cocok untuk jas, gaun, rok" },
+  { icon: "⚡", name: "Express", price: "Rp 15.000/kg", waktu: "4 jam", desc: "Laundry selesai dalam 4 jam" },
+  { icon: "📦", name: "Cuci Lipat", price: "Rp 10.000/kg", waktu: "24 jam", desc: "Cuci + lipat rapi, siap pakai" },
+  { icon: "🔥", name: "Cuci Setrika", price: "Rp 15.000/kg", waktu: "6 jam", desc: "Cuci + setrika cepat, wangi dan rapi" },
+  { icon: "🧶", name: "Cuci Karpet", price: "Rp 50.000/pcs", waktu: "48 jam", desc: "Cuci karpet besar dan tebal" },
+  { icon: "🧥", name: "Cuci Jaket", price: "Rp 12.000/kg", waktu: "24 jam", desc: "Cuci jaket dan outerwear" },
+  { icon: "👔", name: "Cuci Jas", price: "Rp 35.000/pcs", waktu: "48 jam", desc: "Cuci jas profesional" },
+  { icon: "🔥", name: "Setrika Saja", price: "Rp 5.000/kg", waktu: "6 jam", desc: "Hanya setrika, tanpa cucian" },
+];
+
+export default function LandingPage() {
+  const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const benefits = [
+    { icon: "⏱️", title: "Cepat", desc: "Proses cepat dengan layanan express 4 jam" },
+    { icon: "💎", title: "Bersih", desc: "Hasil cucian bersih dan wangi" },
+    { icon: "🚗", title: "Antar & Jemput", desc: "Jasa layanan antar & jemput ini sangat memudahkan" },
+    { icon: "💰", title: "Terjangkau", desc: "Harga kompetitif dan transparan" },
+  ];
+
+  return (
+    <div style={styles.container}>
+      {/* STICKY NAVBAR */}
+      <header style={{ ...styles.navbar, ...(isScrolled ? styles.navbarScrolled : {}) }}>
+        <div style={styles.navContent}>
+          <div style={styles.navLogo}>
+            <span style={styles.navLogoIcon}>🧺</span>
+            <div>
+              <span style={styles.navLogoText}>Pinang Laundry</span>
+              <span style={styles.navLogoSub}>Bersih, Cepat, Terpercaya</span>
+            </div>
+          </div>
+
+          <nav style={styles.navLinks}>
+            <a href="#home" className="nav-link" style={styles.navLink}>Home</a>
+            <a href="#services" className="nav-link" style={styles.navLink}>Layanan</a>
+            <a href="#about" className="nav-link" style={styles.navLink}>Tentang</a>
+            <a href="#contact" className="nav-link" style={styles.navLink}>Kontak</a>
+          </nav>
+
+          <div style={styles.navButtons}>
+            <button onClick={() => navigate("/login")} style={styles.navLoginBtn}>Login Admin</button>
+            <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
+          </div>
+
+          <button style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
+            {mobileMenu ? "✕" : "☰"}
+          </button>
+        </div>
+
+        {mobileMenu && (
+          <div style={styles.mobileMenu}>
+            <a href="#home" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Home</a>
+            <a href="#services" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Layanan</a>
+            <a href="#about" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Tentang</a>
+            <a href="#contact" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Kontak</a>
+            <button onClick={() => { setMobileMenu(false); navigate("/customer/login"); }} style={styles.mobileOrderBtn}>Pesan Sekarang</button>
+          </div>
+        )}
+      </header>
+
+      {/* HERO SECTION */}
+      <section id="home" style={styles.hero}>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.2) 100%)", zIndex: 1 }}></div>
+        <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 60, width: "100%", maxWidth: 1200, margin: "0 auto" }}>
+        <div style={styles.heroContent}>
+          <div style={styles.heroBadge}>🧺 Promo Terbatas!</div>
+          <h1 style={styles.heroTitle}>Pinang Laundry</h1>
+          <p style={styles.heroSubtitle}>Pakaian kamu bersih, wangi, dan rapi — selesai tepat waktu, setiap kali.</p>
+          <div style={styles.heroButtons}>
+            <button onClick={() => navigate("/customer/login")} style={styles.heroCtaBtn}>
+              <span>Pesan Sekarang</span>
+              <span style={styles.heroCtaArrow}>→</span>
+            </button>
+            <a href="#services" style={styles.heroSecondaryBtn}>Lihat Layanan</a>
+          </div>
+          <div style={styles.heroStats}>
+            <div style={styles.heroStat}>
+              <span style={styles.heroStatNumber}>5000+</span>
+              <span style={styles.heroStatLabel}>Pelanggan Puas</span>
+            </div>
+            <div style={styles.heroStatDivider}></div>
+            <div style={styles.heroStat}>
+              <span style={styles.heroStatNumber}>4 Jam</span>
+              <span style={styles.heroStatLabel}>Layanan Express</span>
+            </div>
+            <div style={styles.heroStatDivider}></div>
+            <div style={styles.heroStat}>
+              <span style={styles.heroStatNumber}>100%</span>
+              <span style={styles.heroStatLabel}>Garansi Bersih</span>
+            </div>
+          </div>
+        </div>
+        <div style={styles.heroVisual}>
+          <div style={styles.heroVisualCard}>
+            <div style={styles.heroVisualIcon}>🧺</div>
+            <div style={styles.heroVisualIconSmallRow}>
+              <span style={styles.heroVisualIconSmall}>👕</span>
+              <span style={styles.heroVisualIconSmall}>👖</span>
+              <span style={styles.heroVisualIconSmall}>🧥</span>
+            </div>
+            <div style={styles.heroVisualBadge1}>✨ Bersih & Wangi</div>
+            <div style={styles.heroVisualBadge2}>🚗 Antar & Jemput</div>
+            <div style={styles.heroVisualBadge3}>⏱️ 4 Jam Express</div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      {/* SERVICES SECTION */}
+      <section id="services" style={{ padding: "80px 24px", minHeight: "100vh", background: "#EFF6FF" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={styles.sectionHeader}>
+          <span style={styles.sectionBadge}>Layanan Kami</span>
+          <h2 style={styles.sectionTitle}>Pilihan Layanan Terbaik</h2>
+          <p style={styles.sectionSubtitle}>Cucian numpuk? Pilih paket laundry terbaikmu dan nikmati hari bebas mencuci!</p>
+        </div>
+        <div style={styles.servicesGrid}>
+          {allServices.map((s, i) => (
+            <div key={i} style={styles.serviceCard}>
+              <div style={styles.serviceCardTop}>
+                <div style={styles.serviceIcon}>{s.icon}</div>
+                <div style={styles.serviceTime}>{s.waktu}</div>
+              </div>
+              <h3 style={styles.serviceName}>{s.name}</h3>
+              <p style={styles.serviceDesc}>{s.desc}</p>
+              <div style={styles.servicePriceRow}>
+                <span style={styles.servicePrice}>{s.price}</span>
+              </div>
+              <button onClick={() => navigate("/customer/login")} style={styles.serviceOrderBtn}>Pesan Sekarang</button>
+            </div>
+          ))}
+        </div>
+        </div>
+      </section>
+
+      {/* WHY CHOOSE US */}
+      <section id="about" style={styles.benefits}>
+        <div style={styles.sectionHeader}>
+          <span style={styles.sectionBadge}>Keunggulan</span>
+          <h2 style={styles.sectionTitle}>Mengapa Memilih Pinang Laundry?</h2>
+          <p style={styles.sectionSubtitle}>Kami memberikan pengalaman laundry terbaik untuk Anda</p>
+        </div>
+        <div style={styles.benefitsGrid}>
+          {benefits.map((b, i) => (
+            <div key={i} style={styles.benefitCard}>
+              <div style={styles.benefitIconBg}>
+                <span style={styles.benefitIcon}>{b.icon}</span>
+              </div>
+              <h3 style={styles.benefitTitle}>{b.title}</h3>
+              <p style={styles.benefitDesc}>{b.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW TO ORDER */}
+      <section style={styles.howToOrder}>
+        <div style={styles.sectionHeader}>
+          <span style={{ ...styles.sectionBadge, fontSize: 14, fontWeight: 600, letterSpacing: "1px" }}>Cara Memesan</span>
+          <h2 style={{ ...styles.sectionTitle, fontSize: 40, fontWeight: 700 }}>Mudah & Praktis</h2>
+        </div>
+        <div style={styles.steps}>
+          {[
+            { num: "1", title: "Login / Daftar", desc: "Daftar akun pelanggan" },
+            { num: "2", title: "Pilih Layanan", desc: "Tentukan layanan & berat" },
+            { num: "3", title: "Isi Alamat", desc: "Masukkan alamat jemput" },
+            { num: "4", title: "Kami antar & jemput", desc: "Harga murah meriah" },
+          ].map((step, i) => (
+            <div key={i} style={styles.stepItem}>
+              <div style={{ ...styles.stepCircle, width: 64, height: 64, fontSize: 22, fontWeight: 700 }}>{step.num}</div>
+              <h4 style={{ ...styles.stepTitle, fontSize: 18, fontWeight: 600 }}>{step.title}</h4>
+              <p style={{ ...styles.stepDesc, fontSize: 15 }}>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section style={styles.testimonials}>
+        <div style={styles.sectionHeader}>
+          <span style={styles.sectionBadge}>Testimoni</span>
+          <h2 style={styles.sectionTitle}>Apa Kata Pelanggan Kami?</h2>
+        </div>
+        <div style={styles.testimonialGrid}>
+          {testimonials.map((t, i) => (
+            <div key={i} style={styles.testimonialCard}>
+              <div style={styles.testimonialStars}>
+                {Array(t.rating).fill("⭐").map((s, j) => <span key={j}>{s}</span>)}
+              </div>
+              <p style={styles.testimonialText}>"{t.text}"</p>
+              <div style={styles.testimonialAuthor}>
+                <div style={styles.testimonialAvatar}>{t.name[0]}</div>
+                <span style={styles.testimonialName}>{t.name}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA SECTION */}
+      <section style={styles.ctaSection}>
+        <div style={styles.ctaContent}>
+          <h2 style={styles.ctaTitle}>Siap Mencuci?</h2>
+          <p style={styles.ctaSubtitle}>Jangan lewatkan promo hari ini!</p>
+          <button onClick={() => navigate("/customer/login")} style={styles.ctaButton}>Mulai Pesan Sekarang 🧺</button>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" style={styles.contact}>
+        <div style={styles.sectionHeader}>
+          <span style={styles.sectionBadge}>Hubungi Kami</span>
+          <h2 style={styles.sectionTitle}>Get In Touch</h2>
+        </div>
+        <div style={styles.contactGrid}>
+          <div style={styles.contactCard}>
+            <span style={styles.contactIcon}>📞</span>
+            <h4 style={styles.contactLabel}>Telepon / WA</h4>
+            <p style={styles.contactValue}>0812-3456-7890</p>
+          </div>
+          <div style={styles.contactCard}>
+            <span style={styles.contactIcon}>📍</span>
+            <h4 style={styles.contactLabel}>Alamat</h4>
+            <p style={styles.contactValue}>Jl. Pinang Raya, Margonda Depok</p>
+          </div>
+          <div style={styles.contactCard}>
+            <span style={styles.contactIcon}>🕐</span>
+            <h4 style={styles.contactLabel}>Jam Operasional</h4>
+            <p style={styles.contactValue}>Senin-Sabtu (08.00-20.00)</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={styles.footer}>
+        <div style={styles.footerContent}>
+          <div style={styles.footerBrand}>
+            <span style={styles.footerLogo}>🧺</span>
+            <div>
+              <h3 style={styles.footerBrandName}>Pinang Laundry</h3>
+              <p style={styles.footerBrandTagline}>Bersih, Cepat, Terpercaya</p>
+            </div>
+          </div>
+          <div style={styles.footerLinks}>
+            <h4 style={styles.footerLinkTitle}>Menu</h4>
+            <a href="#home" style={styles.footerLink}>Home</a>
+            <a href="#services" style={styles.footerLink}>Layanan</a>
+            <a href="#about" style={styles.footerLink}>Tentang</a>
+          </div>
+          <div style={styles.footerLinks}>
+            <h4 style={styles.footerLinkTitle}>Layanan</h4>
+            <span style={styles.footerLink}>Cuci Kiloan</span>
+            <span style={styles.footerLink}>Express</span>
+            <span style={styles.footerLink}>Cuci Karpet</span>
+          </div>
+          <div style={styles.footerLinks}>
+            <h4 style={styles.footerLinkTitle}>Kontak</h4>
+            <span style={styles.footerLink}>0812-3456-7890</span>
+            <span style={styles.footerLink}>Jl. Pinang Raya</span>
+          </div>
+        </div>
+        <div style={styles.footerBottom}>
+          <p>© 2026 Pinang Laundry. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+const styles = {
+  container: { fontFamily: "'Segoe UI', -apple-system, sans-serif", background: "linear-gradient(180deg, #f0f7ff 0%, #ffffff 30%, #f8fafc 60%, #f0f7ff 100%)", minHeight: "100vh", paddingTop: 72 },
+  
+  navbar: { position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(10px)", transition: "all 0.3s ease", borderBottom: "1px solid rgba(241,245,249,0.8)" },
+  navbarScrolled: { boxShadow: "0 4px 20px rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(10px)" },
+  navContent: { maxWidth: 1200, margin: "0 auto", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" },
+  navLogo: { display: "flex", alignItems: "center", gap: 12, cursor: "default" },
+  navLogoIcon: { fontSize: 32 },
+  navLogoText: { display: "block", fontSize: 20, fontWeight: 800, color: "#1e40af" },
+  navLogoSub: { display: "block", fontSize: 11, color: "#94a3b8" },
+  navLinks: { display: "flex", gap: 8 },
+  navLink: { color: "#475569", textDecoration: "none", fontWeight: 700, fontSize: 24, letterSpacing: "0.3px", cursor: "pointer", padding: "8px 16px", transition: "all 0.2s ease" },
+  navButtons: { display: "flex", gap: 12 },
+  navLoginBtn: { padding: "10px 20px", borderRadius: 10, border: "2px solid #3b82f6", background: "transparent", color: "#3b82f6", fontWeight: 700, cursor: "pointer", fontSize: 14 },
+  navOrderBtn: { padding: "10px 20px", borderRadius: 10, border: "none", background: "#3b82f6", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 },
+  mobileToggle: { display: "none", background: "none", border: "none", fontSize: 24, cursor: "pointer" },
+  mobileMenu: { display: "flex", flexDirection: "column", gap: 12, padding: "16px 24px", background: "#fff", borderTop: "1px solid #f1f5f9" },
+  mobileNavLink: { padding: "12px 0", color: "#64748b", textDecoration: "none", fontWeight: 600, cursor: "pointer" },
+  mobileOrderBtn: { padding: "14px 20px", borderRadius: 10, border: "none", background: "#3b82f6", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14, textAlign: "center" },
+
+  hero: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 10%", backgroundImage: "url('/store-bg.png')", backgroundSize: "cover", backgroundPosition: "center", position: "relative", minHeight: "100vh", width: "100%" },
+  heroContent: { flex: 1, paddingLeft: 120 },
+  heroBadge: { display: "inline-block", padding: "10px 24px", background: "rgba(255,255,255,0.2)", color: "#ffffff", borderRadius: 24, fontSize: 16, fontWeight: 400, letterSpacing: "+0.3px", marginBottom: 36 },
+  heroTitle: { fontSize: 72, fontWeight: 700, color: "#ffffff", marginBottom: 32, lineHeight: 1.1, letterSpacing: "-1.5px" },
+  heroHighlight: { color: "#93c5fd" },
+  heroSubtitle: { fontSize: 20, color: "#ffffff", marginBottom: 48, maxWidth: 700, lineHeight: 1.8, letterSpacing: 0 },
+  heroButtons: { display: "flex", gap: 24, marginBottom: 56 },
+  heroCtaBtn: { display: "flex", alignItems: "center", gap: 10, padding: "18px 40px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "#fff", fontSize: 18, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 20px rgba(59,130,246,0.4)" },
+  heroCtaArrow: { fontSize: 22 },
+  heroSecondaryBtn: { padding: "18px 40px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "transparent", color: "#ffffff", fontSize: 18, fontWeight: 400, cursor: "pointer", textDecoration: "none" },
+  heroStats: { display: "flex", gap: 56 },
+  heroStat: { display: "flex", flexDirection: "column", textAlign: "center", minWidth: 100 },
+  heroStatNumber: { fontSize: 40, fontWeight: 700, color: "#ffffff" },
+  heroStatLabel: { fontSize: 16, color: "rgba(255,255,255,0.75)", letterSpacing: "+0.3px" },
+  heroStatDivider: { width: 1, height: 48, background: "rgba(255,255,255,0.3)" },
+  heroVisual: { flex: 1, display: "flex", justifyContent: "center", alignItems: "center" },
+  heroVisualCard: { position: "relative", width: 280, height: 280, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(12px)", borderRadius: 40, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" },
+  heroVisualIcon: { fontSize: 80, lineHeight: 1 },
+  heroVisualIconSmallRow: { display: "flex", gap: 8 },
+  heroVisualIconSmall: { fontSize: 32, lineHeight: 1 },
+  heroVisualBadge1: { position: "absolute", top: -10, right: -20, padding: "8px 16px", background: "#22c55e", color: "#fff", borderRadius: 16, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(34,197,94,0.4)" },
+  heroVisualBadge2: { position: "absolute", bottom: 30, left: -30, padding: "8px 16px", background: "#3b82f6", color: "#fff", borderRadius: 16, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(59,130,246,0.4)" },
+  heroVisualBadge3: { position: "absolute", bottom: -10, right: -10, padding: "8px 16px", background: "#f59e0b", color: "#fff", borderRadius: 16, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(245,158,11,0.4)" },
+
+  section: { padding: "80px 24px", maxWidth: 1200, margin: "0 auto", minHeight: "100vh" },
+  sectionHeader: { textAlign: "center", marginBottom: 48 },
+  sectionBadge: { display: "inline-block", padding: "8px 18px", background: "#eff6ff", color: "#3b82f6", borderRadius: 20, fontSize: 16, fontWeight: 400, letterSpacing: "+0.3px", marginBottom: 16 },
+  sectionTitle: { fontSize: 32, fontWeight: 700, color: "#1e293b", marginBottom: 8, letterSpacing: "-0.5px" },
+  sectionSubtitle: { fontSize: 16, color: "#64748b", margin: "0 auto", lineHeight: 1.65, letterSpacing: 0, whiteSpace: "nowrap" },
+
+  servicesGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 },
+  serviceCard: { padding: 24, background: "#fff", borderRadius: 20, border: "1px solid #f1f5f9", transition: "all 0.3s ease", cursor: "default", boxShadow: "0 4px 16px rgba(0,0,0,0.05)" },
+  serviceCardTop: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  serviceIcon: { fontSize: 40 },
+  serviceTime: { padding: "4px 10px", background: "#dcfce7", color: "#22c55e", borderRadius: 8, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
+  serviceName: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 8 },
+  serviceDesc: { fontSize: 16, color: "#64748b", marginBottom: 16, lineHeight: 1.65, letterSpacing: 0 },
+  servicePriceRow: { marginBottom: 16 },
+  servicePrice: { fontSize: 22, fontWeight: 700, color: "#3b82f6" },
+  serviceOrderBtn: { display: "block", width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "#3b82f6", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer" },
+
+  benefits: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #e8f4f8 100%)" },
+  benefitsGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, maxWidth: 1000, margin: "0 auto" },
+  benefitCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.04)", transition: "all 0.3s ease" },
+  benefitIconBg: { width: 64, height: 64, background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
+  benefitIcon: { fontSize: 32 },
+  benefitTitle: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 8 },
+  benefitDesc: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },
+
+  howToOrder: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)" },
+  steps: { display: "flex", justifyContent: "center", gap: 48, flexWrap: "wrap", marginTop: 40 },
+  stepItem: { textAlign: "center", flex: "0 0 auto" },
+  stepCircle: { width: 60, height: 60, background: "#3b82f6", color: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, margin: "0 auto 16px" },
+  stepTitle: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 4 },
+  stepDesc: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },
+
+  testimonials: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)" },
+  testimonialGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, maxWidth: 1000, margin: "0 auto" },
+  testimonialCard: { padding: 24, background: "#fff", borderRadius: 20, boxShadow: "0 4px 16px rgba(0,0,0,0.04)", border: "1px solid #f1f5f9" },
+  testimonialStars: { marginBottom: 12 },
+  testimonialText: { fontSize: 16, color: "#64748b", lineHeight: 1.65, marginBottom: 16, fontStyle: "italic", letterSpacing: 0 },
+  testimonialAuthor: { display: "flex", alignItems: "center", gap: 12 },
+  testimonialAvatar: { width: 36, height: 36, background: "#3b82f6", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700 },
+  testimonialName: { fontSize: 14, fontWeight: 400, color: "#1e293b" },
+
+  ctaSection: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" },
+  ctaContent: { textAlign: "center" },
+  ctaTitle: { fontSize: 36, fontWeight: 700, color: "#fff", marginBottom: 8, letterSpacing: "-0.5px" },
+  ctaSubtitle: { fontSize: 16, color: "rgba(255,255,255,0.9)", marginBottom: 28, lineHeight: 1.65, letterSpacing: 0 },
+  ctaButton: { display: "inline-block", padding: "16px 32px", borderRadius: 14, border: "none", background: "#fff", color: "#3b82f6", fontSize: 16, fontWeight: 700, cursor: "pointer" },
+
+  contact: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #f0f7ff 100%)" },
+  contactGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, maxWidth: 900, margin: "0 auto" },
+  contactCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.04)", border: "1px solid #f1f5f9" },
+  contactIcon: { fontSize: 40, marginBottom: 12 },
+  contactLabel: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 4 },
+  contactValue: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },
+
+  footer: { padding: "60px 24px 24px", background: "#1e293b" },
+  footerContent: { display: "flex", justifyContent: "space-between", maxWidth: 1000, margin: "0 auto", gap: 48, flexWrap: "wrap" },
+  footerBrand: { display: "flex", gap: 12 },
+  footerLogo: { fontSize: 32 },
+  footerBrandName: { fontSize: 18, fontWeight: 800, color: "#fff", margin: 0 },
+  footerBrandTagline: { fontSize: 12, color: "#94a3b8" },
+  footerLinks: { display: "flex", flexDirection: "column", gap: 12 },
+  footerLinkTitle: { fontSize: 14, fontWeight: 400, color: "#fff", marginBottom: 4 },
+  footerLink: { fontSize: 14, color: "#94a3b8", textDecoration: "none", cursor: "default", lineHeight: 1.65 },
+  footerBottom: { textAlign: "center", padding: "24px 0 0", marginTop: 48, borderTop: "1px solid #334155" },
+};

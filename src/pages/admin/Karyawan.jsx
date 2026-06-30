@@ -1,0 +1,310 @@
+import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+
+const formatTanggalIndonesia = () => {
+  const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  const today = new Date();
+  return `${today.getDate()} ${bulan[today.getMonth()]} ${today.getFullYear()}, ${hari[today.getDay()]}`;
+};
+
+const initialData = [
+  { no: 1, name: "Siti Aisyah", role: "Kasir", phone: "0812-3456-7890", order: 120, status: "Aktif" },
+  { no: 2, name: "Budi Setiawan", role: "Staff Laundry", phone: "0813-2345-6789", order: 98, status: "Aktif" },
+  { no: 3, name: "Dewi Lestari", role: "Staff Laundry", phone: "0814-1234-5678", order: 85, status: "Aktif" },
+  { no: 4, name: "Andi Saputra", role: "Delivery", phone: "0815-9876-5432", order: 55, status: "Aktif" },
+  { no: 5, name: "Rina Susilowati", role: "Staff Laundry", phone: "0816-4567-8901", order: 42, status: "Cuti" },
+  { no: 6, name: "Joko Widodo", role: "Staff Laundry", phone: "0817-1111-2222", order: 38, status: "Aktif" },
+  { no: 7, name: "Siti Rahayu", role: "Kasir", phone: "0818-3333-4444", order: 35, status: "Aktif" },
+  { no: 8, name: "Budi Hermawan", role: "Delivery", phone: "0819-5555-6666", order: 30, status: "Aktif" },
+  { no: 9, name: "Dewi Anjani", role: "Staff Laundry", phone: "0820-7777-8888", order: 25, status: "Aktif" },
+  { no: 10, name: "Alex Alex", role: "Admin", phone: "0821-9999-0000", order: 20, status: "Aktif" },
+];
+
+export default function Karyawan() {
+  const currentDate = formatTanggalIndonesia();
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [newKaryawan, setNewKaryawan] = useState({ name: "", role: "Staff Laundry", phone: "" });
+  
+  const [allKaryawan, setAllKaryawan] = useState(() => {
+    const saved = localStorage.getItem("karyawanData");
+    return saved ? JSON.parse(saved) : initialData;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("karyawanData", JSON.stringify(allKaryawan));
+  }, [allKaryawan]);
+
+  const filteredKaryawan = allKaryawan.filter(k => 
+    k.name.toLowerCase().includes(search.toLowerCase()) || 
+    k.role.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(filteredKaryawan.length / itemsPerPage);
+  const paginatedKaryawan = filteredKaryawan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleTambahKaryawan = () => {
+    if (newKaryawan.name && newKaryawan.phone) {
+      const newNo = allKaryawan.length + 1;
+      const newData = {
+        no: newNo,
+        name: newKaryawan.name,
+        role: newKaryawan.role,
+        phone: newKaryawan.phone,
+        order: 0,
+        status: "Aktif"
+      };
+      setAllKaryawan([...allKaryawan, newData]);
+      setNewKaryawan({ name: "", role: "Staff Laundry", phone: "" });
+      setShowModal(false);
+      alert(`Karyawan berhasil ditambahkan!\nNama: ${newData.name}\nRole: ${newData.role}`);
+    } else {
+      alert("Mohon isi nama dan nomor HP!");
+    }
+  };
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleEditKaryawan = (karyawan) => {
+    setNewKaryawan({ name: karyawan.name, role: karyawan.role, phone: karyawan.phone });
+    setShowModal(true);
+  };
+
+  const handleDeleteKaryawan = (no) => {
+    if (confirm("Yakin ingin menghapus karyawan ini?")) {
+      setAllKaryawan(allKaryawan.filter(k => k.no !== no));
+      alert("Karyawan berhasil dihapus!");
+    }
+  };
+
+  return (
+    <div style={styles.app}>
+      <aside style={styles.sidebar}>
+        <div style={styles.sidebarTop}>
+          <div style={styles.logoSection}>
+            <div style={styles.logoIcon}>🧺</div>
+            <div>
+              <h1 style={styles.logoText}>Pinang Laundry</h1>
+              <p style={styles.logoSub}>Bersih, Cepat, Terpercaya</p>
+            </div>
+          </div>
+
+          <nav style={styles.nav}>
+            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="🏠" label="Dashboard" />
+            </NavLink>
+            <NavLink to="/transaksi" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="🧾" label="Transaksi" />
+            </NavLink>
+            <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="👥" label="Pelanggan" />
+            </NavLink>
+            <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="👨‍💼" label="Karyawan" />
+            </NavLink>
+            <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="🏷️" label="Layanan" />
+            </NavLink>
+            <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="📊" label="Laporan" />
+            </NavLink>
+            <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="⚙️" label="Pengaturan" />
+            </NavLink>
+          </nav>
+        </div>
+
+        <div style={styles.profileWidget}>
+          <div style={styles.avatarCircle}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={styles.profName}>Alex</div>
+            <div style={styles.profRole}>Admin</div>
+          </div>
+        </div>
+      </aside>
+
+      <main style={styles.main}>
+        <header style={styles.header}>
+          <h2 style={styles.welcome}>Manajemen Karyawan</h2>
+          <div style={styles.headerRight}>
+            <div style={styles.dateBox} onClick={() => alert("Kalender")}>📅 {currentDate}</div>
+            <div style={styles.notifBtn}>🔔<span style={styles.notifBadge}>3</span></div>
+            <div style={styles.topAvatar}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+          </div>
+        </header>
+
+        <div style={styles.statsRow}>
+          <StatCard label="Total Karyawan" val={allKaryawan.length.toString()} color="#e0f2fe" iColor="#0ea5e9" icon="👨‍💼" growth="8.5%" />
+          <StatCard label="Kasir" val={allKaryawan.filter(k => k.role === "Kasir").length.toString()} color="#dcfce7" iColor="#22c55e" icon="💰" growth="2.1%" />
+          <StatCard label="Staff Laundry" val={allKaryawan.filter(k => k.role === "Staff Laundry").length.toString()} color="#f3e8ff" iColor="#a855f7" icon="👕" growth="5.3%" />
+          <StatCard label="Delivery" val={allKaryawan.filter(k => k.role === "Delivery").length.toString()} color="#ffedd5" iColor="#f97316" icon="🚗" growth="1.2%" />
+        </div>
+
+        <section style={styles.card}>
+          <div style={styles.cardHeader}>
+            <h3 style={styles.cardTitle}>Data Karyawan</h3>
+            <div style={styles.actionButtons}>
+              <input placeholder="Cari karyawan..." value={search} onChange={(e) => setSearch(e.target.value)} style={styles.search} />
+              <button style={styles.btnAdd} onClick={() => setShowModal(true)}>+ Tambah Karyawan</button>
+            </div>
+          </div>
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.thRow}>
+                <th style={styles.th}>No</th>
+                <th style={styles.th}>Nama</th>
+                <th style={styles.th}>Role</th>
+                <th style={styles.th}>No. Telepon</th>
+                <th style={styles.th}>Total Order</th>
+                <th style={styles.th}>Status</th>
+                <th style={styles.th}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedKaryawan.map((k) => (
+                <KaryawanRow key={k.no} no={k.no} name={k.name} role={k.role} phone={k.phone} order={k.order} status={k.status} onEdit={() => handleEditKaryawan(k)} onDelete={() => handleDeleteKaryawan(k.no)} />
+              ))}
+            </tbody>
+          </table>
+          <div style={styles.pagination}>
+            <span onClick={() => goToPage(currentPage - 1)} style={{cursor: currentPage > 1 ? "pointer" : "default", opacity: currentPage > 1 ? 1 : 0.5}}>‹</span>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <span key={page} onClick={() => goToPage(page)} style={page === currentPage ? styles.pageActive : {cursor: "pointer"}}>{page}</span>
+            ))}
+            <span onClick={() => goToPage(currentPage + 1)} style={{cursor: currentPage < totalPages ? "pointer" : "default", opacity: currentPage < totalPages ? 1 : 0.5}}>›</span>
+          </div>
+        </section>
+      </main>
+
+      {showModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Tambah Karyawan</h3>
+            <input style={styles.modalInput} placeholder="Nama Karyawan" value={newKaryawan.name} onChange={(e) => setNewKaryawan({...newKaryawan, name: e.target.value})} />
+            <select style={styles.modalInput} value={newKaryawan.role} onChange={(e) => setNewKaryawan({...newKaryawan, role: e.target.value})}>
+              <option value="Admin">Admin</option>
+              <option value="Kasir">Kasir</option>
+              <option value="Staff Laundry">Staff Laundry</option>
+              <option value="Delivery">Delivery</option>
+            </select>
+            <input style={styles.modalInput} placeholder="Nomor HP" value={newKaryawan.phone} onChange={(e) => setNewKaryawan({...newKaryawan, phone: e.target.value})} />
+            <div style={styles.modalButtons}>
+              <button style={styles.modalCancel} onClick={() => setShowModal(false)}>Batal</button>
+              <button style={styles.modalSave} onClick={handleTambahKaryawan}>Simpan</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const NavItem = ({ icon, label }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <span>{icon}</span> {label}
+  </div>
+);
+
+const StatCard = ({ label, val, color, iColor, icon, growth }) => (
+  <div style={styles.statCard}>
+    <div style={{ ...styles.statIcon, backgroundColor: color, color: iColor }}>{icon}</div>
+    <div style={{ marginLeft: 16 }}>
+      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 800 }}>{val}</div>
+      <div style={{ fontSize: 10, color: "#22c55e", fontWeight: 700 }}>▲ {growth} <span style={{color: '#94a3b8', fontWeight: 400}}>dari bulan lalu</span></div>
+    </div>
+  </div>
+);
+
+function getRoleBadge(role) {
+  if (role === "Admin") return { padding: "4px 10px", borderRadius: 8, background: "#eff6ff", color: "#3b82f6", fontSize: 10, fontWeight: 800 };
+  if (role === "Kasir") return { padding: "4px 10px", borderRadius: 8, background: "#ecfdf5", color: "#10b981", fontSize: 10, fontWeight: 800 };
+  if (role === "Staff Laundry") return { padding: "4px 10px", borderRadius: 8, background: "#f5f3ff", color: "#8b5cf6", fontSize: 10, fontWeight: 800 };
+  return { padding: "4px 10px", borderRadius: 8, background: "#fff7ed", color: "#f97316", fontSize: 10, fontWeight: 800 };
+}
+
+function getStatusBadge(status) {
+  if (status === "Aktif") return { color: "#22c55e", fontWeight: 800, padding: "4px 8px", background: "#f0fdf4", borderRadius: 6 };
+  return { color: "#f97316", fontWeight: 800, padding: "4px 8px", background: "#fff7ed", borderRadius: 6 };
+}
+
+const KaryawanRow = ({ no, name, role, phone, order, status, onEdit, onDelete }) => (
+  <tr style={styles.tr}>
+    <td style={styles.td}>{no}</td>
+    <td style={styles.td}>👤 {name}</td>
+    <td style={styles.td}><span style={getRoleBadge(role)}>{role}</span></td>
+    <td style={styles.td}>{phone}</td>
+    <td style={styles.td}>{order}</td>
+    <td style={styles.td}><span style={getStatusBadge(status)}>{status}</span></td>
+    <td style={styles.td}>
+      <button style={styles.actionBtn} onClick={onEdit}>✏️</button>
+      <button style={styles.actionBtn} onClick={onDelete}>🗑️</button>
+    </td>
+  </tr>
+);
+
+const styles = {
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", fontFamily: "sans-serif", color: "#1e293b" },
+  sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
+  sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
+  logoSection: { display: "flex", alignItems: "center", gap: 12 },
+  logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
+  logoText: { fontSize: 18, fontWeight: 800, color: "#1e40af", margin: 0 },
+  logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
+  nav: { display: "flex", flexDirection: "column", gap: 6 },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "flex" },
+  navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
+  avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
+  profName: { fontSize: 13, fontWeight: 800 },
+  profRole: { fontSize: 10, color: "#94a3b8" },
+  main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
+  welcome: { fontSize: 24, fontWeight: 800, margin: 0 },
+  headerRight: { display: "flex", alignItems: "center", gap: 15 },
+  dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9", cursor: "pointer" },
+  notifBtn: { position: "relative", padding: 10, background: "#fff", borderRadius: 12, border: "1px solid #f1f5f9", cursor: "pointer" },
+  notifBadge: { position: "absolute", top: 8, right: 8, width: 8, height: 8, background: "#ef4444", borderRadius: "50%", border: "2px solid #fff" },
+  topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
+  statsRow: { display: "flex", gap: 20, marginBottom: 25 },
+  statCard: { flex: 1, background: "#fff", padding: "20px", borderRadius: 24, display: "flex", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" },
+  statIcon: { width: 48, height: 48, borderRadius: 14, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
+  card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", minWidth: 0 },
+  cardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  cardTitle: { fontSize: 16, fontWeight: 800, margin: 0 },
+  actionButtons: { display: "flex", gap: 12 },
+  search: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, width: 200 },
+  btnAdd: { background: "#3b82f6", color: "#fff", border: "none", padding: "10px 18px", borderRadius: 12, fontWeight: 700, fontSize: 12, cursor: "pointer" },
+  table: { width: "100%", borderCollapse: "collapse" },
+  thRow: { borderBottom: "1px solid #f8fafc" },
+  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 11, fontWeight: 700 },
+  td: { padding: "15px", fontSize: 12, borderBottom: "1px solid #f8fafc", fontWeight: 600 },
+  tr: { borderBottom: "1px solid #f8fafc" },
+  pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
+  pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
+  actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
+  modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
+  modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
+  modalTitle: { fontSize: 20, fontWeight: 800, margin: 0, textAlign: "center" },
+  modalInput: { padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 14 },
+  modalButtons: { display: "flex", gap: 12, marginTop: 10 },
+  modalCancel: { flex: 1, padding: 12, borderRadius: 12, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 14, fontWeight: 600 },
+  modalSave: { flex: 1, padding: 12, borderRadius: 12, border: "none", background: "#3b82f6", color: "white", cursor: "pointer", fontSize: 14, fontWeight: 700 }
+};
