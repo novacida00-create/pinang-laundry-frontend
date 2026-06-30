@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Chatbot from "../../components/chatbot/chatbot.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL || "/api";
+
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
   const bulan = [
@@ -238,7 +240,7 @@ export default function CustomerDashboard() {
     setQrisImageUrl("");
     try {
       const orderId = `QRIS-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const res = await fetch("/api/midtrans/qris", {
+      const res = await fetch(`${API_URL}/midtrans/qris`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
