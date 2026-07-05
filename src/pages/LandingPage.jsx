@@ -281,7 +281,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div style={styles.footerBottom}>
-          <p>© 2026 Pinang Laundry. All rights reserved.</p>
+          <p>@2026 Pinang Laundry. All Rights Reserved.</p>
         </div>
       </footer>
 
@@ -436,5 +436,5 @@ const styles = {
   footerLinks: { display: "flex", flexDirection: "column", gap: 12 },
   footerLinkTitle: { fontSize: 14, fontWeight: 400, color: "#fff", marginBottom: 4 },
   footerLink: { fontSize: 14, color: "#94a3b8", textDecoration: "none", cursor: "default", lineHeight: 1.65 },
-  footerBottom: { textAlign: "center", padding: "24px 0 0", marginTop: 48, borderTop: "1px solid #334155" },
+  footerBottom: { textAlign: "center", padding: "24px 0 0", marginTop: 48, borderTop: "1px solid #334155", color: "#94a3b8", fontSize: 14 },
 };
