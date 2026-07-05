@@ -310,6 +310,13 @@ export default function CustomerDashboard() {
     if (cb) cb.checked = false;
   };
 
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `.mt-overlay{display:none}@media(max-width:768px){.mt-i:checked~.mt-overlay{display:block!important;position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;z-index:9999!important;background:rgba(0,0,0,0.3)!important;cursor:pointer!important}}`;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
+
   const pendingOrders = orders.filter(o => o.status === "Menunggu");
   const processOrders = orders.filter(o => o.status === "Diproses");
   const completedOrders = orders.filter(o => o.status === "Selesai");
@@ -318,7 +325,7 @@ export default function CustomerDashboard() {
     <div className="customer-layout" style={styles.app}>
       <input type="checkbox" id="mt" className="mt-i" />
 
-      <label htmlFor="mt" style={styles.sidebarOverlay}></label>
+      <label htmlFor="mt" className="mt-overlay"></label>
 
       <aside className="customer-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
@@ -1006,7 +1013,6 @@ const styles = {
   profName: { fontSize: 14, fontWeight: 400 },
   profRole: { fontSize: 10, color: "#94a3b8" },
   logoutBtn: { background: "none", border: "none", cursor: "pointer", fontSize: 18, transition: "all 0.2s", opacity: 0.6, ":hover": { opacity: 1 } },
-  sidebarOverlay: { display: "none" },
 
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
