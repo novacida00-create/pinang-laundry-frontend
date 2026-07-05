@@ -305,6 +305,11 @@ export default function CustomerDashboard() {
     }
   };
 
+  const closeSidebar = () => {
+    const cb = document.getElementById("mt");
+    if (cb) cb.checked = false;
+  };
+
   const pendingOrders = orders.filter(o => o.status === "Menunggu");
   const processOrders = orders.filter(o => o.status === "Diproses");
   const completedOrders = orders.filter(o => o.status === "Selesai");
@@ -312,6 +317,8 @@ export default function CustomerDashboard() {
   return (
     <div className="customer-layout" style={styles.app}>
       <input type="checkbox" id="mt" className="mt-i" />
+
+      <label htmlFor="mt" style={styles.sidebarOverlay}></label>
 
       <aside className="customer-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
@@ -324,19 +331,19 @@ export default function CustomerDashboard() {
           </div>
 
           <nav style={styles.nav}>
-            <div onClick={() => setCurrentTab("dashboard")} style={{ ...styles.navItem, ...(currentTab === "dashboard" ? styles.navActive : {}) }}>
+            <div onClick={() => { setCurrentTab("dashboard"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "dashboard" ? styles.navActive : {}) }}>
               🏠 Dashboard
             </div>
-            <div onClick={() => setCurrentTab("pesanan")} style={{ ...styles.navItem, ...(currentTab === "pesanan" ? styles.navActive : {}) }}>
+            <div onClick={() => { setCurrentTab("pesanan"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "pesanan" ? styles.navActive : {}) }}>
               📦 Pesanan Saya {pendingOrders.length > 0 && <span style={styles.badge}>{pendingOrders.length}</span>}
             </div>
-            <div onClick={() => setCurrentTab("layanan")} style={{ ...styles.navItem, ...(currentTab === "layanan" ? styles.navActive : {}) }}>
+            <div onClick={() => { setCurrentTab("layanan"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "layanan" ? styles.navActive : {}) }}>
               🏷️ Layanan
             </div>
-            <div onClick={() => setCurrentTab("testimoni")} style={{ ...styles.navItem, ...(currentTab === "testimoni" ? styles.navActive : {}) }}>
+            <div onClick={() => { setCurrentTab("testimoni"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "testimoni" ? styles.navActive : {}) }}>
               💬 Testimoni
             </div>
-            <div onClick={() => setCurrentTab("pengaturan")} style={{ ...styles.navItem, ...(currentTab === "pengaturan" ? styles.navActive : {}) }}>
+            <div onClick={() => { setCurrentTab("pengaturan"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "pengaturan" ? styles.navActive : {}) }}>
               ⚙️ Pengaturan
             </div>
           </nav>
@@ -999,6 +1006,7 @@ const styles = {
   profName: { fontSize: 14, fontWeight: 400 },
   profRole: { fontSize: 10, color: "#94a3b8" },
   logoutBtn: { background: "none", border: "none", cursor: "pointer", fontSize: 18, transition: "all 0.2s", opacity: 0.6, ":hover": { opacity: 1 } },
+  sidebarOverlay: { display: "none" },
 
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
