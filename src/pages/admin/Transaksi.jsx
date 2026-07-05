@@ -8,81 +8,151 @@ const formatTanggalIndonesia = () => {
   return `${today.getDate()} ${bulan[today.getMonth()]} ${today.getFullYear()}, ${hari[today.getDay()]}`;
 };
 
+const formatRupiah = (num) => {
+  return "Rp " + (parseInt(num) || 0).toLocaleString("id-ID");
+};
+
 export default function Transaksi() {
   const currentDate = formatTanggalIndonesia();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [newTransaksi, setNewTransaksi] = useState({ name: "", layanan: "Cuci Kiloan", berat: "", total: "" });
-  
+  const [filterStatus, setFilterStatus] = useState("semua");
   const [orders, setOrders] = useState([]);
-  const [stats, setStats] = useState({ baru: 0, proses: 0, selesai: 0, total: 0 });
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [receiptOrder, setReceiptOrder] = useState(null);
 
   useEffect(() => {
-    // Update stats whenever orders change
-    setStats({
-      baru: orders.filter(o => o.status === "Menunggu").length,
-      proses: orders.filter(o => o.status === "Diproses").length,
-      selesai: orders.filter(o => o.status === "Selesai").length,
-      total: orders.length
-    });
-  }, [orders]);
-
-  useEffect(() => {
+    migratePaymentData();
     loadOrders();
-    const interval = setInterval(loadOrders, 2000);
+    const interval = setInterval(loadOrders, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  const loadOrders = () => {
-    const savedOrders = localStorage.getItem("customerOrders");
-    setOrders(savedOrders ? JSON.parse(savedOrders).map((o, index) => ({ ...o, no: index + 1 })) : []);
+  const migratePaymentData = () => {
+    const migrated = localStorage.getItem("paymentMigrated");
+    if (migrated) return;
+    const laporanRaw = localStorage.getItem("laporanData");
+    const ordersRaw = localStorage.getItem("customerOrders");
+    if (!laporanRaw || !ordersRaw) return;
+    const laporan = JSON.parse(laporanRaw);
+    const orders = JSON.parse(ordersRaw);
+    let changed = false;
+    const updatedOrders = orders.map(o => {
+      if (o.payment) return o;
+      const match = laporan.find(l => l.pelanggan === o.customer_name && l.layanan === o.service_name && l.payment);
+      if (match) { changed = true; return { ...o, payment: match.payment }; }
+      return o;
+    });
+    if (changed) {
+      localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
+    }
+    localStorage.setItem("paymentMigrated", "true");
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    const savedOrders = localStorage.getItem("customerOrders");
-    if (savedOrders) {
-      const allOrders = JSON.parse(savedOrders);
-      const updatedOrders = allOrders.map(o => 
-        o.id === orderId ? { ...o, status: newStatus } : o
-      );
-      localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
-      setOrders(updatedOrders.map((o, index) => ({ ...o, no: index + 1 })));
+  const loadOrders = () => {
+    const saved = localStorage.getItem("customerOrders");
+    if (saved) {
+      const allOrders = JSON.parse(saved).map((o, i) => ({ ...o, no: i + 1 }));
+      setOrders(allOrders);
     }
   };
 
-  const filteredOrders = orders.filter(o => 
-    o.customer_name.toLowerCase().includes(search.toLowerCase()) || 
-    o.service_name.toLowerCase().includes(search.toLowerCase()) ||
-    (o.order_code && o.order_code.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredOrders = orders.filter(o => {
+    const matchSearch = (o.order_code || "").toLowerCase().includes(search.toLowerCase()) ||
+      (o.customer_name || "").toLowerCase().includes(search.toLowerCase());
+    if (filterStatus === "semua") return matchSearch;
+    if (filterStatus === "Lunas") return matchSearch && o.payment_status === "Lunas";
+    return matchSearch && (o.payment_status !== "Lunas" || !o.payment_status);
+  });
 
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+  const totalPendapatan = orders.filter(o => o.status === "Selesai" || o.payment_status === "Lunas")
+    .reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+  const totalPendapatanHariIni = orders.filter(o => {
+    if (o.status !== "Selesai" && o.payment_status !== "Lunas") return false;
+    const t = new Date(o.created_at);
+    const now = new Date();
+    return t.toDateString() === now.toDateString();
+  }).reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+
+  const handlePrintReceipt = (order) => {
+    setReceiptOrder(order);
+    setShowReceiptModal(true);
   };
 
-  const handleViewDetail = (order) => {
-    setSelectedOrder(order);
-    setShowDetailModal(true);
-  };
-
-  const handleUpdateStatus = (orderId, status) => {
-    updateOrderStatus(orderId, status);
-    alert(`Status pesanan diperbarui menjadi: ${status}`);
+  const printReceipt = () => {
+    if (!receiptOrder) return;
+    const pw = window.open('', '_blank');
+    if (!pw) { alert("Izinkan popup untuk mencetak struk"); return; }
+    const o = receiptOrder;
+    pw.document.write(`
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Struk Pembayaran - ${o.order_code}</title>
+<style>
+  @page { margin: 10mm; size: 80mm auto; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; padding: 10px; }
+  .header { text-align: center; margin-bottom: 12px; }
+  .header h2 { font-size: 16px; margin-bottom: 2px; }
+  .header p { font-size: 10px; color: #555; }
+  .divider { border-top: 1px dashed #000; margin: 8px 0; }
+  .info { margin-bottom: 8px; }
+  .info div { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px; }
+  .items { margin-bottom: 8px; }
+  .items th { text-align: left; font-size: 10px; padding: 4px 0; border-bottom: 1px solid #000; }
+  .items td { font-size: 11px; padding: 4px 0; }
+  .total { margin: 8px 0; }
+  .total div { display: flex; justify-content: space-between; font-size: 12px; }
+  .grand-total { font-size: 14px; font-weight: bold; border-top: 2px solid #000; padding-top: 6px; margin-top: 6px; }
+  .footer { text-align: center; margin-top: 16px; font-size: 10px; color: #555; }
+  .status { text-align: center; margin: 10px 0; }
+  .status span { padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+  .lunas { background: #d1fae5; color: #065f46; }
+  .belum { background: #fef3c7; color: #92400e; }
+</style></head><body>
+  <div class="header">
+    <div>🧺</div>
+    <h2>PINANG LAUNDRY</h2>
+    <p>Bersih, Cepat, Terpercaya</p>
+    <p>Jl. Pinang Raya, Margonda Depok</p>
+  </div>
+  <div class="divider"></div>
+  <div class="info">
+    <div><span>Invoice</span><span>${o.order_code}</span></div>
+    <div><span>Tanggal</span><span>${new Date(o.created_at).toLocaleDateString('id-ID')}</span></div>
+    <div><span>Pelanggan</span><span>${o.customer_name}</span></div>
+    <div><span>Telepon</span><span>${o.phone || "-"}</span></div>
+    <div><span>Layanan</span><span>${o.service_name}</span></div>
+    <div><span>Berat</span><span>${o.weight} kg</span></div>
+    ${o.delivery_mode ? `<div><span>Pengiriman</span><span>${o.delivery_mode === "kurir" ? "Antar-Jemput" : "Antar Mandiri"}</span></div>` : ""}
+    <div><span>Pembayaran</span><span>${o.payment === "qris" ? "QRIS" : o.payment === "cash" ? "TUNAI" : o.payment ? o.payment : "-"}</span></div>
+    ${o.ongkir ? `<div><span>Ongkir</span><span>${formatRupiah(o.ongkir)}</span></div>` : ""}
+  </div>
+  <div class="divider"></div>
+  <div class="total">
+    <div><span>Total</span><span>${formatRupiah(o.total)}</span></div>
+    <div class="grand-total"><span>Bayar</span><span>${formatRupiah(o.total)}</span></div>
+  </div>
+  <div class="status">
+    <span class="${o.payment_status === "Lunas" ? "lunas" : "belum"}">${o.payment_status === "Lunas" ? "LUNAS" : "BELUM LUNAS"}</span>
+  </div>
+  <div class="divider"></div>
+  <div class="footer">
+    <p>Terima kasih telah menggunakan layanan kami!</p>
+    <p>${currentDate}</p>
+  </div>
+  <script>window.print()</script>
+</body></html>`);
+    pw.document.close();
   };
 
   return (
-    <div style={styles.app}>
-      {/* SIDEBAR */}
-      <aside style={styles.sidebar}>
+    <div className="admin-layout" style={styles.app}>
+      <input type="checkbox" id="mt" className="mt-i" />
+      <aside className="admin-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>🧺</div>
@@ -91,275 +161,234 @@ export default function Transaksi() {
               <p style={styles.logoSub}>Bersih, Cepat, Terpercaya</p>
             </div>
           </div>
-
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🏠" label="Dashboard" />
-            </NavLink>
-            <NavLink to="/transaksi" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🧾" label="Transaksi" />
-            </NavLink>
-            <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="👥" label="Pelanggan" />
-            </NavLink>
-            <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="👨‍💼" label="Karyawan" />
-            </NavLink>
-            <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🏷️" label="Layanan" />
-            </NavLink>
-            <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="📊" label="Laporan" />
-            </NavLink>
-            <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="⚙️" label="Pengaturan" />
-            </NavLink>
+            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="🏠" label="Dashboard" /></NavLink>
+            <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="🧾" label="Orderan" /></NavLink>
+            <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="👥" label="Pelanggan" /></NavLink>
+            <div style={{ ...styles.navItem, background: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" }}><NavItem icon="💳" label="Transaksi" /></div>
+            <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="👨‍💼" label="Karyawan" /></NavLink>
+            <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="🏷️" label="Layanan" /></NavLink>
+            <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="📊" label="Laporan" /></NavLink>
+            <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="⚙️" label="Pengaturan" /></NavLink>
           </nav>
         </div>
-
         <div style={styles.profileWidget}>
           <div style={styles.avatarCircle}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={styles.profName}>Alex</div>
-            <div style={styles.profRole}>Admin</div>
-          </div>
+          <div style={{ flex: 1 }}> <div style={styles.profName}>Alex</div> <div style={styles.profRole}>Admin</div> </div>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main style={styles.main}>
+      <main className="admin-main" style={styles.main}>
+        <label htmlFor="mt" className="mt-l">☰</label>
         <header style={styles.header}>
-          <h2 style={styles.welcome}>Manajemen Transaksi</h2>
+          <h2 style={styles.welcome}>Transaksi Customer</h2>
           <div style={styles.headerRight}>
-            <div style={styles.dateBox} onClick={() => alert("Kalender")}>📅 {currentDate}</div>
-            <div style={styles.notifBtn}>🔔<span style={styles.notifBadge}>3</span></div>
+            <div style={styles.dateBox}>📅 {currentDate}</div>
             <div style={styles.topAvatar}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
             </div>
           </div>
         </header>
 
         <div style={styles.statsRow}>
-          <StatCard label="Pesanan Baru" val={stats.baru.toString()} color="#e0f2fe" iColor="#0ea5e9" icon="📦" growth=" Baru" />
-          <StatCard label="Diproses" val={stats.proses.toString()} color="#dcfce7" iColor="#22c55e" icon="⚙️" growth=" Proses" />
-          <StatCard label="Selesai" val={stats.selesai.toString()} color="#f3e8ff" iColor="#a855f7" icon="✅" growth=" Selesai" />
-          <StatCard label="Total Pesanan" val={stats.total.toString()} color="#ffedd5" iColor="#f97316" icon="👕" growth="Semua" />
+          <div style={styles.statCard}>
+            <div style={{ ...styles.statIcon, backgroundColor: "#e0f2fe", color: "#0ea5e9" }}>💰</div>
+            <div style={{ marginLeft: 16 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Total Pendapatan</div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{formatRupiah(totalPendapatan)}</div>
+            </div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={{ ...styles.statIcon, backgroundColor: "#dcfce7", color: "#22c55e" }}>📅</div>
+            <div style={{ marginLeft: 16 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Pendapatan Hari Ini</div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{formatRupiah(totalPendapatanHariIni)}</div>
+            </div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={{ ...styles.statIcon, backgroundColor: "#f3e8ff", color: "#a855f7" }}>📋</div>
+            <div style={{ marginLeft: 16 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Total Transaksi</div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{orders.length}</div>
+            </div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={{ ...styles.statIcon, backgroundColor: "#ffedd5", color: "#f97316" }}>✅</div>
+            <div style={{ marginLeft: 16 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Lunas</div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{orders.filter(o => o.payment_status === "Lunas").length}</div>
+            </div>
+          </div>
         </div>
 
         <section style={styles.card}>
           <div style={styles.cardHeader}>
-            <h3 style={styles.cardTitle}>Pesanan Pelanggan</h3>
+            <h3 style={styles.cardTitle}>Riwayat Transaksi</h3>
             <div style={styles.actionButtons}>
-              <input 
-                placeholder="Cari pesanan..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={styles.search} 
-              />
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={styles.filterSelect}>
+                <option value="semua">Semua Status</option>
+                <option value="Lunas">Lunas</option>
+                <option value="Belum">Belum Lunas</option>
+              </select>
+              <input placeholder="Cari invoice / pelanggan..." value={search} onChange={(e) => setSearch(e.target.value)} style={styles.search} />
             </div>
           </div>
-          {orders.length === 0 ? (
-            <div style={styles.emptyState}>
-              <div style={styles.emptyIcon}>📋</div>
-              <p>Belum ada pesanan dari pelanggan</p>
-              <p style={styles.emptyHint}>Pelanggan akan membuat pesanan dari halaman customer</p>
-            </div>
-          ) : (
-            <table style={styles.table}>
-              <thead>
-                <tr style={styles.thRow}>
-                  <th style={styles.th}>No</th>
-                  <th style={styles.th}>Kode Pesanan</th>
-                  <th style={styles.th}>Pelanggan</th>
-                  <th style={styles.th}>Layanan</th>
-                  <th style={styles.th}>Berat</th>
-                  <th style={styles.th}>Total</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={styles.th}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedOrders.map((t) => (
-                  <TransaksiRow 
-                    key={t.id} 
-                    no={t.no} 
-                    orderCode={t.order_code || "-"}
-                    name={t.customer_name} 
-                    layanan={t.service_name} 
-                    berat={t.weight + " kg"} 
-                    total={t.total.toString()} 
-                    status={t.status} 
-                    onView={() => handleViewDetail(t)}
-                    onStatusChange={(status) => handleUpdateStatus(t.id, status)}
-                  />
-                ))}
-              </tbody>
-            </table>
-          )}
-          {orders.length > 0 && (
-            <div style={styles.pagination}>
-              <span onClick={() => goToPage(currentPage - 1)} style={{cursor: currentPage > 1 ? "pointer" : "default", opacity: currentPage > 1 ? 1 : 0.5}}>‹</span>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <span 
-                  key={page}
-                  onClick={() => goToPage(page)} 
-                  style={page === currentPage ? styles.pageActive : {cursor: "pointer"}}
-                >
-                  {page}
-                </span>
-              ))}
-              <span onClick={() => goToPage(currentPage + 1)} style={{cursor: currentPage < totalPages ? "pointer" : "default", opacity: currentPage < totalPages ? 1 : 0.5}}>›</span>
-            </div>
-          )}
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.thRow}>
+                <th style={styles.th}>Invoice</th>
+                <th style={styles.th}>Pelanggan</th>
+                <th style={styles.th}>Total</th>
+                <th style={styles.th}>Metode Bayar</th>
+                <th style={styles.th}>Status Bayar</th>
+                <th style={styles.th}>Tanggal</th>
+                <th style={styles.th}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedOrders.map((o) => {
+                return (
+                  <tr key={o.id || o.no} style={styles.tr}>
+                    <td style={styles.td}><span style={styles.invoiceCode}>{o.order_code || "-"}</span></td>
+                    <td style={styles.td}>👤 {o.customer_name}</td>
+                    <td style={styles.td}><span style={styles.totalPrice}>{formatRupiah(o.total)}</span></td>
+                    <td style={styles.td}>
+                      {o.payment === "qris" ? <span style={styles.badgeQRIS}>QRIS</span> :
+                       o.payment === "cash" ? <span style={styles.badgeCash}>Tunai</span> :
+                       <span style={styles.badgePending}>-</span>}
+                    </td>
+                    <td style={styles.td}>
+                      <span style={o.payment_status === "Lunas" ? styles.badgeCash : styles.badgePending}>
+                        {o.payment_status === "Lunas" ? "✅ Lunas" : "⏳ Belum"}
+                      </span>
+                    </td>
+                    <td style={{ ...styles.td, fontSize: 11, color: "#64748b" }}>{o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID') : "-"}</td>
+                    <td style={styles.td}>
+                      <button style={styles.printBtn} onClick={() => handlePrintReceipt(o)} title="Cetak Struk">🖨️</button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {paginatedOrders.length === 0 && (
+                <tr><td colSpan="7" style={{ textAlign: "center", padding: 40, color: "#94a3b8", fontSize: 13 }}>Belum ada transaksi</td></tr>
+              )}
+            </tbody>
+          </table>
+          <div style={styles.pagination}>
+            <span onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} style={{cursor: currentPage > 1 ? "pointer" : "default", opacity: currentPage > 1 ? 1 : 0.5}}>‹</span>
+            {Array.from({ length: totalPages || 1 }, (_, i) => i + 1).map(page => (
+              <span key={page} onClick={() => setCurrentPage(page)} style={page === currentPage ? styles.pageActive : {cursor: "pointer"}}>{page}</span>
+            ))}
+            <span onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} style={{cursor: currentPage < totalPages ? "pointer" : "default", opacity: currentPage < totalPages ? 1 : 0.5}}>›</span>
+          </div>
         </section>
+      </main>
 
-        {/* MODAL DETAIL PESANAN */}
-        {showDetailModal && selectedOrder && (
-          <div style={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
-            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <h3 style={styles.modalTitle}>Detail Pesanan</h3>
-              <div style={styles.detailContent}>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Kode Pesanan:</span><span style={styles.detailValue}>{selectedOrder.order_code}</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Pelanggan:</span><span style={styles.detailValue}>{selectedOrder.customer_name}</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Layanan:</span><span style={styles.detailValue}>{selectedOrder.service_name}</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Berat/Jumlah:</span><span style={styles.detailValue}>{selectedOrder.weight} kg</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Total:</span><span style={styles.detailValueBold}>Rp {selectedOrder.total?.toLocaleString('id-ID')}</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>No. Telepon:</span><span style={styles.detailValue}>{selectedOrder.phone}</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Alamat:</span><span style={styles.detailValue}>{selectedOrder.address}</span></div>
-                <div style={styles.detailRow}><span style={styles.detailLabel}>Status:</span>
-                  <select value={selectedOrder.status} onChange={(e) => { handleUpdateStatus(selectedOrder.id, e.target.value); setSelectedOrder({...selectedOrder, status: e.target.value}); }} style={styles.statusSelectLarge}>
-                    <option value="Menunggu">Menunggu</option>
-                    <option value="Diproses">Diproses</option>
-                    <option value="Selesai">Selesai</option>
-                  </select>
+      {showReceiptModal && receiptOrder && (
+        <div style={styles.modalOverlay} onClick={() => setShowReceiptModal(false)}>
+          <div style={styles.receiptModal} onClick={e => e.stopPropagation()}>
+            <div style={styles.receiptHeader}>
+              <h3 style={{ margin: 0 }}>🧾 Struk Pembayaran</h3>
+              <button style={styles.closeBtn} onClick={() => setShowReceiptModal(false)}>✕</button>
+            </div>
+            <div style={styles.receiptBody}>
+              <div style={styles.receiptInfo}>
+                <div style={styles.receiptRow}><span>Invoice</span><span style={{ fontWeight: 700 }}>{receiptOrder.order_code}</span></div>
+                <div style={styles.receiptRow}><span>Tanggal</span><span>{new Date(receiptOrder.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                <div style={styles.receiptRow}><span>Pelanggan</span><span>{receiptOrder.customer_name}</span></div>
+                <div style={styles.receiptRow}><span>Telepon</span><span>{receiptOrder.phone || "-"}</span></div>
+                <div style={styles.divider}></div>
+                <div style={styles.receiptRow}><span>Layanan</span><span>{receiptOrder.service_name}</span></div>
+                <div style={styles.receiptRow}><span>Berat</span><span>{receiptOrder.weight} kg</span></div>
+                {receiptOrder.delivery_mode && <div style={styles.receiptRow}><span>Pengiriman</span><span>{receiptOrder.delivery_mode === "kurir" ? "Antar-Jemput Kurir" : "Antar Mandiri"}</span></div>}
+                {receiptOrder.ongkir ? <div style={styles.receiptRow}><span>Ongkos Kirim</span><span>{formatRupiah(receiptOrder.ongkir)}</span></div> : null}
+                <div style={styles.divider}></div>
+                <div style={{ ...styles.receiptRow, fontWeight: 800, fontSize: 16 }}><span>Total Bayar</span><span style={{ color: "#059669" }}>{formatRupiah(receiptOrder.total)}</span></div>
+                <div style={styles.receiptRow}><span>Pembayaran</span><span style={{ fontWeight: 700, color: receiptOrder.payment === "qris" ? "#7c3aed" : receiptOrder.payment === "cash" ? "#065f46" : "#94a3b8" }}>{receiptOrder.payment === "qris" ? "💳 QRIS" : receiptOrder.payment === "cash" ? "💵 Tunai" : "-"}</span></div>
+                <div style={styles.receiptRow}>
+                  <span>Status</span>
+                  <span style={{ color: receiptOrder.payment_status === "Lunas" ? "#22c55e" : "#f59e0b", fontWeight: 700 }}>
+                    {receiptOrder.payment_status === "Lunas" ? "✅ Lunas" : "⏳ Belum Lunas"}
+                  </span>
                 </div>
               </div>
-              <div style={styles.modalButtons}>
-                <button style={styles.modalClose} onClick={() => setShowDetailModal(false)}>Tutup</button>
-              </div>
+            </div>
+            <div style={styles.receiptFooter}>
+              <button style={styles.cancelBtn} onClick={() => setShowReceiptModal(false)}>Tutup</button>
+              <button style={styles.printReceiptBtn} onClick={printReceipt}>🖨️ Cetak Struk</button>
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
-/* --- COMPONENTS --- */
+
 const NavItem = ({ icon, label }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
     <span>{icon}</span> {label}
   </div>
 );
 
-const StatCard = ({ label, val, color, iColor, icon, growth }) => (
-  <div style={styles.statCard}>
-    <div style={{ ...styles.statIcon, backgroundColor: color, color: iColor }}>{icon}</div>
-    <div style={{ marginLeft: 16 }}>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 800 }}>{val}</div>
-      <div style={{ fontSize: 10, color: "#22c55e", fontWeight: 700 }}>▲ {growth} <span style={{color: '#94a3b8', fontWeight: 400}}>dari bulan lalu</span></div>
-    </div>
-  </div>
-);
-
-function getStatusBadge(status) {
-  if (status === "Selesai") return { color: "#22c55e", fontWeight: 800, padding: "4px 8px", background: "#f0fdf4", borderRadius: 6 };
-  if (status === "Siap") return { color: "#a855f7", fontWeight: 800, padding: "4px 8px", background: "#f5f3ff", borderRadius: 6 };
-  if (status === "Proses") return { color: "#f97316", fontWeight: 800, padding: "4px 8px", background: "#fff7ed", borderRadius: 6 };
-  return { color: "#3b82f6", fontWeight: 800, padding: "4px 8px", background: "#eff6ff", borderRadius: 6 };
-}
-
-const TransaksiRow = ({ no, orderCode, name, layanan, berat, total, status, onView, onStatusChange }) => (
-  <tr style={styles.tr}>
-    <td style={styles.td}>{no}</td>
-    <td style={styles.td}><span style={styles.orderCode}>{orderCode}</span></td>
-    <td style={styles.td}>👤 {name}</td>
-    <td style={styles.td}>{layanan}</td>
-    <td style={styles.td}>{berat}</td>
-    <td style={styles.td}>Rp {parseInt(total).toLocaleString('id-ID')}</td>
-    <td style={styles.td}>
-      <select 
-        value={status} 
-        onChange={(e) => onStatusChange(e.target.value)}
-        style={{ ...styles.statusSelect, ...getStatusBadge(status) }}
-      >
-        <option value="Menunggu">Menunggu</option>
-        <option value="Diproses">Diproses</option>
-        <option value="Selesai">Selesai</option>
-      </select>
-    </td>
-    <td style={styles.td}>
-      <button style={styles.actionBtn} onClick={onView} title="Lihat Detail">👁️</button>
-    </td>
-  </tr>
-);
-
-/* --- STYLES --- */
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", fontFamily: "sans-serif", color: "#1e293b" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
   sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
   logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 800, color: "#1e40af", margin: 0 },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
   logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "flex" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
   navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
   profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
   avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 13, fontWeight: 800 },
+  profName: { fontSize: 14, fontWeight: 600 },
   profRole: { fontSize: 10, color: "#94a3b8" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
-  welcome: { fontSize: 24, fontWeight: 800, margin: 0 },
+  welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
   headerRight: { display: "flex", alignItems: "center", gap: 15 },
-  dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9" },
-  notifBtn: { position: "relative", padding: 10, background: "#fff", borderRadius: 12, border: "1px solid #f1f5f9" },
-  notifBadge: { position: "absolute", top: 8, right: 8, width: 8, height: 8, background: "#ef4444", borderRadius: "50%", border: "2px solid #fff" },
+  dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9", cursor: "pointer" },
   topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
   statsRow: { display: "flex", gap: 20, marginBottom: 25 },
   statCard: { flex: 1, background: "#fff", padding: "20px", borderRadius: 24, display: "flex", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" },
   statIcon: { width: 48, height: 48, borderRadius: 14, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
   card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", minWidth: 0 },
   cardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  cardTitle: { fontSize: 16, fontWeight: 800, margin: 0 },
+  cardTitle: { fontSize: 16, fontWeight: 600, margin: 0 },
   actionButtons: { display: "flex", gap: 12 },
-  search: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, width: 200 },
-  btnAdd: { background: "#3b82f6", color: "#fff", border: "none", padding: "10px 18px", borderRadius: 12, fontWeight: 700, fontSize: 12, cursor: "pointer" },
+  search: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, width: 220 },
+  filterSelect: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, background: "#fff", cursor: "pointer" },
   table: { width: "100%", borderCollapse: "collapse" },
   thRow: { borderBottom: "1px solid #f8fafc" },
-  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 11, fontWeight: 700 },
-  td: { padding: "15px", fontSize: 12, borderBottom: "1px solid #f8fafc", fontWeight: 600 },
+  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 12, fontWeight: 600 },
+  td: { padding: "15px", fontSize: 13, borderBottom: "1px solid #f8fafc", fontWeight: 500 },
   tr: { borderBottom: "1px solid #f8fafc" },
+  invoiceCode: { padding: "4px 8px", background: "#f1f5f9", borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: "monospace" },
+  totalPrice: { color: "#059669", fontWeight: 800 },
+  statusBadge: { padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 800, display: "inline-block" },
+  badgeQRIS: { padding: "4px 8px", borderRadius: 6, background: "#f3e8ff", color: "#7c3aed", fontSize: 10, fontWeight: 800 },
+  badgeCash: { padding: "4px 8px", borderRadius: 6, background: "#d1fae5", color: "#065f46", fontSize: 10, fontWeight: 800 },
+  badgePending: { padding: "4px 8px", borderRadius: 6, background: "#fef3c7", color: "#92400e", fontSize: 10, fontWeight: 800 },
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
-  actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
-  modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
-  modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
-  modalTitle: { fontSize: 20, fontWeight: 800, margin: 0, textAlign: "center" },
-  modalInput: { padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 14 },
-  modalButtons: { display: "flex", gap: 12, marginTop: 10 },
-  modalCancel: { flex: 1, padding: 12, borderRadius: 12, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 14, fontWeight: 600 },
-  modalSave: { flex: 1, padding: 12, borderRadius: 12, border: "none", background: "#3b82f6", color: "white", cursor: "pointer", fontSize: 14, fontWeight: 700 },
-  emptyState: { textAlign: "center", padding: 60, background: "#fff", borderRadius: 28, marginBottom: 24 },
-  emptyIcon: { fontSize: 48, marginBottom: 16 },
-  emptyHint: { color: "#94a3b8", fontSize: 13 },
-  orderCode: { padding: "4px 8px", background: "#f1f5f9", borderRadius: 6, fontSize: 11, fontWeight: 700 },
-  statusSelect: { padding: "6px 10px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12, fontWeight: 700, cursor: "pointer" },
-  detailContent: { display: "flex", flexDirection: "column", gap: 12 },
-  detailRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f1f5f9" },
-  detailLabel: { color: "#64748b", fontSize: 13 },
-  detailValue: { fontWeight: 700, fontSize: 13 },
-  detailValueBold: { fontWeight: 800, fontSize: 16, color: "#22c55e" },
-  statusSelectLarge: { padding: "8px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, fontWeight: 700 },
-  modalClose: { flex: 1, padding: 12, borderRadius: 12, border: "none", background: "#3b82f6", color: "white", cursor: "pointer", fontSize: 14, fontWeight: 700 }
+  printBtn: { background: "none", border: "none", cursor: "pointer", fontSize: 18, padding: "4px 8px", borderRadius: 8, transition: "all 0.2s" },
+  modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
+  receiptModal: { background: "#fff", borderRadius: 20, width: 420, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 50px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" },
+  receiptHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #e2e8f0" },
+  closeBtn: { width: 32, height: 32, borderRadius: "50%", border: "none", background: "#f1f5f9", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b" },
+  receiptBody: { padding: "20px 24px" },
+  receiptInfo: { display: "flex", flexDirection: "column", gap: 10 },
+  receiptRow: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 },
+  divider: { height: 1, background: "#e2e8f0", margin: "4px 0" },
+  receiptFooter: { display: "flex", gap: 12, padding: "16px 24px", borderTop: "1px solid #e2e8f0" },
+  cancelBtn: { flex: 1, padding: 12, borderRadius: 12, border: "2px solid #e2e8f0", background: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#64748b" },
+  printReceiptBtn: { flex: 1, padding: 12, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 700 },
 };

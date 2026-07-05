@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage";
 import CustomerLoginPage from "../pages/auth/CustomerLoginPage";
 import Dashboard from "../pages/admin/Dashboard";
+import Orderan from "../pages/admin/Orderan";
 import Transaksi from "../pages/admin/Transaksi";
 import Pelanggan from "../pages/admin/Pelanggan";
 import Karyawan from "../pages/admin/Karyawan";
@@ -27,6 +28,7 @@ export default function AppRoutes() {
         <Route path="/customer/dashboard" element={<CustomerDashboard />} />
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/layanan" element={<AdminLayanan />} />
+        <Route path="/orderan" element={<Orderan />} />
         <Route path="/transaksi" element={<Transaksi />} />
         <Route path="/pelanggan" element={<Pelanggan />} />
         <Route path="/karyawan" element={<Karyawan />} />

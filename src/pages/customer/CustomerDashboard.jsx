@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Chatbot from "../../components/chatbot/chatbot.jsx";
 
+
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 const formatTanggalIndonesia = () => {
@@ -40,6 +41,14 @@ export default function CustomerDashboard() {
   const [selectedService, setSelectedService] = useState(null);
   const [orderForm, setOrderForm] = useState({ weight: "", phone: "", address: "" });
   const getUnit = (name) => name === "Cuci Karpet" || name === "Cuci Baton" ? "pcs" : "kg";
+  const [deliveryMode, setDeliveryMode] = useState("kurir");
+  const [distance, setDistance] = useState("2-4");
+  const ongkirPrices = { "0-1": 0, "1-2": 5000, "2-4": 10000, "4-6": 15000, "6-10": 25000 };
+  const getOngkir = (d) => ongkirPrices[d] || 0;
+  const getDistanceLabel = (d) => {
+    const labels = { "0-1": "Radius 0 - 1 km (Gratis)", "1-2": "Radius 1 - 2 km (Rp 5.000)", "2-4": "Radius 2 - 4 km (Ongkir +Rp 10.000)", "4-6": "Radius 4 - 6 km (Ongkir +Rp 15.000)", "6-10": "Radius 6 - 10 km (Ongkir +Rp 25.000)" };
+    return labels[d] || "";
+  };
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -66,13 +75,20 @@ export default function CustomerDashboard() {
 
     const savedServices = localStorage.getItem("layananData");
     if (savedServices) {
-      let parsed = JSON.parse(savedServices).filter(s => s.status === "Aktif");
+      let parsed = JSON.parse(savedServices).filter(s => s.status === "Aktif" && s.name !== "Cuci Gold");
+      const seen = new Set();
+      parsed = parsed.filter(s => {
+        if (seen.has(s.name)) return false;
+        seen.add(s.name);
+        return true;
+      });
       parsed = parsed.map(s => {
-        if (s.name === "Cuci Gold") return { ...s, name: "Cuci Setrika", harga: "75000" };
         if (s.name === "Cuci Kiloan" && s.harga === "8000") return { ...s, harga: "6000" };
+        if (s.name === "Cuci Setrika" && s.harga === "75000") return { ...s, harga: "12000" };
         if (s.name === "Express" && s.harga === "25000") return { ...s, harga: "7500" };
         return s;
       });
+      localStorage.setItem("layananData", JSON.stringify(parsed));
       setServices(parsed);
     } else {
       setServices([
@@ -82,6 +98,7 @@ export default function CustomerDashboard() {
         { no: 4, name: "Cuci Karpet", jenis: "Spesial", harga: "50000", waktu: "48 jam" },
         { no: 5, name: "Cuci Sepatu", jenis: "Spesial", harga: "30000", waktu: "24 jam" },
         { no: 6, name: "Cuci Boneka", jenis: "Satuan", harga: "10000", waktu: "24 jam" },
+        { no: 7, name: "Cuci Setrika", jenis: "Kiloan", harga: "12000", waktu: "24 jam" },
       ]);
     }
   }, [customerName]);
@@ -101,20 +118,32 @@ export default function CustomerDashboard() {
   const handlePesan = (service) => {
     setSelectedService(service);
     setOrderForm({ weight: "", phone: "", address: "" });
+    setDeliveryMode("kurir");
+    setDistance("2-4");
     setShowOrderModal(true);
   };
 
   const handleSubmitOrder = () => {
-    if (!orderForm.phone || !orderForm.address) {
-      alert("Mohon isi nomor telepon dan alamat!");
+    if (!orderForm.phone) {
+      alert("Mohon isi nomor telepon!");
+      return;
+    }
+    if (deliveryMode === "kurir" && !orderForm.address) {
+      alert("Mohon isi alamat penjemputan!");
       return;
     }
     if (!orderForm.weight || parseFloat(orderForm.weight) <= 0) {
       alert("Mohon masukkan jumlah yang valid!");
       return;
     }
+    if (deliveryMode === "kurir" && !distance) {
+      alert("Mohon pilih jarak rumah ke toko!");
+      return;
+    }
 
-    const total = parseFloat(orderForm.weight) * parseInt(selectedService.harga);
+    const biayaCuci = parseFloat(orderForm.weight) * parseInt(selectedService.harga);
+    const ongkir = deliveryMode === "kurir" ? getOngkir(distance) : 0;
+    const total = biayaCuci + ongkir;
     const newOrder = {
       id: Date.now(),
       order_code: "INV-" + Date.now(),
@@ -122,6 +151,10 @@ export default function CustomerDashboard() {
       service_name: selectedService.name,
       weight: parseFloat(orderForm.weight),
       price: parseInt(selectedService.harga),
+      biaya_cuci: biayaCuci,
+      ongkir: ongkir,
+      delivery_mode: deliveryMode,
+      jarak: deliveryMode === "kurir" ? distance : null,
       total: total,
       status: "Menunggu",
       created_at: new Date().toISOString(),
@@ -142,6 +175,7 @@ export default function CustomerDashboard() {
       allPelanggan.push({
         no: allPelanggan.length + 1,
         name: customerName,
+        email: customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com',
         phone: orderForm.phone,
         address: orderForm.address,
         order: 1,
@@ -150,7 +184,7 @@ export default function CustomerDashboard() {
     } else {
       allPelanggan = allPelanggan.map(p => 
         p.name === customerName 
-          ? { ...p, order: p.order + 1, phone: orderForm.phone, address: orderForm.address }
+          ? { ...p, order: p.order + 1, phone: orderForm.phone, address: orderForm.address, email: p.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com') }
           : p
       );
     }
@@ -172,6 +206,8 @@ export default function CustomerDashboard() {
       berat: orderForm.weight,
       harga: selectedService.harga,
       total: total.toString(),
+      ongkir: ongkir.toString(),
+      delivery_mode: deliveryMode,
       status: "Baru"
     });
     localStorage.setItem("laporanData", JSON.stringify(allLaporan));
@@ -274,9 +310,10 @@ export default function CustomerDashboard() {
   const completedOrders = orders.filter(o => o.status === "Selesai");
 
   return (
-    <div style={styles.app}>
+    <div className="customer-layout" style={styles.app}>
+      <input type="checkbox" id="mt" className="mt-i" />
 
-      <aside style={styles.sidebar}>
+      <aside className="customer-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>🧺</div>
@@ -315,7 +352,8 @@ export default function CustomerDashboard() {
           </div>
       </aside>
 
-      <main style={styles.main}>
+      <main className="customer-main" style={styles.main}>
+        <label htmlFor="mt" className="mt-l">☰</label>
         <header style={styles.header}>
           <h2 style={styles.welcome}>Selamat datang, {customerName} 👋</h2>
           <div style={styles.headerRight}>
@@ -386,7 +424,7 @@ export default function CustomerDashboard() {
                           <span>Rp {order.total.toLocaleString('id-ID')}</span>
                         </div>
                         <div style={styles.orderDetailRow}>
-                          <span style={{ color: "#94a3b8", fontSize: 12 }}>📍 {order.address}</span>
+                          {order.address && <span style={{ color: "#94a3b8", fontSize: 12 }}>📍 {order.address}</span>}
                         </div>
                       </div>
                       <div style={styles.orderDate}>
@@ -450,7 +488,7 @@ export default function CustomerDashboard() {
                           </span>
                         </div>
                         <div style={styles.orderDetailRow}>
-                          <span style={{ color: "#94a3b8", fontSize: 12 }}>📍 {order.address}</span>
+                          {order.address && <span style={{ color: "#94a3b8", fontSize: 12 }}>📍 {order.address}</span>}
                           {order.phone && <span style={{ color: "#94a3b8", fontSize: 12 }}>📞 {order.phone}</span>}
                         </div>
                       </div>
@@ -626,29 +664,96 @@ export default function CustomerDashboard() {
       </main>
 
       {showOrderModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowOrderModal(false)}>
-          <div style={styles.modal} onClick={e => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Pesan {selectedService?.name}</h3>
-            <div style={styles.modalContent}>
-              <label style={styles.label}>Harga per {getUnit(selectedService?.name)}</label>
-              <div style={styles.priceDisplay}>Rp {parseInt(selectedService?.harga || 0).toLocaleString('id-ID')}</div>
-              
-              <label style={styles.label}>Jumlah ({getUnit(selectedService?.name)})</label>
-              <input type="number" min="1" placeholder="Masukkan jumlah" value={orderForm.weight} onChange={e => setOrderForm({ ...orderForm, weight: e.target.value })} style={styles.input} />
-              
-              <label style={styles.label}>Total Harga</label>
-              <div style={styles.totalDisplay}>Rp {((parseFloat(orderForm.weight) || 0) * parseInt(selectedService?.harga || 0)).toLocaleString('id-ID')}</div>
-              
-              <label style={styles.label}>Nomor Telepon</label>
-              <input type="tel" placeholder="Contoh: 0812xxxx" value={orderForm.phone} onChange={e => setOrderForm({ ...orderForm, phone: e.target.value })} style={styles.input} />
-              
-              <label style={styles.label}>Alamat Pickup</label>
-              <textarea placeholder="Masukkan alamat lengkap untuk penjemputan" value={orderForm.address} onChange={e => setOrderForm({ ...orderForm, address: e.target.value })} style={styles.textarea} />
-              
-              <div style={styles.modalButtons}>
-                <button style={styles.cancelBtn} onClick={() => setShowOrderModal(false)}>Batal</button>
-                <button style={styles.submitBtn} onClick={handleSubmitOrder}>Kirim Pesanan</button>
+        <div style={styles.orderModalOverlay} onClick={() => setShowOrderModal(false)}>
+          <div style={styles.orderModal} onClick={e => e.stopPropagation()}>
+            <div style={styles.orderModalHeader}>
+              <span>Pesan {selectedService?.name}</span>
+              <button style={styles.orderModalClose} onClick={() => setShowOrderModal(false)}>✕</button>
+            </div>
+            <div style={styles.orderModalBody}>
+              <div style={styles.infoHarga}>Harga: Rp {parseInt(selectedService?.harga || 0).toLocaleString('id-ID')}/{getUnit(selectedService?.name)}</div>
+
+              <div style={styles.sectionLabel}>1. MASUKKAN JUMLAH ESTIMASI</div>
+              <div style={styles.fieldBox}>
+                <div style={styles.fieldRow}>
+                  <span style={styles.fieldLabel}>Jumlah ({getUnit(selectedService?.name)})</span>
+                  <input type="number" min="0" step="0.1" placeholder="0" value={orderForm.weight} onChange={e => setOrderForm({ ...orderForm, weight: e.target.value })} style={styles.orderInput} />
+                </div>
               </div>
+
+              <div style={styles.sectionLabel}>2. OPSI PENGIRIMAN</div>
+              <div style={styles.radioGroup}>
+                <label style={styles.radioLabel} onClick={() => setDeliveryMode("mandiri")}>
+                  <input type="radio" name="delivery" checked={deliveryMode === "mandiri"} onChange={() => setDeliveryMode("mandiri")} style={styles.radio} />
+                  <span>Antar Mandiri ke Outlet</span>
+                </label>
+                <label style={styles.radioLabel} onClick={() => setDeliveryMode("kurir")}>
+                  <input type="radio" name="delivery" checked={deliveryMode === "kurir"} onChange={() => setDeliveryMode("kurir")} style={styles.radio} />
+                  <span style={{ fontWeight: deliveryMode === "kurir" ? 700 : 400, color: deliveryMode === "kurir" ? "#2563eb" : "#1e293b" }}>Request Antar-Jemput Kurir</span>
+                </label>
+              </div>
+
+              {deliveryMode === "kurir" && (
+                <>
+                  <div style={styles.sectionLabel}>3. INFORMASI PENJEMPUTAN</div>
+                  <div style={styles.fieldBox}>
+                    <div style={styles.fieldRow}>
+                      <span style={styles.fieldLabel}>Nomor Telepon Aktif</span>
+                      <input type="tel" placeholder="0812-3456-7890" value={orderForm.phone} onChange={e => setOrderForm({ ...orderForm, phone: e.target.value })} style={styles.orderInput} />
+                    </div>
+                    <div style={styles.fieldRow}>
+                      <span style={styles.fieldLabel}>Pilih Jarak Rumah ke Toko</span>
+                      <select value={distance} onChange={e => setDistance(e.target.value)} style={styles.orderSelect}>
+                        <option value="0-1">Radius 0 - 1 km (Gratis)</option>
+                        <option value="1-2">Radius 1 - 2 km (Rp 5.000)</option>
+                        <option value="2-4">Radius 2 - 4 km (Ongkir +Rp 10.000)</option>
+                        <option value="4-6">Radius 4 - 6 km (Ongkir +Rp 15.000)</option>
+                        <option value="6-10">Radius 6 - 10 km (Ongkir +Rp 25.000)</option>
+                      </select>
+                    </div>
+                    <div style={styles.fieldRow}>
+                      <span style={styles.fieldLabel}>Alamat Lengkap Penjemputan</span>
+                      <textarea placeholder="Jalan, Kelurahan, Kecamatan, Kota" value={orderForm.address} onChange={e => setOrderForm({ ...orderForm, address: e.target.value })} style={styles.orderTextarea} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {deliveryMode === "mandiri" && (
+                <>
+                  <div style={styles.sectionLabel}>3. INFORMASI PEMESAN</div>
+                  <div style={styles.fieldBox}>
+                    <div style={styles.fieldRow}>
+                      <span style={styles.fieldLabel}>Nomor Telepon Aktif</span>
+                      <input type="tel" placeholder="0812-3456-7890" value={orderForm.phone} onChange={e => setOrderForm({ ...orderForm, phone: e.target.value })} style={styles.orderInput} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div style={styles.divider}></div>
+              <div style={styles.ringkasan}>
+                <div style={styles.ringkasanTitle}>RINGKASAN BIAYA</div>
+                <div style={styles.ringkasanRow}>
+                  <span>Total Cuci ({orderForm.weight || 0} {getUnit(selectedService?.name)} x Rp {parseInt(selectedService?.harga || 0).toLocaleString('id-ID')})</span>
+                  <span>Rp {((parseFloat(orderForm.weight) || 0) * parseInt(selectedService?.harga || 0)).toLocaleString('id-ID')}</span>
+                </div>
+                {deliveryMode === "kurir" && (
+                  <div style={styles.ringkasanRow}>
+                    <span>Ongkos Kirim ({getDistanceLabel(distance)})</span>
+                    <span>Rp {getOngkir(distance).toLocaleString('id-ID')}</span>
+                  </div>
+                )}
+                <div style={styles.divider}></div>
+                <div style={styles.ringkasanTotal}>
+                  <span>TOTAL ESTIMASI BAYAR</span>
+                  <span>Rp {(((parseFloat(orderForm.weight) || 0) * parseInt(selectedService?.harga || 0)) + (deliveryMode === "kurir" ? getOngkir(distance) : 0)).toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+            </div>
+            <div style={styles.orderModalFooter}>
+              <button style={styles.cancelBtn} onClick={() => setShowOrderModal(false)}>Batal</button>
+              <button style={styles.submitBtn} onClick={handleSubmitOrder}>Kirim Pesanan</button>
             </div>
           </div>
         </div>
@@ -807,8 +912,9 @@ export default function CustomerDashboard() {
               <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a" }}>✓ LUNAS</span>
             </div>
             <div style={{ textAlign: "center", fontSize: 11, color: "#94a3b8", marginBottom: 16 }}>
-              Terima kasih telah menggunakan layanan kami<br />
-              Barang sudah tidak menjadi tanggung jawab kami setelah 1 minggu
+              Terima kasih telah memilih Pinang Laundry!<br />
+              Bersih, Cepat, Terpercaya.<br />
+              Sampai jumpa di cucian bersih berikutnya, ya! 👋
             </div>
             <div style={{ display: "flex", gap: 12 }}>
               <button style={styles.cancelBtn} onClick={() => setShowReceiptModal(false)}>Tutup</button>
@@ -857,8 +963,9 @@ export default function CustomerDashboard() {
   <div class="total"><span>TOTAL</span><span>Rp ${receiptOrder.total.toLocaleString('id-ID')}</span></div>
   <div class="lunas">✓ LUNAS</div>
   <div class="footer">
-    Terima kasih telah menggunakan layanan kami<br/>
-    Barang sudah tidak menjadi tanggung jawab kami setelah 1 minggu
+    Terima kasih telah memilih Pinang Laundry!<br/>
+    Bersih, Cepat, Terpercaya.<br/>
+    Sampai jumpa di cucian bersih berikutnya, ya! 👋
   </div>
   <script>window.print()</script>
 </body></html>`);
@@ -948,6 +1055,29 @@ const styles = {
   modalButtons: { display: "flex", gap: 12, marginTop: 20 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 14, border: "2px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 16, fontWeight: 400, color: "#64748b" },
   submitBtn: { flex: 1, padding: 14, borderRadius: 14, border: "none", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white", cursor: "pointer", fontSize: 16, fontWeight: 700, boxShadow: "0 4px 12px rgba(59,130,246,0.3)" },
+
+  orderModalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
+  orderModal: { background: "#fff", borderRadius: 20, width: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 50px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" },
+  orderModalHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #e2e8f0", fontSize: 18, fontWeight: 700, color: "#1e293b" },
+  orderModalClose: { width: 32, height: 32, borderRadius: "50%", border: "none", background: "#f1f5f9", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b" },
+  orderModalBody: { padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 },
+  infoHarga: { textAlign: "center", fontSize: 15, color: "#64748b", padding: "10px 16px", background: "#f0f7ff", borderRadius: 10, fontWeight: 600 },
+  sectionLabel: { fontSize: 13, fontWeight: 700, color: "#3b82f6", letterSpacing: "0.5px" },
+  fieldBox: { background: "#f8fafc", borderRadius: 12, padding: 16, display: "flex", flexDirection: "column", gap: 12 },
+  fieldRow: { display: "flex", flexDirection: "column", gap: 6 },
+  fieldLabel: { fontSize: 13, fontWeight: 600, color: "#475569" },
+  orderInput: { padding: "10px 14px", borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 14, outline: "none", background: "#fff", width: "100%", boxSizing: "border-box" },
+  orderSelect: { padding: "10px 14px", borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 14, outline: "none", background: "#fff", width: "100%", cursor: "pointer", boxSizing: "border-box" },
+  orderTextarea: { padding: "10px 14px", borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 14, outline: "none", background: "#fff", width: "100%", minHeight: 70, resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" },
+  radioGroup: { display: "flex", flexDirection: "column", gap: 8 },
+  radioLabel: { display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 10, border: "1px solid #e2e8f0", cursor: "pointer", fontSize: 14, fontWeight: 500, background: "#fff", transition: "all 0.2s" },
+  radio: { width: 18, height: 18, accentColor: "#3b82f6", cursor: "pointer" },
+  divider: { height: 1, background: "#e2e8f0", margin: "4px 0" },
+  ringkasan: { display: "flex", flexDirection: "column", gap: 8 },
+  ringkasanTitle: { fontSize: 13, fontWeight: 700, color: "#1e293b", letterSpacing: "0.5px" },
+  ringkasanRow: { display: "flex", justifyContent: "space-between", fontSize: 14, color: "#475569" },
+  ringkasanTotal: { display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 800, color: "#059669", padding: "8px 0" },
+  orderModalFooter: { display: "flex", gap: 12, padding: "16px 24px", borderTop: "1px solid #e2e8f0" },
   editBtn: { padding: "8px 20px", borderRadius: 10, border: "2px solid #3b82f6", background: "transparent", color: "#3b82f6", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease" },
   paymentOrderInfo: { background: "#f8fafc", padding: 16, borderRadius: 16, textAlign: "center" },
   paymentTotal: { fontSize: 22, fontWeight: 700, color: "#059669", margin: 0 },

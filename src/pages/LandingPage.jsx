@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Chatbot from "../components/chatbot/chatbot.jsx";
 
 const testimonials = [
   { name: "Siti Aminah", text: "Pelayanannya cepat dan cucian selalu bersih! Servis excelente!", rating: 5 },
@@ -38,10 +39,10 @@ export default function LandingPage() {
   ];
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="container-wrap">
       {/* STICKY NAVBAR */}
       <header style={{ ...styles.navbar, ...(isScrolled ? styles.navbarScrolled : {}) }}>
-        <div style={styles.navContent}>
+        <div style={styles.navContent} className="nav-content">
           <div style={styles.navLogo}>
             <span style={styles.navLogoIcon}>🧺</span>
             <div>
@@ -50,25 +51,25 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <nav style={styles.navLinks}>
+          <nav style={styles.navLinks} className="nav-link">
             <a href="#home" className="nav-link" style={styles.navLink}>Home</a>
             <a href="#services" className="nav-link" style={styles.navLink}>Layanan</a>
             <a href="#about" className="nav-link" style={styles.navLink}>Tentang</a>
             <a href="#contact" className="nav-link" style={styles.navLink}>Kontak</a>
           </nav>
 
-          <div style={styles.navButtons}>
+          <div style={styles.navButtons} className="nav-btns">
             <button onClick={() => navigate("/login")} style={styles.navLoginBtn}>Login Admin</button>
             <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
           </div>
 
-          <button style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
+          <button className="mobile-toggle" style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
             {mobileMenu ? "✕" : "☰"}
           </button>
         </div>
 
         {mobileMenu && (
-          <div style={styles.mobileMenu}>
+          <div style={styles.mobileMenu} className="mobile-menu-wrap">
             <a href="#home" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Home</a>
             <a href="#services" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Layanan</a>
             <a href="#about" style={styles.mobileNavLink} onClick={() => setMobileMenu(false)}>Tentang</a>
@@ -79,38 +80,38 @@ export default function LandingPage() {
       </header>
 
       {/* HERO SECTION */}
-      <section id="home" style={styles.hero}>
+      <section id="home" style={styles.hero} className="hero-wrap">
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.2) 100%)", zIndex: 1 }}></div>
         <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 60, width: "100%", maxWidth: 1200, margin: "0 auto" }}>
-        <div style={styles.heroContent}>
-          <div style={styles.heroBadge}>🧺 Promo Terbatas!</div>
-          <h1 style={styles.heroTitle}>Pinang Laundry</h1>
-          <p style={styles.heroSubtitle}>Pakaian kamu bersih, wangi, dan rapi — selesai tepat waktu, setiap kali.</p>
-          <div style={styles.heroButtons}>
-            <button onClick={() => navigate("/customer/login")} style={styles.heroCtaBtn}>
+        <div style={styles.heroContent} className="hero-content">
+          <div style={styles.heroBadge} className="hero-badge">🧺 Promo Terbatas!</div>
+          <h1 style={styles.heroTitle} className="hero-title">Pinang Laundry</h1>
+          <p style={styles.heroSubtitle} className="hero-subtitle">Kilat Hasilnya, Bersih Bajunya.</p>
+          <div style={styles.heroButtons} className="hero-buttons">
+            <button onClick={() => navigate("/customer/login")} style={styles.heroCtaBtn} className="hero-cta">
               <span>Pesan Sekarang</span>
               <span style={styles.heroCtaArrow}>→</span>
             </button>
-            <a href="#services" style={styles.heroSecondaryBtn}>Lihat Layanan</a>
+            <a href="#services" style={styles.heroSecondaryBtn} className="hero-secondary">Lihat Layanan</a>
           </div>
-          <div style={styles.heroStats}>
+          <div style={styles.heroStats} className="hero-stats">
             <div style={styles.heroStat}>
-              <span style={styles.heroStatNumber}>5000+</span>
-              <span style={styles.heroStatLabel}>Pelanggan Puas</span>
+              <span style={styles.heroStatNumber} className="hero-stat-number">3000+</span>
+              <span style={styles.heroStatLabel} className="hero-stat-label">Pelanggan Puas</span>
             </div>
             <div style={styles.heroStatDivider}></div>
-            <div style={styles.heroStat}>
-              <span style={styles.heroStatNumber}>4 Jam</span>
-              <span style={styles.heroStatLabel}>Layanan Express</span>
+            <div style={styles.heroStat} className="hero-stat">
+              <span style={styles.heroStatNumber} className="hero-stat-number">4 Jam</span>
+              <span style={styles.heroStatLabel} className="hero-stat-label">Layanan Express</span>
             </div>
-            <div style={styles.heroStatDivider}></div>
-            <div style={styles.heroStat}>
-              <span style={styles.heroStatNumber}>100%</span>
-              <span style={styles.heroStatLabel}>Garansi Bersih</span>
+            <div style={styles.heroStatDivider} className="hero-stat-divider"></div>
+            <div style={styles.heroStat} className="hero-stat">
+              <span style={styles.heroStatNumber} className="hero-stat-number">100%</span>
+              <span style={styles.heroStatLabel} className="hero-stat-label">Garansi Bersih</span>
             </div>
           </div>
         </div>
-        <div style={styles.heroVisual}>
+        <div style={styles.heroVisual} className="hero-visual">
           <div style={styles.heroVisualCard}>
             <div style={styles.heroVisualIcon}>🧺</div>
             <div style={styles.heroVisualIconSmallRow}>
@@ -131,10 +132,10 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <div style={styles.sectionHeader}>
           <span style={styles.sectionBadge}>Layanan Kami</span>
-          <h2 style={styles.sectionTitle}>Pilihan Layanan Terbaik</h2>
-          <p style={styles.sectionSubtitle}>Cucian numpuk? Pilih paket laundry terbaikmu dan nikmati hari bebas mencuci!</p>
+          <h2 style={styles.sectionTitle} className="section-title">Pilihan Layanan Terbaik</h2>
+          <p style={styles.sectionSubtitle} className="section-subtitle">Cucian numpuk? Pilih paket laundry terbaikmu dan nikmati hari bebas mencuci!</p>
         </div>
-        <div style={styles.servicesGrid}>
+        <div style={styles.servicesGrid} className="services-grid">
           {allServices.map((s, i) => (
             <div key={i} style={styles.serviceCard}>
               <div style={styles.serviceCardTop}>
@@ -157,10 +158,10 @@ export default function LandingPage() {
       <section id="about" style={styles.benefits}>
         <div style={styles.sectionHeader}>
           <span style={styles.sectionBadge}>Keunggulan</span>
-          <h2 style={styles.sectionTitle}>Mengapa Memilih Pinang Laundry?</h2>
-          <p style={styles.sectionSubtitle}>Kami memberikan pengalaman laundry terbaik untuk Anda</p>
+          <h2 style={styles.sectionTitle} className="section-title">Mengapa Memilih Pinang Laundry?</h2>
+          <p style={styles.sectionSubtitle} className="section-subtitle">Kami memberikan pengalaman laundry terbaik untuk Anda</p>
         </div>
-        <div style={styles.benefitsGrid}>
+        <div style={styles.benefitsGrid} className="benefits-grid">
           {benefits.map((b, i) => (
             <div key={i} style={styles.benefitCard}>
               <div style={styles.benefitIconBg}>
@@ -177,9 +178,9 @@ export default function LandingPage() {
       <section style={styles.howToOrder}>
         <div style={styles.sectionHeader}>
           <span style={{ ...styles.sectionBadge, fontSize: 14, fontWeight: 600, letterSpacing: "1px" }}>Cara Memesan</span>
-          <h2 style={{ ...styles.sectionTitle, fontSize: 40, fontWeight: 700 }}>Mudah & Praktis</h2>
+          <h2 className="section-title" style={{ ...styles.sectionTitle, fontSize: 40, fontWeight: 700 }}>Mudah & Praktis</h2>
         </div>
-        <div style={styles.steps}>
+        <div style={styles.steps} className="steps-wrap">
           {[
             { num: "1", title: "Login / Daftar", desc: "Daftar akun pelanggan" },
             { num: "2", title: "Pilih Layanan", desc: "Tentukan layanan & berat" },
@@ -199,9 +200,9 @@ export default function LandingPage() {
       <section style={styles.testimonials}>
         <div style={styles.sectionHeader}>
           <span style={styles.sectionBadge}>Testimoni</span>
-          <h2 style={styles.sectionTitle}>Apa Kata Pelanggan Kami?</h2>
+          <h2 style={styles.sectionTitle} className="section-title">Apa Kata Pelanggan Kami?</h2>
         </div>
-        <div style={styles.testimonialGrid}>
+        <div style={styles.testimonialGrid} className="testimonial-grid">
           {testimonials.map((t, i) => (
             <div key={i} style={styles.testimonialCard}>
               <div style={styles.testimonialStars}>
@@ -230,9 +231,9 @@ export default function LandingPage() {
       <section id="contact" style={styles.contact}>
         <div style={styles.sectionHeader}>
           <span style={styles.sectionBadge}>Hubungi Kami</span>
-          <h2 style={styles.sectionTitle}>Get In Touch</h2>
+          <h2 style={styles.sectionTitle} className="section-title">Get In Touch</h2>
         </div>
-        <div style={styles.contactGrid}>
+        <div style={styles.contactGrid} className="contact-grid">
           <div style={styles.contactCard}>
             <span style={styles.contactIcon}>📞</span>
             <h4 style={styles.contactLabel}>Telepon / WA</h4>
@@ -253,7 +254,7 @@ export default function LandingPage() {
 
       {/* FOOTER */}
       <footer style={styles.footer}>
-        <div style={styles.footerContent}>
+        <div style={styles.footerContent} className="footer-content">
           <div style={styles.footerBrand}>
             <span style={styles.footerLogo}>🧺</span>
             <div>
@@ -283,12 +284,53 @@ export default function LandingPage() {
           <p>© 2026 Pinang Laundry. All rights reserved.</p>
         </div>
       </footer>
+
+      <Chatbot />
+
+      <style>{`
+        @media (max-width: 768px) {
+          .nav-link, .nav-btns { display: none !important; }
+          .mobile-toggle { display: block !important; }
+        }
+        @media (min-width: 769px) {
+          .mobile-menu-wrap { display: none !important; }
+        }
+        @media (max-width: 768px) {
+          .container-wrap { padding-top: 64px !important; }
+          .hero-wrap { flex-direction: column !important; padding: 0 24px !important; text-align: center !important; min-height: 90vh !important; }
+          .hero-content { padding-left: 0 !important; }
+          .hero-badge { font-size: 13px !important; margin-bottom: 20px !important; }
+          .hero-title { font-size: 36px !important; margin-bottom: 16px !important; }
+          .hero-subtitle { font-size: 15px !important; margin-bottom: 28px !important; max-width: 100% !important; }
+          .hero-buttons { flex-direction: column !important; gap: 12px !important; align-items: center !important; margin-bottom: 32px !important; }
+          .hero-cta, .hero-secondary { padding: 14px 32px !important; font-size: 15px !important; text-align: center !important; }
+          .hero-stats { gap: 20px !important; justify-content: center !important; }
+          .hero-stat { min-width: auto !important; }
+          .hero-stat-number { font-size: 24px !important; }
+          .hero-stat-label { font-size: 12px !important; }
+          .hero-stat-divider { height: 32px !important; }
+          .hero-visual { display: none !important; }
+          .services-grid { grid-template-columns: 1fr !important; }
+          .benefits-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .testimonial-grid { grid-template-columns: 1fr !important; }
+          .contact-grid { grid-template-columns: 1fr !important; }
+          .steps-wrap { gap: 24px !important; }
+          .footer-content { flex-direction: column !important; gap: 24px !important; }
+          .section-subtitle { white-space: normal !important; }
+        }
+        @media (max-width: 480px) {
+          .hero-title { font-size: 28px !important; }
+          .benefits-grid { grid-template-columns: 1fr !important; }
+          .section-title { font-size: 24px !important; }
+          .nav-content { padding: 12px 16px !important; }
+        }
+      `}</style>
     </div>
   );
 }
 
 const styles = {
-  container: { fontFamily: "'Segoe UI', -apple-system, sans-serif", background: "linear-gradient(180deg, #f0f7ff 0%, #ffffff 30%, #f8fafc 60%, #f0f7ff 100%)", minHeight: "100vh", paddingTop: 72 },
+  container: { background: "linear-gradient(180deg, #f0f7ff 0%, #ffffff 30%, #f8fafc 60%, #f0f7ff 100%)", minHeight: "100vh", paddingTop: 72 },
   
   navbar: { position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(10px)", transition: "all 0.3s ease", borderBottom: "1px solid rgba(241,245,249,0.8)" },
   navbarScrolled: { boxShadow: "0 4px 20px rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(10px)" },

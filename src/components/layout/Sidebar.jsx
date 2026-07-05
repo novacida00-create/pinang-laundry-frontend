@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 export default function Sidebar() {
   const menu = [
     { icon: "🏠", label: "Dashboard", path: "/" },
-    { icon: "🧾", label: "Transaksi", path: "/transaksi" },
+    { icon: "🧾", label: "Orderan", path: "/orderan" },
     { icon: "👥", label: "Pelanggan", path: "/pelanggan" },
     { icon: "👨‍💼", label: "Karyawan", path: "/karyawan" },
     { icon: "🏷️", label: "Layanan", path: "/admin/layanan" },

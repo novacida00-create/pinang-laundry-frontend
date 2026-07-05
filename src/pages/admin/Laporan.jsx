@@ -52,7 +52,7 @@ export default function Laporan() {
       const ordersSaved = localStorage.getItem("customerOrders");
       if (ordersSaved) {
         const orders = JSON.parse(ordersSaved);
-        orders.filter(o => o.status === "Selesai" || o.payment_status === "Lunas").forEach(o => {
+        orders.forEach(o => {
           const exists = data.some(l => l.pelanggan === o.customer_name && l.tanggal === formatTanggalDariISO(o.created_at));
           if (!exists) {
             data.push({
@@ -62,7 +62,7 @@ export default function Laporan() {
               berat: o.weight.toString(),
               harga: o.price.toString(),
               total: o.total.toString(),
-              status: "Selesai"
+              status: o.status || "Baru"
             });
           }
         });
@@ -165,17 +165,21 @@ export default function Laporan() {
     
     setAllLaporan(allLaporan.map(l => l.no === editData.no ? updatedData : l));
 
-    if (editData.status === "Selesai") {
-      const savedOrders = localStorage.getItem("customerOrders");
-      if (savedOrders) {
-        const orders = JSON.parse(savedOrders);
-        const updatedOrders = orders.map(o =>
-          o.customer_name === editData.pelanggan && o.service_name === editData.layanan && o.status !== "Selesai"
-            ? { ...o, status: "Selesai", payment_status: "Lunas", payment: "cash", paid_at: new Date().toISOString() }
-            : o
-        );
-        localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
-      }
+    const savedOrders = localStorage.getItem("customerOrders");
+    if (savedOrders) {
+      const orders = JSON.parse(savedOrders);
+      const updatedOrders = orders.map(o =>
+        o.customer_name === editData.pelanggan && o.service_name === editData.layanan
+          ? {
+              ...o,
+              status: editData.status === "Selesai" ? "Selesai" : o.status,
+              payment_status: editData.payment_status || o.payment_status,
+              payment: editData.payment || o.payment,
+              paid_at: editData.status === "Selesai" && o.status !== "Selesai" ? new Date().toISOString() : o.paid_at
+            }
+          : o
+      );
+      localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
     }
 
     setShowModal(false);
@@ -195,8 +199,9 @@ export default function Laporan() {
     .reduce((sum, l) => sum + parseInt(l.total), 0);
 
   return (
-    <div style={styles.app}>
-      <aside style={styles.sidebar}>
+    <div className="admin-layout" style={styles.app}>
+      <input type="checkbox" id="mt" className="mt-i" />
+      <aside className="admin-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>🧺</div>
@@ -210,12 +215,15 @@ export default function Laporan() {
             <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="🏠" label="Dashboard" />
             </NavLink>
-            <NavLink to="/transaksi" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🧾" label="Transaksi" />
+            <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="🧾" label="Orderan" />
             </NavLink>
             <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="👥" label="Pelanggan" />
             </NavLink>
+            <div style={styles.navItem} onClick={() => window.location.href='/transaksi'}>
+              <NavItem icon="💳" label="Transaksi" />
+            </div>
             <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="👨‍💼" label="Karyawan" />
             </NavLink>
@@ -245,7 +253,8 @@ export default function Laporan() {
         </div>
       </aside>
 
-      <main style={styles.main}>
+      <main className="admin-main" style={styles.main}>
+        <label htmlFor="mt" className="mt-l">☰</label>
         <header style={styles.header}>
           <h2 style={styles.welcome}>Laporan</h2>
           <div style={styles.headerRight}>
@@ -446,21 +455,37 @@ export default function Laporan() {
               <button style={styles.modalSave} onClick={() => {
                 const pw = window.open('', '_blank');
                 if (!pw) { alert("Izinkan popup untuk mencetak laporan"); return; }
+
+                const bulanList = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                const formatDate = (iso) => {
+                  const t = new Date(iso);
+                  return `${t.getDate().toString().padStart(2, "0")} ${bulanList[t.getMonth()]} ${t.getFullYear()}`;
+                };
+
+                const orders = JSON.parse(localStorage.getItem("customerOrders") || "[]");
+
                 const now = new Date();
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const filtered = allLaporan.filter(l => {
-                  const itemDate = getDateFromString(l.tanggal);
+
+                const filteredOrders = orders.filter(o => {
+                  const d = new Date(o.created_at);
+                  const itemDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
                   if (printPeriod === "harian") return itemDate.toDateString() === today.toDateString();
-                  if (printPeriod === "mingguan") { const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7); return itemDate >= weekAgo && itemDate <= today; }
+                  if (printPeriod === "mingguan") { const wa = new Date(today); wa.setDate(wa.getDate() - 7); return itemDate >= wa && itemDate <= today; }
                   if (printPeriod === "bulanan") return itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
                   if (printPeriod === "tahunan") return itemDate.getFullYear() === today.getFullYear();
                   return true;
-                }).filter(l => l.pelanggan.toLowerCase().includes(search.toLowerCase()) || l.layanan.toLowerCase().includes(search.toLowerCase()));
+                });
+
+                const selesaiOrders = filteredOrders.filter(o => o.status === "Selesai" || o.payment_status === "Lunas");
+                const totalTransaksi = filteredOrders.length;
+                const totalSelesai = selesaiOrders.length;
+                const totalKg = selesaiOrders.reduce((sum, o) => sum + (parseFloat(o.weight) || 0), 0);
+                const totalPend = selesaiOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+
                 const label = { harian: "Harian", mingguan: "Mingguan", bulanan: "Bulanan", tahunan: "Tahunan" }[printPeriod] || "Semua";
                 setShowPrintModal(false);
-                const selesai = filtered.filter(l => l.status === "Selesai");
-                const totalKg = selesai.reduce((sum, l) => sum + parseInt(l.berat.replace(/kg|pcs/g, "").trim()), 0);
-                const totalPend = selesai.reduce((sum, l) => sum + parseInt(l.total), 0);
+
                 pw.document.write(`
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Laporan - Pinang Laundry</title>
@@ -504,29 +529,29 @@ export default function Laporan() {
     <span>Jenis Laporan: ${label}</span>
   </div>
   <div class="summary">
-    <div class="summary-item"><div class="val">${filtered.length}</div><div class="lbl">Total Transaksi</div></div>
-    <div class="summary-item"><div class="val">${totalKg} kg</div><div class="lbl">Total Berat</div></div>
-    <div class="summary-item"><div class="val">${selesai.length}</div><div class="lbl">Selesai</div></div>
+    <div class="summary-item"><div class="val">${totalTransaksi}</div><div class="lbl">Total Transaksi</div></div>
+    <div class="summary-item"><div class="val">${totalKg.toFixed(1)} kg</div><div class="lbl">Total Berat</div></div>
+    <div class="summary-item"><div class="val">${totalSelesai}</div><div class="lbl">Selesai</div></div>
     <div class="summary-item"><div class="val">Rp ${totalPend.toLocaleString('id-ID')}</div><div class="lbl">Total Pendapatan</div></div>
   </div>
   <table>
     <thead><tr><th>No</th><th>Tanggal</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th></tr></thead>
     <tbody>
-      ${filtered.map((l, i) => `
+      ${filteredOrders.map((o, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td>${l.tanggal}</td>
-          <td>${l.pelanggan}</td>
-          <td>${l.layanan}</td>
-          <td>${formatBerat(l.berat, l.layanan)}</td>
-          <td>Rp ${parseInt(l.total).toLocaleString('id-ID')}</td>
-          <td>${l.status}</td>
+          <td>${formatDate(o.created_at)}</td>
+          <td>${o.customer_name}</td>
+          <td>${o.service_name}</td>
+          <td>${o.weight} kg</td>
+          <td>Rp ${parseFloat(o.total).toLocaleString('id-ID')}</td>
+          <td>${o.status}</td>
         </tr>
       `).join('')}
     </tbody>
   </table>
   <div class="total-section">
-    <div class="label">Total Pendapatan (Selesai)</div>
+    <div class="label">Total Pendapatan (Selesai / Lunas)</div>
     <div class="amount">Rp ${totalPend.toLocaleString('id-ID')}</div>
   </div>
   <div class="ttd">
@@ -563,23 +588,23 @@ function getStatusBadge(status) {
 }
 
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", fontFamily: "sans-serif", color: "#1e293b" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
   sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
   logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 800, color: "#1e40af", margin: 0 },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
   logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "flex" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
   navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
   profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
   avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 13, fontWeight: 800 },
+  profName: { fontSize: 14, fontWeight: 600 },
   profRole: { fontSize: 10, color: "#94a3b8" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
-  welcome: { fontSize: 24, fontWeight: 800, margin: 0 },
+  welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
   headerRight: { display: "flex", alignItems: "center", gap: 15 },
   dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9" },
   topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
@@ -588,15 +613,15 @@ const styles = {
   statIcon: { width: 48, height: 48, borderRadius: 14, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
   card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", minWidth: 0 },
   cardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  cardTitle: { fontSize: 16, fontWeight: 800, margin: 0 },
+  cardTitle: { fontSize: 16, fontWeight: 600, margin: 0 },
   actionButtons: { display: "flex", gap: 12 },
   search: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, width: 200 },
   filterSelect: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, background: "#fff", cursor: "pointer" },
   btnExport: { background: "#3b82f6", color: "#fff", border: "none", padding: "10px 18px", borderRadius: 12, fontWeight: 700, fontSize: 12, cursor: "pointer" },
   table: { width: "100%", borderCollapse: "collapse" },
   thRow: { borderBottom: "1px solid #f8fafc" },
-  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 11, fontWeight: 700 },
-  td: { padding: "15px", fontSize: 12, borderBottom: "1px solid #f8fafc", fontWeight: 600 },
+  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 12, fontWeight: 600 },
+  td: { padding: "15px", fontSize: 13, borderBottom: "1px solid #f8fafc", fontWeight: 500 },
   tr: { borderBottom: "1px solid #f8fafc" },
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },

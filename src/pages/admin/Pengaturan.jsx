@@ -17,7 +17,10 @@ const defaultSettings = {
   jamTutup: "21:00",
   notifEmail: false,
   notifSMS: false,
-  autoReminder: false
+  autoReminder: false,
+  fonnteToken: "",
+  waAdmin: "",
+  waNotif: false
 };
 
 export default function Pengaturan() {
@@ -46,7 +49,7 @@ export default function Pengaturan() {
 
   const toggleSetting = (key) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
-    alert(`${key === 'notifEmail' ? 'Notifikasi Email' : key === 'notifSMS' ? 'Notifikasi SMS' : 'Auto Reminder'} ${!settings[key] ? 'diaktifkan' : 'dinonaktifkan'}!`);
+    alert(`${key === 'notifEmail' ? 'Notifikasi Email' : key === 'notifSMS' ? 'Notifikasi WhatsApp' : 'Auto Reminder'} ${!settings[key] ? 'diaktifkan' : 'dinonaktifkan'}!`);
   };
 
   const handleInputChange = (key, value) => {
@@ -54,8 +57,9 @@ export default function Pengaturan() {
   };
 
   return (
-    <div style={styles.app}>
-      <aside style={styles.sidebar}>
+    <div className="admin-layout" style={styles.app}>
+      <input type="checkbox" id="mt" className="mt-i" />
+      <aside className="admin-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>🧺</div>
@@ -69,12 +73,15 @@ export default function Pengaturan() {
             <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="🏠" label="Dashboard" />
             </NavLink>
-            <NavLink to="/transaksi" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🧾" label="Transaksi" />
+            <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="🧾" label="Orderan" />
             </NavLink>
             <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="👥" label="Pelanggan" />
             </NavLink>
+            <div style={styles.navItem} onClick={() => window.location.href='/transaksi'}>
+              <NavItem icon="💳" label="Transaksi" />
+            </div>
             <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="👨‍💼" label="Karyawan" />
             </NavLink>
@@ -104,7 +111,8 @@ export default function Pengaturan() {
         </div>
       </aside>
 
-      <main style={styles.main}>
+      <main className="admin-main" style={styles.main}>
+        <label htmlFor="mt" className="mt-l">☰</label>
         <header style={styles.header}>
           <h2 style={styles.welcome}>Pengaturan</h2>
           <div style={styles.headerRight}>
@@ -230,8 +238,8 @@ export default function Pengaturan() {
             </div>
             <div style={styles.toggleItem} onClick={() => toggleSetting("notifSMS")}>
               <div>
-                <div style={styles.toggleLabel}>Notifikasi SMS</div>
-                <div style={styles.toggleDesc}>Terima notifikasi via SMS</div>
+                <div style={styles.toggleLabel}>Notifikasi WhatsApp</div>
+                <div style={styles.toggleDesc}>Terima notifikasi via WhatsApp</div>
               </div>
               <div style={settings.notifSMS ? styles.toggleOn : styles.toggleOff}>
                 {settings.notifSMS ? "🔔" : "🔕"}
@@ -248,6 +256,30 @@ export default function Pengaturan() {
             </div>
           </div>
         </div>
+
+        <div style={styles.card}>
+          <h3 style={styles.cardTitle}>WhatsApp Notification</h3>
+          <p style={{ fontSize: 12, color: "#94a3b8", margin: "0 0 16px 0" }}>Gunakan <a href="https://fonnte.com" target="_blank" rel="noreferrer">Fonnte</a> untuk notifikasi otomatis ke pelanggan via WhatsApp.</p>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Fonnte Token</label>
+            <input style={styles.input} type="password" value={settings.fonnteToken} onChange={(e) => handleInputChange("fonnteToken", e.target.value)} placeholder="Masukkan token Fonnte" />
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>No. WhatsApp Admin</label>
+            <input style={styles.input} value={settings.waAdmin} onChange={(e) => handleInputChange("waAdmin", e.target.value)} placeholder="08XXXXXXXXXX" />
+          </div>
+          <div style={styles.toggleGroup}>
+            <div style={styles.toggleItem} onClick={() => setSettings(prev => ({ ...prev, waNotif: !prev.waNotif }))}>
+              <div>
+                <div style={styles.toggleLabel}>Aktifkan Notifikasi WA</div>
+                <div style={styles.toggleDesc}>Kirim notifikasi otomatis ke pelanggan & admin</div>
+              </div>
+              <div style={settings.waNotif ? styles.toggleOn : styles.toggleOff}>
+                {settings.waNotif ? "🔔" : "🔕"}
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
@@ -260,29 +292,29 @@ const NavItem = ({ icon, label }) => (
 );
 
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", fontFamily: "sans-serif", color: "#1e293b" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
   sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
   logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 800, color: "#1e40af", margin: 0 },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
   logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "flex" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
   navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
   profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
   avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 13, fontWeight: 800 },
+  profName: { fontSize: 14, fontWeight: 600 },
   profRole: { fontSize: 10, color: "#94a3b8" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto" },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
-  welcome: { fontSize: 24, fontWeight: 800, margin: 0 },
+  welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
   headerRight: { display: "flex", alignItems: "center", gap: 15 },
   dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9" },
   topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
   gridRow: { display: "flex", gap: 24, marginBottom: 25, flexWrap: "wrap" },
   card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", flex: "1 1 300px" },
-  cardTitle: { fontSize: 16, fontWeight: 800, margin: "0 0 20px 0" },
+  cardTitle: { fontSize: 16, fontWeight: 600, margin: "0 0 20px 0" },
   formGroup: { marginBottom: 16 },
   label: { display: "block", fontSize: 12, fontWeight: 700, color: "#64748b", marginBottom: 6 },
   input: { width: "100%", padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 14, fontWeight: 600, boxSizing: "border-box" },

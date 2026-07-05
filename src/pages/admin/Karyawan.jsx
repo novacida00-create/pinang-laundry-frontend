@@ -85,8 +85,9 @@ export default function Karyawan() {
   };
 
   return (
-    <div style={styles.app}>
-      <aside style={styles.sidebar}>
+    <div className="admin-layout" style={styles.app}>
+      <input type="checkbox" id="mt" className="mt-i" />
+      <aside className="admin-sidebar" style={styles.sidebar}>
         <div style={styles.sidebarTop}>
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>🧺</div>
@@ -100,12 +101,15 @@ export default function Karyawan() {
             <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="🏠" label="Dashboard" />
             </NavLink>
-            <NavLink to="/transaksi" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🧾" label="Transaksi" />
+            <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+              <NavItem icon="🧾" label="Orderan" />
             </NavLink>
             <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="👥" label="Pelanggan" />
             </NavLink>
+            <div style={styles.navItem} onClick={() => window.location.href='/transaksi'}>
+              <NavItem icon="💳" label="Transaksi" />
+            </div>
             <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="👨‍💼" label="Karyawan" />
             </NavLink>
@@ -135,7 +139,8 @@ export default function Karyawan() {
         </div>
       </aside>
 
-      <main style={styles.main}>
+      <main className="admin-main" style={styles.main}>
+        <label htmlFor="mt" className="mt-l">☰</label>
         <header style={styles.header}>
           <h2 style={styles.welcome}>Manajemen Karyawan</h2>
           <div style={styles.headerRight}>
@@ -261,23 +266,23 @@ const KaryawanRow = ({ no, name, role, phone, order, status, onEdit, onDelete })
 );
 
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", fontFamily: "sans-serif", color: "#1e293b" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
   sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
   logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 800, color: "#1e40af", margin: 0 },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
   logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "flex" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
   navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
   profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
   avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 13, fontWeight: 800 },
+  profName: { fontSize: 14, fontWeight: 600 },
   profRole: { fontSize: 10, color: "#94a3b8" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
-  welcome: { fontSize: 24, fontWeight: 800, margin: 0 },
+  welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
   headerRight: { display: "flex", alignItems: "center", gap: 15 },
   dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9", cursor: "pointer" },
   notifBtn: { position: "relative", padding: 10, background: "#fff", borderRadius: 12, border: "1px solid #f1f5f9", cursor: "pointer" },
@@ -288,21 +293,21 @@ const styles = {
   statIcon: { width: 48, height: 48, borderRadius: 14, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
   card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", minWidth: 0 },
   cardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  cardTitle: { fontSize: 16, fontWeight: 800, margin: 0 },
+  cardTitle: { fontSize: 16, fontWeight: 600, margin: 0 },
   actionButtons: { display: "flex", gap: 12 },
   search: { padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, width: 200 },
   btnAdd: { background: "#3b82f6", color: "#fff", border: "none", padding: "10px 18px", borderRadius: 12, fontWeight: 700, fontSize: 12, cursor: "pointer" },
   table: { width: "100%", borderCollapse: "collapse" },
   thRow: { borderBottom: "1px solid #f8fafc" },
-  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 11, fontWeight: 700 },
-  td: { padding: "15px", fontSize: 12, borderBottom: "1px solid #f8fafc", fontWeight: 600 },
+  th: { textAlign: "left", padding: "12px 15px", color: "#94a3b8", fontSize: 12, fontWeight: 600 },
+  td: { padding: "15px", fontSize: 13, borderBottom: "1px solid #f8fafc", fontWeight: 500 },
   tr: { borderBottom: "1px solid #f8fafc" },
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
   actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
-  modalTitle: { fontSize: 20, fontWeight: 800, margin: 0, textAlign: "center" },
+  modalTitle: { fontSize: 20, fontWeight: 700, margin: 0, textAlign: "center" },
   modalInput: { padding: "12px 16px", borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 14 },
   modalButtons: { display: "flex", gap: 12, marginTop: 10 },
   modalCancel: { flex: 1, padding: 12, borderRadius: 12, border: "1px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 14, fontWeight: 600 },

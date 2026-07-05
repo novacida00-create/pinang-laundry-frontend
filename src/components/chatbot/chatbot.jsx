@@ -110,7 +110,7 @@ export default function Chatbot() {
       {open && (
         <div style={styles.chatbox}>
           <div style={styles.header}>
-            <span>🤖 Pinang Laundry Bot</span>
+            <span>🤖 Asisten Pinang Laundry</span>
             <button style={styles.closeBtn} onClick={() => setOpen(false)}>✕</button>
           </div>
           
@@ -144,13 +144,13 @@ export default function Chatbot() {
 const styles = {
   container: { position: "fixed", bottom: 20, right: 20, zIndex: 1000 },
   button: { 
-    width: 60, 
-    height: 60, 
+    width: 70, 
+    height: 70, 
     borderRadius: "50%", 
     background: "#3b82f6", 
     border: "none", 
     color: "white", 
-    fontSize: 24, 
+    fontSize: 30, 
     cursor: "pointer",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     display: "flex",
