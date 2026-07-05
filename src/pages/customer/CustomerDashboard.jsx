@@ -1057,10 +1057,10 @@ const styles = {
   submitBtn: { flex: 1, padding: 14, borderRadius: 14, border: "none", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white", cursor: "pointer", fontSize: 16, fontWeight: 700, boxShadow: "0 4px 12px rgba(59,130,246,0.3)" },
 
   orderModalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
-  orderModal: { background: "#fff", borderRadius: 20, width: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 50px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" },
+  orderModal: { background: "#fff", borderRadius: 20, width: 520, maxHeight: "90vh", boxShadow: "0 25px 50px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" },
   orderModalHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #e2e8f0", fontSize: 18, fontWeight: 700, color: "#1e293b" },
   orderModalClose: { width: 32, height: 32, borderRadius: "50%", border: "none", background: "#f1f5f9", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b" },
-  orderModalBody: { padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 },
+  orderModalBody: { padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", flex: 1 },
   infoHarga: { textAlign: "center", fontSize: 15, color: "#64748b", padding: "10px 16px", background: "#f0f7ff", borderRadius: 10, fontWeight: 600 },
   sectionLabel: { fontSize: 13, fontWeight: 700, color: "#3b82f6", letterSpacing: "0.5px" },
   fieldBox: { background: "#f8fafc", borderRadius: 12, padding: 16, display: "flex", flexDirection: "column", gap: 12 },

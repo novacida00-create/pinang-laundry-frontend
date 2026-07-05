@@ -82,7 +82,7 @@ export default function CustomerLoginPage() {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="clp-wrap" style={styles.container}>
       <div style={styles.leftBg}></div>
       <div style={styles.rightBg}></div>
       <div style={styles.card}>
