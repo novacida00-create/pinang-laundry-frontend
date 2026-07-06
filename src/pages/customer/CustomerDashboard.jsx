@@ -322,6 +322,7 @@ export default function CustomerDashboard() {
   const completedOrders = orders.filter(o => o.status === "Selesai");
 
   return (
+    <>
     <div className="customer-layout" style={styles.app}>
       <input type="checkbox" id="mt" className="mt-i" />
 
@@ -990,8 +991,10 @@ export default function CustomerDashboard() {
         </div>
       )}
 
-      <Chatbot />
     </div>
+
+      <Chatbot />
+    </>
   );
 }
 
