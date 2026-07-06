@@ -139,26 +139,23 @@ export default function CustomerLoginPage() {
           </div>
         </div>
         <div style={styles.cardRight}>
-          <h2 style={styles.title}>Login Pelanggan</h2>
-          <p style={styles.subtitle}>Login ke akun Anda untuk memesan</p>
+          <h2 style={{ ...styles.title, fontSize: 18 }}>Login Pelanggan</h2>
 
           {error && <div style={styles.errorBox}>{error}</div>}
 
-          <form onSubmit={handleLogin} style={styles.form}>
-            <label style={styles.label}>Username</label>
-            <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
+          <label style={styles.label}>Username</label>
+          <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
 
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <label style={styles.label}>Password</label>
-              <span style={{ marginLeft: "auto", ...styles.label, cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
-            </div>
-            <div style={styles.passWrap}>
-              <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
-              <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
-            </div>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <label style={styles.label}>Password</label>
+            <span style={{ marginLeft: "auto", fontSize: 14, fontWeight: 400, color: "#3b82f6", letterSpacing: "+0.3px", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+          </div>
+          <div style={styles.passWrap}>
+            <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+            <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
+          </div>
 
-            <button type="submit" style={styles.button}>Login</button>
-          </form>
+          <button onClick={handleLogin} style={styles.button}>Login</button>
 
           <div style={styles.footer}>
             <span style={styles.footerText}>Belum punya akun? </span>
@@ -254,7 +251,7 @@ const styles = {
   cardLeftStats: { display: "flex", gap: 32, marginTop: 8 },
   cardLeftStatNum: { display: "block", fontSize: 22, fontWeight: 700, textAlign: "center" },
   cardLeftStatLabel: { display: "block", fontSize: 12, color: "rgba(255,255,255,0.7)", textAlign: "center", letterSpacing: "+0.3px" },
-  cardRight: { flex: 1, padding: "40px 36px", display: "flex", flexDirection: "column", gap: 16, justifyContent: "center" },
+  cardRight: { flex: 1, padding: "40px 36px", display: "flex", flexDirection: "column", gap: 12, justifyContent: "center" },
   modal: { width: 400, background: "#ffffff", borderRadius: 32, padding: "36px", boxShadow: "0 25px 50px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", gap: 12 },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   logoSection: { display: "flex", alignItems: "center", gap: 12, marginBottom: 4 },
