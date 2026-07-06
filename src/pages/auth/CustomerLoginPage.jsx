@@ -30,7 +30,6 @@ export default function CustomerLoginPage() {
 .clp-wrap > div:nth-child(3) > div:last-child p { font-size: 15px !important; }
 .clp-wrap > div:nth-child(1), .clp-wrap > div:nth-child(2) { width: 300px !important; height: 300px !important; }
 .clp-wrap > div[style*="fixed"] > div { width: 90% !important; max-width: 360px !important; padding: 24px 20px !important; border-radius: 24px !important; margin: 0 auto !important; }
-.clp-wrap > div:nth-child(3) > div:last-child form > div:nth-child(4) span { right: 16px !important; font-size: 22px !important; opacity: 0.7 !important; }
 .clp-wrap > div:nth-child(3) > div:last-child > div:last-child { margin-top: 16px !important; }
 .clp-wrap > div:nth-child(3) > div:last-child > div:last-child span { font-size: 15px !important; }
 }
@@ -44,7 +43,6 @@ export default function CustomerLoginPage() {
 .clp-wrap input { font-size: 15px !important; padding: 12px 14px !important; border-radius: 12px !important; }
 .clp-wrap button { font-size: 15px !important; padding: 13px !important; border-radius: 12px !important; }
 .clp-wrap > div[style*="fixed"] > div { width: 92% !important; max-width: 340px !important; padding: 20px 16px !important; border-radius: 20px !important; }
-.clp-wrap > div:nth-child(3) > div:last-child form > div:nth-child(4) span { right: 14px !important; font-size: 20px !important; opacity: 0.7 !important; }
 .clp-wrap > div:nth-child(3) > div:last-child > div:last-child { margin-top: 14px !important; }
 .clp-wrap > div:nth-child(3) > div:last-child > div:last-child span { font-size: 14px !important; }
 }
@@ -144,15 +142,17 @@ export default function CustomerLoginPage() {
           {error && <div style={styles.errorBox}>{error}</div>}
 
           <label style={styles.label}>Username</label>
-          <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
-
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <label style={styles.label}>Password</label>
-            <span style={{ marginLeft: "auto", fontSize: 14, fontWeight: 400, color: "#3b82f6", letterSpacing: "+0.3px", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+          <div style={{ width: "100%" }}>
+            <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
           </div>
+
+          <label style={styles.label}>Password</label>
           <div style={styles.passWrap}>
             <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
             <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
+          </div>
+          <div style={{ textAlign: "right", marginTop: -8 }}>
+            <span style={{ fontSize: 13, color: "#3b82f6", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
           </div>
 
           <button onClick={handleLogin} style={styles.button}>Login</button>
@@ -259,13 +259,12 @@ const styles = {
   logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
   logoSub: { fontSize: 12, color: "#94a3b8", margin: 0, letterSpacing: "+0.3px" },
   title: { fontSize: 22, fontWeight: 600, color: "#1e293b", margin: 0, letterSpacing: "-0.5px" },
-  subtitle: { fontSize: 16, color: "#64748b", margin: 0, lineHeight: 1.65 },
-  form: { display: "flex", flexDirection: "column", gap: 6 },
+
   label: { fontSize: 14, fontWeight: 400, color: "#475569", letterSpacing: "+0.3px" },
   errorBox: { padding: "12px 16px", backgroundColor: "#fef2f2", color: "#dc2626", borderRadius: 12, fontSize: 14, fontWeight: 400, textAlign: "center", border: "1px solid #fecaca", lineHeight: 1.65 },
   input: { width: "100%", padding: "14px 16px", borderRadius: 14, border: "1px solid #e2e8f0", fontSize: 16, outline: "none", background: "#f8fafc", boxSizing: "border-box", lineHeight: 1.65 },
   passWrap: { position: "relative", display: "flex", alignItems: "center" },
-  passToggle: { position: "absolute", right: 14, cursor: "pointer", fontSize: 18, opacity: 0.6 },
+  passToggle: { position: "absolute", right: 14, cursor: "pointer", fontSize: 20, opacity: 0.7 },
   button: { width: "100%", padding: 14, marginTop: 12, background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white", border: "none", borderRadius: 14, fontSize: 16, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(59,130,246,0.3)", transition: "all 0.2s ease" },
   footer: { textAlign: "center", marginTop: 8 },
   footerText: { fontSize: 14, color: "#64748b", lineHeight: 1.65 },
