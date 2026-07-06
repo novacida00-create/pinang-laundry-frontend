@@ -146,11 +146,11 @@ export default function CustomerLoginPage() {
 
           <form onSubmit={handleLogin} style={styles.form}>
             <label style={styles.label}>Username</label>
-            <input type="text" placeholder="Masukkan nama" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
+            <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
               <label style={styles.label}>Password</label>
-              <span style={{ fontSize: 12, fontWeight: 400, color: "#3b82f6", cursor: "pointer", letterSpacing: "+0.3px" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+              <span style={{ fontSize: 11, color: "#3b82f6", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
             </div>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
