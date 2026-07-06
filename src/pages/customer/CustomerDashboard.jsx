@@ -49,6 +49,8 @@ export default function CustomerDashboard() {
     const labels = { "0-1": "Radius 0 - 1 km (Gratis)", "1-2": "Radius 1 - 2 km (Rp 5.000)", "2-4": "Radius 2 - 4 km (Ongkir +Rp 10.000)", "4-6": "Radius 4 - 6 km (Ongkir +Rp 15.000)", "6-10": "Radius 6 - 10 km (Ongkir +Rp 25.000)" };
     return labels[d] || "";
   };
+  const orderSteps = ["Jumlah", "Pengiriman", "Detail"];
+  const currentStep = !orderForm.weight || parseFloat(orderForm.weight) <= 0 ? 1 : deliveryMode ? 3 : 2;
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -688,6 +690,27 @@ export default function CustomerDashboard() {
             <div style={styles.orderModalBody}>
               <div style={styles.infoHarga}>Harga: Rp {parseInt(selectedService?.harga || 0).toLocaleString('id-ID')}/{getUnit(selectedService?.name)}</div>
 
+              <div style={styles.stepper}>
+                {orderSteps.map((label, i) => {
+                  const stepNum = i + 1;
+                  const isCompleted = stepNum < currentStep;
+                  const isActive = stepNum === currentStep;
+                  return (
+                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, background: isCompleted ? "#22c55e" : isActive ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#e2e8f0", color: isCompleted || isActive ? "#fff" : "#94a3b8", boxShadow: isActive ? "0 4px 12px rgba(59,130,246,0.4)" : "none", transition: "all 0.3s" }}>
+                          {isCompleted ? "✓" : stepNum}
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? "#3b82f6" : isCompleted ? "#22c55e" : "#94a3b8", letterSpacing: "0.3px" }}>{label}</span>
+                      </div>
+                      {i < orderSteps.length - 1 && (
+                        <span style={{ fontSize: 18, color: isCompleted ? "#22c55e" : "#cbd5e1", margin: "0 12px", marginBottom: 18, transition: "all 0.3s" }}>→</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
               <div style={styles.sectionLabel}>1. MASUKKAN JUMLAH ESTIMASI</div>
               <div style={styles.fieldBox}>
                 <div style={styles.fieldRow}>
@@ -767,8 +790,8 @@ export default function CustomerDashboard() {
               </div>
             </div>
             <div style={styles.orderModalFooter}>
-              <button style={styles.cancelBtn} onClick={() => setShowOrderModal(false)}>Batal</button>
-              <button style={styles.submitBtn} onClick={handleSubmitOrder}>Kirim Pesanan</button>
+              <button style={{ ...styles.cancelBtn, flex: 1 }} onClick={() => setShowOrderModal(false)}>Batal</button>
+              <button style={{ ...styles.submitBtn, flex: 2 }} onClick={handleSubmitOrder}>📨 Kirim Pesanan</button>
             </div>
           </div>
         </div>
@@ -1008,7 +1031,7 @@ const styles = {
   logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
   logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 400, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 13, fontWeight: 400, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" },
   navActive: { background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)" },
   badge: { backgroundColor: "#ef4444", color: "#fff", padding: "2px 8px", borderRadius: 10, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
   profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "linear-gradient(135deg, #f8fafc, #f1f5f9)", borderRadius: 18, border: "1px solid #e2e8f0" },
@@ -1033,12 +1056,12 @@ const styles = {
   cardTitle: { fontSize: 22, fontWeight: 600, margin: "0 0 20px 0", display: "flex", alignItems: "center", gap: 8, letterSpacing: "-0.5px" },
 
   serviceGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 },
-  serviceCard: { padding: 20, background: "#f8fafc", borderRadius: 20, textAlign: "center", border: "1px solid #f1f5f9", transition: "all 0.3s", cursor: "default", ":hover": { transform: "translateY(-4px)", boxShadow: "0 8px 25px rgba(0,0,0,0.08)" } },
+  serviceCard: { padding: 20, background: "#f8fafc", borderRadius: 20, textAlign: "center", border: "1px solid #f1f5f9", transition: "all 0.3s", cursor: "default", display: "flex", flexDirection: "column", ":hover": { transform: "translateY(-4px)", boxShadow: "0 8px 25px rgba(0,0,0,0.08)" } },
   serviceIcon: { fontSize: 36, marginBottom: 10 },
   serviceName: { fontSize: 20, fontWeight: 600, marginBottom: 6 },
   servicePrice: { fontSize: 22, fontWeight: 700, color: "#3b82f6", marginBottom: 4 },
   serviceTime: { fontSize: 14, color: "#64748b", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 },
-  pesanBtn: { background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", border: "none", padding: "10px 20px", borderRadius: 10, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 12px rgba(59,130,246,0.3)" },
+  pesanBtn: { background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", border: "none", padding: "10px 20px", borderRadius: 10, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 12px rgba(59,130,246,0.3)", transition: "all 0.2s", marginTop: "auto", ":hover": { transform: "scale(1.03)", boxShadow: "0 6px 20px rgba(59,130,246,0.4)" }, ":active": { transform: "scale(0.97)" } },
 
   orderList: { display: "flex", flexDirection: "column", gap: 14 },
   orderItem: { padding: 20, background: "#f8fafc", borderRadius: 20, border: "1px solid #f1f5f9", transition: "all 0.2s", ":hover": { borderColor: "#cbd5e1" } },
@@ -1052,13 +1075,13 @@ const styles = {
   bayarBtn: { background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", border: "none", padding: "10px 20px", borderRadius: 10, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 12px rgba(245,158,11,0.3)" },
 
   serviceGridFull: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 },
-  serviceCardFull: { padding: 24, background: "#f8fafc", borderRadius: 20, textAlign: "center", borderTop: "4px solid #3b82f6", transition: "all 0.3s", ":hover": { transform: "translateY(-6px)", boxShadow: "0 12px 30px rgba(0,0,0,0.08)" } },
+  serviceCardFull: { padding: 24, background: "#f8fafc", borderRadius: 20, textAlign: "center", borderTop: "4px solid #3b82f6", transition: "all 0.3s", display: "flex", flexDirection: "column", ":hover": { transform: "translateY(-6px)", boxShadow: "0 12px 30px rgba(0,0,0,0.08)" } },
   serviceBadge: { display: "inline-block", padding: "4px 12px", background: "#e0f2fe", color: "#0284c7", borderRadius: 20, fontSize: 12, fontWeight: 400, marginBottom: 10, letterSpacing: "+0.3px" },
   serviceIconFull: { fontSize: 40, marginBottom: 10 },
   serviceNameFull: { fontSize: 20, fontWeight: 600, marginBottom: 8 },
   servicePriceFull: { fontSize: 22, fontWeight: 700, color: "#3b82f6", marginBottom: 4 },
   serviceTimeFull: { fontSize: 14, color: "#64748b", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 },
-  pesanBtnFull: { background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 12, fontWeight: 700, fontSize: 16, cursor: "pointer", width: "100%", boxShadow: "0 4px 12px rgba(59,130,246,0.3)" },
+  pesanBtnFull: { background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 12, fontWeight: 700, fontSize: 16, cursor: "pointer", width: "100%", boxShadow: "0 4px 12px rgba(59,130,246,0.3)", transition: "all 0.2s", marginTop: "auto", ":hover": { transform: "scale(1.03)", boxShadow: "0 6px 20px rgba(59,130,246,0.4)" }, ":active": { transform: "scale(0.97)" } },
 
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 28, padding: 32, width: 440, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 50px rgba(0,0,0,0.25)" },
@@ -1070,8 +1093,9 @@ const styles = {
   totalDisplay: { fontSize: 24, fontWeight: 700, color: "#059669" },
   textarea: { padding: "12px 16px", borderRadius: 14, border: "1px solid #e2e8f0", fontSize: 16, lineHeight: 1.65, minHeight: 80, resize: "vertical" },
   modalButtons: { display: "flex", gap: 12, marginTop: 20 },
-  cancelBtn: { flex: 1, padding: 14, borderRadius: 14, border: "2px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 16, fontWeight: 400, color: "#64748b" },
-  submitBtn: { flex: 1, padding: 14, borderRadius: 14, border: "none", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white", cursor: "pointer", fontSize: 16, fontWeight: 700, boxShadow: "0 4px 12px rgba(59,130,246,0.3)" },
+  cancelBtn: { flex: 1, padding: 14, borderRadius: 14, border: "2px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 16, fontWeight: 400, color: "#64748b", transition: "all 0.2s", ":hover": { background: "#f8fafc", borderColor: "#cbd5e1" } },
+  stepper: { display: "flex", alignItems: "center", justifyContent: "center", padding: "8px 16px 4px", maxWidth: 380, margin: "0 auto" },
+  submitBtn: { flex: 1, padding: 16, borderRadius: 14, border: "none", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white", cursor: "pointer", fontSize: 18, fontWeight: 700, boxShadow: "0 6px 20px rgba(59,130,246,0.4)", transition: "all 0.2s", letterSpacing: "0.5px", ":hover": { transform: "translateY(-2px)", boxShadow: "0 8px 25px rgba(59,130,246,0.5)" }, ":active": { transform: "translateY(0)" } },
 
   orderModalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   orderModal: { background: "#fff", borderRadius: 20, width: 520, maxHeight: "90vh", boxShadow: "0 25px 50px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" },
