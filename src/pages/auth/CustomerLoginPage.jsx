@@ -217,9 +217,9 @@ export default function CustomerLoginPage() {
             <label style={styles.label}>Username</label>
             <input type="text" placeholder="Nama" value={resetUsername} onChange={(e) => setResetUsername(e.target.value)} style={styles.input} />
 
-            <label style={styles.label}>Password</label>
+            <label style={styles.label}>Kata Sandi Baru</label>
             <div style={styles.passWrap}>
-              <input type={showPass ? "text" : "password"} placeholder="Password baru" value={resetNewPass} onChange={(e) => setResetNewPass(e.target.value)} style={styles.input} />
+              <input type={showPass ? "text" : "password"} placeholder="Kata sandi baru" value={resetNewPass} onChange={(e) => setResetNewPass(e.target.value)} style={styles.input} />
               <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
             </div>
 
