@@ -150,7 +150,7 @@ export default function CustomerLoginPage() {
           </div>
           <div style={styles.passWrap}>
             <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
-            <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
+            <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDC41\u200D\uD83D\uDDE8\uFE0F" : "\uD83D\uDC41"}</span>
           </div>
 
           <button onClick={handleLogin} style={styles.button}>Login</button>
@@ -186,7 +186,7 @@ export default function CustomerLoginPage() {
             <label style={styles.label}>Password</label>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Buat kata sandi" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} style={styles.input} />
-              <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
+              <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDC41\u200D\uD83D\uDDE8\uFE0F" : "\uD83D\uDC41"}</span>
             </div>
 
             <button onClick={handleRegister} style={styles.button}>Daftar</button>
@@ -220,7 +220,7 @@ export default function CustomerLoginPage() {
             <label style={styles.label}>Kata Sandi Baru</label>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Kata sandi baru" value={resetNewPass} onChange={(e) => setResetNewPass(e.target.value)} style={styles.input} />
-              <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
+              <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDC41\u200D\uD83D\uDDE8\uFE0F" : "\uD83D\uDC41"}</span>
             </div>
 
             <button onClick={handleResetPassword} style={styles.button}>Ganti Password</button>
