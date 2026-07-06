@@ -57,7 +57,7 @@ export default function CustomerLoginPage() {
     e.preventDefault();
     setError("");
     if (!username || !password) {
-      setError("Masukkan username dan kata sandi!");
+      setError("Masukkan username dan password!");
       return;
     }
     const customers = JSON.parse(localStorage.getItem("customers") || "[]");
