@@ -188,7 +188,7 @@ export default function CustomerLoginPage() {
             <label style={styles.label}>Email</label>
             <input type="email" placeholder="Email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} style={styles.input} />
 
-            <label style={styles.label}>Kata Sandi</label>
+            <label style={styles.label}>Password</label>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Buat kata sandi" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} style={styles.input} />
               <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
