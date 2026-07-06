@@ -148,13 +148,13 @@ export default function CustomerLoginPage() {
             <label style={styles.label}>Username</label>
             <input type="text" placeholder="Masukkan username" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
 
-            <label style={styles.label}>Password</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+              <label style={styles.label}>Password</label>
+              <span style={{ fontSize: 14, fontWeight: 400, color: "#3b82f6", cursor: "pointer", letterSpacing: "+0.3px" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+            </div>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
               <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
-            </div>
-            <div style={{ textAlign: "right", marginTop: -4 }}>
-              <span style={styles.link} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
             </div>
 
             <button type="submit" style={styles.button}>Login</button>
