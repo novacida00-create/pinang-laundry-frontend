@@ -150,7 +150,7 @@ export default function CustomerLoginPage() {
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
               <label style={styles.label}>Password</label>
-              <span style={{ fontSize: 11, color: "#3b82f6", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+              <span style={{ fontSize: 12, color: "#3b82f6", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
             </div>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
