@@ -146,11 +146,11 @@ export default function CustomerLoginPage() {
 
           <form onSubmit={handleLogin} style={styles.form}>
             <label style={styles.label}>Username</label>
-            <input type="text" placeholder="Masukkan username" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
+            <input type="text" placeholder="Masukkan nama" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
               <label style={styles.label}>Password</label>
-              <span style={{ fontSize: 14, fontWeight: 400, color: "#3b82f6", cursor: "pointer", letterSpacing: "+0.3px" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+              <span style={{ fontSize: 12, fontWeight: 400, color: "#3b82f6", cursor: "pointer", letterSpacing: "+0.3px" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
             </div>
             <div style={styles.passWrap}>
               <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
@@ -183,7 +183,7 @@ export default function CustomerLoginPage() {
             {error && <div style={styles.errorBox}>{error}</div>}
 
             <label style={styles.label}>Username</label>
-            <input type="text" placeholder="Buat username" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} style={styles.input} />
+            <input type="text" placeholder="Buat nama" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} style={styles.input} />
 
             <label style={styles.label}>Email</label>
             <input type="email" placeholder="Email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} style={styles.input} />
