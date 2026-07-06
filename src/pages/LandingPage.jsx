@@ -237,7 +237,7 @@ export default function LandingPage() {
           <div style={styles.contactCard}>
             <span style={styles.contactIcon}>📞</span>
             <h4 style={styles.contactLabel}>Telepon / WA</h4>
-            <p style={styles.contactValue}>0812-3456-7890</p>
+            <p style={styles.contactValue}>0895-4293-50001</p>
           </div>
           <div style={styles.contactCard}>
             <span style={styles.contactIcon}>📍</span>
@@ -276,8 +276,8 @@ export default function LandingPage() {
           </div>
           <div style={styles.footerLinks}>
             <h4 style={styles.footerLinkTitle}>Kontak</h4>
-            <span style={styles.footerLink}>0812-3456-7890</span>
-            <span style={styles.footerLink}>Jl. Pinang Raya</span>
+            <span style={styles.footerLink}>0895-4293-50001</span>
+            <span style={styles.footerLink}>Jl. Pinang Raya, Margonda Depok</span>
           </div>
         </div>
         <div style={styles.footerBottom}>
