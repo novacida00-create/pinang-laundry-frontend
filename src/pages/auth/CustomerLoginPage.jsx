@@ -142,17 +142,15 @@ export default function CustomerLoginPage() {
           {error && <div style={styles.errorBox}>{error}</div>}
 
           <label style={styles.label}>Username</label>
-          <div style={{ width: "100%" }}>
-            <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
-          </div>
+          <input type="text" placeholder="Masukkan nama anda" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
 
-          <label style={styles.label}>Password</label>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label style={styles.label}>Password</label>
+            <span style={{ fontSize: 13, color: "#3b82f6", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
+          </div>
           <div style={styles.passWrap}>
             <input type={showPass ? "text" : "password"} placeholder="Masukkan kata sandi" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
             <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
-          </div>
-          <div style={{ textAlign: "right", marginTop: -8 }}>
-            <span style={{ fontSize: 13, color: "#3b82f6", cursor: "pointer" }} onClick={() => { setShowReset(true); setError(""); setResetUsername(username); }}>Lupa password?</span>
           </div>
 
           <button onClick={handleLogin} style={styles.button}>Login</button>
@@ -217,11 +215,11 @@ export default function CustomerLoginPage() {
             {error && <div style={styles.errorBox}>{error}</div>}
 
             <label style={styles.label}>Username</label>
-            <input type="text" placeholder="Username" value={resetUsername} onChange={(e) => setResetUsername(e.target.value)} style={styles.input} />
+            <input type="text" placeholder="Nama" value={resetUsername} onChange={(e) => setResetUsername(e.target.value)} style={styles.input} />
 
-            <label style={styles.label}>Kata Sandi Baru</label>
+            <label style={styles.label}>Password</label>
             <div style={styles.passWrap}>
-              <input type={showPass ? "text" : "password"} placeholder="Kata sandi baru" value={resetNewPass} onChange={(e) => setResetNewPass(e.target.value)} style={styles.input} />
+              <input type={showPass ? "text" : "password"} placeholder="Password baru" value={resetNewPass} onChange={(e) => setResetNewPass(e.target.value)} style={styles.input} />
               <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDE48" : "\uD83D\uDc41\uFE0F"}</span>
             </div>
 
@@ -251,7 +249,7 @@ const styles = {
   cardLeftStats: { display: "flex", gap: 32, marginTop: 8 },
   cardLeftStatNum: { display: "block", fontSize: 22, fontWeight: 700, textAlign: "center" },
   cardLeftStatLabel: { display: "block", fontSize: 12, color: "rgba(255,255,255,0.7)", textAlign: "center", letterSpacing: "+0.3px" },
-  cardRight: { flex: 1, padding: "40px 36px", display: "flex", flexDirection: "column", gap: 12, justifyContent: "center" },
+  cardRight: { flex: 1, padding: "40px 36px", display: "flex", flexDirection: "column", gap: 12 },
   modal: { width: 400, background: "#ffffff", borderRadius: 32, padding: "36px", boxShadow: "0 25px 50px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", gap: 12 },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   logoSection: { display: "flex", alignItems: "center", gap: 12, marginBottom: 4 },
