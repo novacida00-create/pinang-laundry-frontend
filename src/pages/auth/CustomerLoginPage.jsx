@@ -1,14 +1,10 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function CustomerLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [regUsername, setRegUsername] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
   const [error, setError] = useState("");
   const [showReset, setShowReset] = useState(false);
   const [resetUsername, setResetUsername] = useState("");
@@ -95,28 +91,6 @@ export default function CustomerLoginPage() {
     setError("");
   };
 
-  const handleRegister = () => {
-    setError("");
-    if (!regUsername || !regEmail || !regPassword) {
-      setError("Mohon isi semua data!");
-      return;
-    }
-    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    if (customers.find(c => c.username === regUsername)) {
-      setError("Username sudah digunakan!");
-      return;
-    }
-    if (customers.find(c => c.email === regEmail)) {
-      setError("Email sudah terdaftar!");
-      return;
-    }
-    customers.push({ name: regUsername, username: regUsername, email: regEmail, password: regPassword });
-    localStorage.setItem("customers", JSON.stringify(customers));
-    alert("Pendaftaran berhasil! Silakan login.");
-    setShowRegister(false);
-    setRegUsername(""); setRegEmail(""); setRegPassword("");
-  };
-
   return (
     <div className="clp-wrap" style={styles.container}>
       <div style={styles.leftBg}></div>
@@ -157,47 +131,10 @@ export default function CustomerLoginPage() {
 
           <div style={styles.footer}>
             <span style={styles.footerText}>Belum punya akun? </span>
-            <span style={styles.link} onClick={() => { setShowRegister(true); setError(""); }}>Daftar di sini</span>
+            <span style={styles.link} onClick={() => navigate("/customer/register")}>Daftar di sini</span>
           </div>
         </div>
       </div>
-
-      {showRegister && (
-        <div style={styles.modalOverlay} onClick={() => { setShowRegister(false); setError(""); }}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.logoSection}>
-              <div style={styles.logoIcon}>&#x1F9FA;</div>
-              <div>
-                <h2 style={{ ...styles.logoText, fontSize: 18 }}>Pinang Laundry</h2>
-                <p style={styles.logoSub}>Buat akun baru</p>
-              </div>
-            </div>
-
-            <h2 style={{ ...styles.title, fontSize: 18 }}>Daftar Akun Baru</h2>
-
-            {error && <div style={styles.errorBox}>{error}</div>}
-
-            <label style={styles.label}>Username</label>
-            <input type="text" placeholder="Buat nama" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} style={styles.input} />
-
-            <label style={styles.label}>Email</label>
-            <input type="email" placeholder="Email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} style={styles.input} />
-
-            <label style={styles.label}>Password</label>
-            <div style={styles.passWrap}>
-              <input type={showPass ? "text" : "password"} placeholder="Buat kata sandi" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} style={styles.input} />
-              <span onClick={() => setShowPass(!showPass)} style={styles.passToggle}>{showPass ? "\uD83D\uDC41\u200D\uD83D\uDDE8\uFE0F" : "\uD83D\uDC41"}</span>
-            </div>
-
-            <button onClick={handleRegister} style={styles.button}>Daftar</button>
-
-            <div style={styles.footer}>
-              <span style={styles.footerText}>Sudah punya akun? </span>
-              <span style={styles.link} onClick={() => { setShowRegister(false); setError(""); }}>Masuk di sini</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showReset && (
         <div style={styles.modalOverlay} onClick={() => { setShowReset(false); setError(""); }}>
@@ -268,3 +205,4 @@ const styles = {
   footerText: { fontSize: 14, color: "#64748b", lineHeight: 1.65 },
   link: { fontSize: 14, color: "#3b82f6", fontWeight: 400, cursor: "pointer" },
 };
+

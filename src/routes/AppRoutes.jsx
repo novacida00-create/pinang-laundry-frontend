@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage";
 import CustomerLoginPage from "../pages/auth/CustomerLoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
 import Dashboard from "../pages/admin/Dashboard";
 import Orderan from "../pages/admin/Orderan";
 import Transaksi from "../pages/admin/Transaksi";
@@ -25,6 +26,7 @@ export default function AppRoutes() {
         <Route path="/kontak" element={<KontakPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/customer/login" element={<CustomerLoginPage />} />
+        <Route path="/customer/register" element={<RegisterPage />} />
         <Route path="/customer/dashboard" element={<CustomerDashboard />} />
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/layanan" element={<AdminLayanan />} />
