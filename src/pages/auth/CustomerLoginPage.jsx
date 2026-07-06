@@ -30,6 +30,9 @@ export default function CustomerLoginPage() {
 .clp-wrap > div:nth-child(3) > div:last-child p { font-size: 15px !important; }
 .clp-wrap > div:nth-child(1), .clp-wrap > div:nth-child(2) { width: 300px !important; height: 300px !important; }
 .clp-wrap > div[style*="fixed"] > div { width: 90% !important; max-width: 360px !important; padding: 24px 20px !important; border-radius: 24px !important; margin: 0 auto !important; }
+.clp-wrap > div:nth-child(3) > div:last-child form div span { right: 16px !important; font-size: 22px !important; opacity: 0.7 !important; }
+.clp-wrap > div:nth-child(3) > div:last-child > div:last-child { margin-top: 16px !important; }
+.clp-wrap > div:nth-child(3) > div:last-child > div:last-child span { font-size: 15px !important; }
 }
 @media (max-width: 480px) {
 .clp-wrap > div:nth-child(3) > div:first-child { padding: 20px 16px 16px !important; }
@@ -41,6 +44,9 @@ export default function CustomerLoginPage() {
 .clp-wrap input { font-size: 15px !important; padding: 12px 14px !important; border-radius: 12px !important; }
 .clp-wrap button { font-size: 15px !important; padding: 13px !important; border-radius: 12px !important; }
 .clp-wrap > div[style*="fixed"] > div { width: 92% !important; max-width: 340px !important; padding: 20px 16px !important; border-radius: 20px !important; }
+.clp-wrap > div:nth-child(3) > div:last-child form div span { right: 14px !important; font-size: 20px !important; opacity: 0.7 !important; }
+.clp-wrap > div:nth-child(3) > div:last-child > div:last-child { margin-top: 14px !important; }
+.clp-wrap > div:nth-child(3) > div:last-child > div:last-child span { font-size: 14px !important; }
 }
 `;
     document.head.appendChild(style);
