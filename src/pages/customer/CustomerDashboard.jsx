@@ -363,7 +363,7 @@ export default function CustomerDashboard() {
               <div style={styles.profName}>{customerName}</div>
               <div style={styles.profRole}>Pelanggan</div>
             </div>
-            <button onClick={() => { localStorage.removeItem("customerLoggedIn"); navigate("/login"); }} style={styles.logoutBtn}>🚪</button>
+            <button onClick={() => { localStorage.removeItem("customerLoggedIn"); navigate("/"); }} style={styles.logoutBtn}><span style={{ filter: "hue-rotate(320deg) saturate(3)" }}>🚪</span> Logout</button>
           </div>
       </aside>
 
@@ -1015,7 +1015,7 @@ const styles = {
   avatarCircle: { width: 40, height: 40, background: "linear-gradient(135deg, #c7d2fe, #818cf8)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18 },
   profName: { fontSize: 14, fontWeight: 400 },
   profRole: { fontSize: 10, color: "#94a3b8" },
-  logoutBtn: { background: "none", border: "none", cursor: "pointer", fontSize: 18, transition: "all 0.2s", opacity: 0.6, ":hover": { opacity: 1 } },
+  logoutBtn: { background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#ef4444", display: "flex", alignItems: "center", gap: 4, padding: "6px 10px", borderRadius: 10, transition: "all 0.2s", opacity: 0.7, ":hover": { opacity: 1, background: "#fef2f2" } },
 
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
