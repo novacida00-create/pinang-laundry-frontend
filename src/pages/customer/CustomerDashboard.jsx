@@ -696,15 +696,15 @@ export default function CustomerDashboard() {
                   const isCompleted = stepNum < currentStep;
                   const isActive = stepNum === currentStep;
                   return (
-                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                    <div key={label} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, background: isCompleted ? "#22c55e" : isActive ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#e2e8f0", color: isCompleted || isActive ? "#fff" : "#94a3b8", boxShadow: isActive ? "0 4px 12px rgba(59,130,246,0.4)" : "none", transition: "all 0.3s" }}>
+                        <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, background: isCompleted ? "#22c55e" : isActive ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#e2e8f0", color: isCompleted || isActive ? "#fff" : "#94a3b8", boxShadow: isActive ? "0 4px 12px rgba(59,130,246,0.4)" : "none", transition: "all 0.3s" }}>
                           {isCompleted ? "✓" : stepNum}
                         </div>
-                        <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? "#3b82f6" : isCompleted ? "#22c55e" : "#94a3b8", letterSpacing: "0.3px" }}>{label}</span>
+                        <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, color: isActive ? "#3b82f6" : isCompleted ? "#22c55e" : "#94a3b8", letterSpacing: "0.3px", whiteSpace: "nowrap" }}>{label}</span>
                       </div>
                       {i < orderSteps.length - 1 && (
-                        <span style={{ fontSize: 18, color: isCompleted ? "#22c55e" : "#cbd5e1", margin: "0 12px", marginBottom: 18, transition: "all 0.3s" }}>→</span>
+                        <span style={{ fontSize: 16, color: isCompleted ? "#22c55e" : "#cbd5e1", margin: "0 8px", marginBottom: 16, flexShrink: 0 }}>→</span>
                       )}
                     </div>
                   );
@@ -1094,7 +1094,7 @@ const styles = {
   textarea: { padding: "12px 16px", borderRadius: 14, border: "1px solid #e2e8f0", fontSize: 16, lineHeight: 1.65, minHeight: 80, resize: "vertical" },
   modalButtons: { display: "flex", gap: 12, marginTop: 20 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 14, border: "2px solid #e2e8f0", background: "white", cursor: "pointer", fontSize: 16, fontWeight: 400, color: "#64748b", transition: "all 0.2s", ":hover": { background: "#f8fafc", borderColor: "#cbd5e1" } },
-  stepper: { display: "flex", alignItems: "center", justifyContent: "center", padding: "8px 16px 4px", maxWidth: 380, margin: "0 auto" },
+  stepper: { display: "flex", alignItems: "center", justifyContent: "space-around", padding: "6px 0 2px" },
   submitBtn: { flex: 1, padding: 16, borderRadius: 14, border: "none", background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white", cursor: "pointer", fontSize: 18, fontWeight: 700, boxShadow: "0 6px 20px rgba(59,130,246,0.4)", transition: "all 0.2s", letterSpacing: "0.5px", ":hover": { transform: "translateY(-2px)", boxShadow: "0 8px 25px rgba(59,130,246,0.5)" }, ":active": { transform: "translateY(0)" } },
 
   orderModalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
