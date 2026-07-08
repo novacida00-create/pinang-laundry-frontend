@@ -5,6 +5,18 @@ import Chatbot from "../../components/chatbot/chatbot.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
+const sendEmail = async (to, subject, html) => {
+  try {
+    await fetch(`${API_URL}/send-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to, subject, html }),
+    });
+  } catch (err) {
+    console.error("Email gagal:", err);
+  }
+};
+
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
   const bulan = [
@@ -39,7 +51,7 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [orderForm, setOrderForm] = useState({ weight: "", phone: "", address: "" });
+  const [orderForm, setOrderForm] = useState({ weight: "", phone: "", address: "", email: "" });
   const getUnit = (name) => name === "Cuci Karpet" || name === "Cuci Baton" ? "pcs" : "kg";
   const [deliveryMode, setDeliveryMode] = useState("kurir");
   const [distance, setDistance] = useState("2-4");
@@ -66,6 +78,7 @@ export default function CustomerDashboard() {
   const [testimonials, setTestimonials] = useState(() => JSON.parse(localStorage.getItem("testimonials") || "[]"));
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const savedOrders = localStorage.getItem("customerOrders");
@@ -119,7 +132,7 @@ export default function CustomerDashboard() {
 
   const handlePesan = (service) => {
     setSelectedService(service);
-    setOrderForm({ weight: "", phone: "", address: "" });
+    setOrderForm({ weight: "", phone: "", address: "", email: "" });
     setDeliveryMode("kurir");
     setDistance("2-4");
     setShowOrderModal(true);
@@ -146,10 +159,12 @@ export default function CustomerDashboard() {
     const biayaCuci = parseFloat(orderForm.weight) * parseInt(selectedService.harga);
     const ongkir = deliveryMode === "kurir" ? getOngkir(distance) : 0;
     const total = biayaCuci + ongkir;
+    const customerEmail = orderForm.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com');
     const newOrder = {
       id: Date.now(),
       order_code: "INV-" + Date.now(),
       customer_name: customerName,
+      email: customerEmail,
       service_name: selectedService.name,
       weight: parseFloat(orderForm.weight),
       price: parseInt(selectedService.harga),
@@ -177,7 +192,7 @@ export default function CustomerDashboard() {
       allPelanggan.push({
         no: allPelanggan.length + 1,
         name: customerName,
-        email: customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com',
+        email: customerEmail,
         phone: orderForm.phone,
         address: orderForm.address,
         order: 1,
@@ -186,7 +201,7 @@ export default function CustomerDashboard() {
     } else {
       allPelanggan = allPelanggan.map(p => 
         p.name === customerName 
-          ? { ...p, order: p.order + 1, phone: orderForm.phone, address: orderForm.address, email: p.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com') }
+          ? { ...p, order: p.order + 1, phone: orderForm.phone, address: orderForm.address, email: customerEmail }
           : p
       );
     }
@@ -269,6 +284,12 @@ export default function CustomerDashboard() {
     setShowPaymentModal(false);
     setReceiptOrder({ ...selectedOrderForPayment, payment: "cash", payment_status: "Lunas", paid_at: new Date().toISOString() });
     setShowReceiptModal(true);
+
+    const cashEmail = selectedOrderForPayment.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com');
+    sendEmail(cashEmail,
+      `Pembayaran Lunas - ${selectedOrderForPayment.order_code}`,
+      `<h2>Halo ${customerName} 👋</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>✅ LUNAS (Tunai)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry! 🧺</p>`
+    );
   };
 
   const handleMidtransPayment = async () => {
@@ -365,7 +386,7 @@ export default function CustomerDashboard() {
               <div style={styles.profName}>{customerName}</div>
               <div style={styles.profRole}>Pelanggan</div>
             </div>
-            <button onClick={() => { localStorage.removeItem("customerLoggedIn"); navigate("/"); }} style={styles.logoutBtn}><span style={{ filter: "hue-rotate(320deg) saturate(3)" }}>🚪</span> Logout</button>
+            <button onClick={() => setShowLogoutModal(true)} style={styles.logoutBtn}>Logout</button>
           </div>
       </aside>
 
@@ -415,7 +436,7 @@ export default function CustomerDashboard() {
                       <div style={styles.serviceName}>{s.name}</div>
                       <div style={styles.servicePrice}>Rp {parseInt(s.harga).toLocaleString('id-ID')}/{s.jenis === "Satuan" ? "pcs" : "kg"}</div>
                       <div style={styles.serviceTime}><span>⏱️</span> <span>{s.waktu}</span></div>
-                      <button onClick={() => { setSelectedService(s); setOrderForm({ weight: "", phone: "", address: "" }); setShowOrderModal(true); }} style={styles.pesanBtn}>Pesan Sekarang</button>
+                      <button onClick={() => { setSelectedService(s); setOrderForm({ weight: "", phone: "", address: "", email: "" }); setShowOrderModal(true); }} style={styles.pesanBtn}>Pesan Sekarang</button>
                     </div>
                   );
                 })}
@@ -731,10 +752,14 @@ export default function CustomerDashboard() {
                 </label>
               </div>
 
-              {deliveryMode === "kurir" && (
+                  {deliveryMode === "kurir" && (
                 <>
                   <div style={styles.sectionLabel}>3. INFORMASI PENJEMPUTAN</div>
                   <div style={styles.fieldBox}>
+                    <div style={styles.fieldRow}>
+                      <span style={styles.fieldLabel}>Email (untuk notifikasi)</span>
+                      <input type="email" placeholder="nama@gmail.com" value={orderForm.email} onChange={e => setOrderForm({ ...orderForm, email: e.target.value })} style={styles.orderInput} />
+                    </div>
                     <div style={styles.fieldRow}>
                       <span style={styles.fieldLabel}>Nomor Telepon Aktif</span>
                       <input type="tel" placeholder="0812-3456-7890" value={orderForm.phone} onChange={e => setOrderForm({ ...orderForm, phone: e.target.value })} style={styles.orderInput} />
@@ -761,6 +786,10 @@ export default function CustomerDashboard() {
                 <>
                   <div style={styles.sectionLabel}>3. INFORMASI PEMESAN</div>
                   <div style={styles.fieldBox}>
+                    <div style={styles.fieldRow}>
+                      <span style={styles.fieldLabel}>Email (untuk notifikasi)</span>
+                      <input type="email" placeholder="nama@gmail.com" value={orderForm.email} onChange={e => setOrderForm({ ...orderForm, email: e.target.value })} style={styles.orderInput} />
+                    </div>
                     <div style={styles.fieldRow}>
                       <span style={styles.fieldLabel}>Nomor Telepon Aktif</span>
                       <input type="tel" placeholder="0812-3456-7890" value={orderForm.phone} onChange={e => setOrderForm({ ...orderForm, phone: e.target.value })} style={styles.orderInput} />
@@ -868,6 +897,12 @@ export default function CustomerDashboard() {
                           setShowReceiptModal(true);
                           setQrisImageUrl("");
                           setQrisOrderId("");
+
+                          const qEmail = selectedOrderForPayment.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com');
+                          sendEmail(qEmail,
+                            `Pembayaran Lunas - ${selectedOrderForPayment.order_code}`,
+                            `<h2>Halo ${customerName} 👋</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>✅ LUNAS (QRIS)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry! 🧺</p>`
+                          );
                         }}
                       >
                         Saya Sudah Bayar
@@ -1017,6 +1052,35 @@ export default function CustomerDashboard() {
     </div>
 
       <Chatbot />
+
+      {showLogoutModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)",
+          display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000
+        }} onClick={() => setShowLogoutModal(false)}>
+          <div style={{
+            background: "white", borderRadius: 28, padding: 32, width: 360,
+            textAlign: "center", boxShadow: "0 25px 50px rgba(0,0,0,0.25)"
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🚪</div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 8px 0" }}>Yakin ingin logout?</h3>
+            <p style={{ fontSize: 14, color: "#64748b", margin: "0 0 24px 0" }}>
+              Anda akan keluar dari akun ini.
+            </p>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => setShowLogoutModal(false)} style={{
+                flex: 1, padding: 14, borderRadius: 14, border: "2px solid #e2e8f0",
+                background: "white", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#64748b"
+              }}>Batal</button>
+              <button onClick={() => { localStorage.removeItem("customerLoggedIn"); navigate("/"); }} style={{
+                flex: 1, padding: 14, borderRadius: 14, border: "none",
+                background: "#ef4444", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#fff"
+              }}>Logout</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -1024,21 +1088,21 @@ export default function CustomerDashboard() {
 const styles = {
   app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
 
-  sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0", position: "relative", zIndex: 1 },
+  sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
-  logoIcon: { width: 40, height: 40, background: "linear-gradient(135deg, #3b82f6, #6366f1)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)" },
-  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
-  logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
+  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
+  logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 13, fontWeight: 400, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" },
-  navActive: { background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "#fff", boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.2s" },
+  navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
   badge: { backgroundColor: "#ef4444", color: "#fff", padding: "2px 8px", borderRadius: 10, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
-  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "linear-gradient(135deg, #f8fafc, #f1f5f9)", borderRadius: 18, border: "1px solid #e2e8f0" },
-  avatarCircle: { width: 40, height: 40, background: "linear-gradient(135deg, #c7d2fe, #818cf8)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18 },
-  profName: { fontSize: 14, fontWeight: 400 },
-  profRole: { fontSize: 10, color: "#94a3b8" },
-  logoutBtn: { background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#ef4444", display: "flex", alignItems: "center", gap: 4, padding: "6px 10px", borderRadius: 10, transition: "all 0.2s", opacity: 0.7, ":hover": { opacity: 1, background: "#fef2f2" } },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
+  avatarCircle: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18 },
+  profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
+  profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
+  logoutBtn: { background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#fca5a5", display: "flex", alignItems: "center", gap: 4, padding: "6px 10px", borderRadius: 10, transition: "all 0.2s", ":hover": { background: "rgba(255,255,255,0.2)", color: "#fff" } },
 
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
