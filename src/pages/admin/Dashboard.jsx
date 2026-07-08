@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
+import Icon from "../../utils/icons.jsx";
 
 
 
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotifModal, setShowNotifModal] = useState(false);
+
   const [notifications, setNotifications] = useState([
     { id: 1, title: "Pesanan Baru", message: "Novacida Haqs memesan Cuci Kiloan", time: "2 menit lalu", read: false },
     { id: 2, title: "Pesanan Selesai", message: "Pesanan Ahmad Rizki sudah selesai", time: "30 menit lalu", read: false },
@@ -133,28 +135,28 @@ export default function Dashboard() {
 
           <nav style={styles.nav}>
             <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🏠" label="Dashboard" />
+              <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🧾" label="Orderan" />
+              <NavItem icon="receipt" label="Orderan" />
             </NavLink>
             <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="👥" label="Pelanggan" />
+              <NavItem icon="users" label="Pelanggan" />
             </NavLink>
             <div style={styles.navItem} onClick={() => navigate("/transaksi")}>
-              <NavItem icon="💳" label="Transaksi" />
+              <NavItem icon="creditCard" label="Transaksi" />
             </div>
             <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="👨‍💼" label="Karyawan" />
+              <NavItem icon="idBadge2" label="Karyawan" />
             </NavLink>
             <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🏷️" label="Layanan" />
+              <NavItem icon="tag" label="Layanan" />
             </NavLink>
             <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="📊" label="Laporan" />
+              <NavItem icon="chartBar" label="Laporan" />
             </NavLink>
             <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="⚙️" label="Pengaturan" />
+              <NavItem icon="settings" label="Pengaturan" />
             </NavLink>
           </nav>
         </div>
@@ -170,20 +172,21 @@ export default function Dashboard() {
             <div style={styles.profName}>Alex</div>
             <div style={styles.profRole}>Admin</div>
           </div>
-          <span style={{ fontSize: 12, color: "#94a3b8", cursor: "pointer" }}>⌄</span>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>⌄</span>
+          <button onClick={() => navigate("/")} style={styles.logoutBtnAdmin}><Icon name="doorExit" /></button>
         </div>
       </aside>
 
       {/* MAIN CONTENT */}
       <main className="admin-main" style={styles.main}>
-        <label htmlFor="mt" className="mt-l">☰</label>
+        <label htmlFor="mt" className="mt-l"><Icon name="menu2" /></label>
         {/* HEADER */}
         <header style={styles.header}>
-          <h2 style={styles.welcome}>Selamat datang, Alex! 👋</h2>
+          <h2 style={styles.welcome}>Selamat datang, Alex!</h2>
           <div style={styles.headerRight}>
-            <div style={styles.dateBox}>📅 {currentDate}</div>
+            <div style={styles.dateBox}><Icon name="calendar" /> {currentDate}</div>
             <div style={styles.notifBtn} onClick={() => setShowNotifModal(true)}>
-              🔔{unreadCount > 0 && <span style={styles.notifBadge}>{unreadCount}</span>}
+              <Icon name="bell" />{unreadCount > 0 && <span style={styles.notifBadge}>{unreadCount}</span>}
             </div>
             <div style={styles.topAvatar} onClick={() => setShowProfileModal(true)}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -196,10 +199,10 @@ export default function Dashboard() {
 
         {/* STATS ROW */}
         <div style={styles.statsRow}>
-          <StatCard label="Total Pendapatan" val={stats.pendapatan} color="#e0f2fe" iColor="#0ea5e9" icon="💰" growth="12.5%" onClick={() => navigate("/laporan")} />
-          <StatCard label="Total Orderan" val={stats.transaksi} color="#dcfce7" iColor="#22c55e" icon="🛒" growth="8.2%" onClick={() => navigate("/orderan")} />
-          <StatCard label="Total Pelanggan" val={stats.pelanggan} color="#f3e8ff" iColor="#a855f7" icon="👥" growth="5.7%" onClick={() => navigate("/pelanggan")} />
-          <StatCard label="Order Selesai" val={stats.selesai} color="#ffedd5" iColor="#f97316" icon="👕" growth="9.1%" onClick={() => navigate("/orderan")} />
+          <StatCard label="Total Pendapatan" val={stats.pendapatan} color="#e0f2fe" iColor="#0ea5e9" icon="cash" growth="12.5%" onClick={() => navigate("/laporan")} />
+          <StatCard label="Total Orderan" val={stats.transaksi} color="#dcfce7" iColor="#22c55e" icon="shoppingBag" growth="8.2%" onClick={() => navigate("/orderan")} />
+          <StatCard label="Total Pelanggan" val={stats.pelanggan} color="#f3e8ff" iColor="#a855f7" icon="users" growth="5.7%" onClick={() => navigate("/pelanggan")} />
+          <StatCard label="Order Selesai" val={stats.selesai} color="#ffedd5" iColor="#f97316" icon="checkbox" growth="9.1%" onClick={() => navigate("/orderan")} />
         </div>
 
         {/* REVENUE CHART */}
@@ -249,14 +252,14 @@ export default function Dashboard() {
               {users.map((user) => (
                 <tr key={user.no} style={styles.tr}>
                   <td style={styles.td}>{user.no}</td>
-                  <td style={styles.td}>👤 {user.name}</td>
+                  <td style={styles.td}><Icon name="user" /> {user.name}</td>
                   <td style={styles.td}>{user.user}</td>
                   <td style={styles.td}><span style={getRoleBadge(user.role)}>{user.role}</span></td>
                   <td style={styles.td}>{user.phone}</td>
                   <td style={styles.td}><span style={styles.statusAktif}>Aktif</span></td>
                   <td style={styles.td}>
-                    <button style={styles.actionBtn} onClick={() => handleEditUser(user)}>✏️</button>
-                    <button style={styles.actionBtn} onClick={() => handleDeleteUser(user.no)}>🗑️</button>
+                    <button style={styles.actionBtn} onClick={() => handleEditUser(user)}><Icon name="edit" /></button>
+                    <button style={styles.actionBtn} onClick={() => handleDeleteUser(user.no)}><Icon name="trash" /></button>
                   </td>
                 </tr>
               ))}
@@ -302,25 +305,25 @@ export default function Dashboard() {
         <div style={styles.modalOverlay} onClick={() => setShowProfileModal(false)}>
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
             <div style={styles.profileHeader}>
-              <div style={styles.profileAvatar}>👤</div>
+              <div style={styles.profileAvatar}><Icon name="user" size={40} /></div>
               <h3>Alex</h3>
               <p style={styles.profileRole}>Admin</p>
             </div>
             <div style={styles.profileInfo}>
               <div style={styles.profileRow}>
-                <span style={styles.profileLabel}>📧 Email</span>
+                <span style={styles.profileLabel}><Icon name="mail" /> Email</span>
                 <span>alex@pinanglaundry.com</span>
               </div>
               <div style={styles.profileRow}>
-                <span style={styles.profileLabel}>📞 Telepon</span>
+                <span style={styles.profileLabel}><Icon name="phone" /> Telepon</span>
                 <span>0812-3456-7890</span>
               </div>
               <div style={styles.profileRow}>
-                <span style={styles.profileLabel}>🏢 Department</span>
+                <span style={styles.profileLabel}><Icon name="building" /> Department</span>
                 <span>Manajemen</span>
               </div>
               <div style={styles.profileRow}>
-                <span style={styles.profileLabel}>📅 Bergabung</span>
+                <span style={styles.profileLabel}><Icon name="calendar" /> Bergabung</span>
                 <span>1 Januari 2024</span>
               </div>
             </div>
@@ -334,13 +337,13 @@ export default function Dashboard() {
         <div style={styles.modalOverlay} onClick={() => setShowNotifModal(false)}>
           <div style={styles.notifModal} onClick={e => e.stopPropagation()}>
             <div style={styles.notifHeader}>
-              <h3>🔔 Notifikasi</h3>
-              <button style={styles.closeBtn} onClick={() => setShowNotifModal(false)}>✕</button>
+              <h3><Icon name="bell" /> Notifikasi</h3>
+              <button style={styles.closeBtn} onClick={() => setShowNotifModal(false)}><Icon name="x" /></button>
             </div>
             <div style={styles.notifList}>
               {notifications.map(n => (
                 <div key={n.id} style={n.read ? styles.notifItemRead : styles.notifItem} onClick={() => markAsRead(n.id)}>
-                  <div style={styles.notifIcon}>{n.read ? "✅" : "🔔"}</div>
+                  <div style={styles.notifIcon}>{n.read ? <Icon name="check" /> : <Icon name="bell" />}</div>
                   <div style={styles.notifContent}>
                     <div style={styles.notifTitle}>{n.title}</div>
                     <div style={styles.notifMessage}>{n.message}</div>
@@ -370,7 +373,7 @@ const chartData = [
 /* --- COMPONENTS --- */
 const NavItem = ({ icon, label }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-    <span>{icon}</span> {label}
+    <Icon name={icon} /> {label}
   </div>
 );
 
@@ -380,7 +383,7 @@ const StatCard = ({ label, val, color, iColor, icon, growth, onClick }) => {
   };
   return (
     <div style={{ ...styles.statCard, cursor: onClick ? "pointer" : "default" }} onClick={handleClick}>
-      <div style={{ ...styles.statIcon, backgroundColor: color, color: iColor }}>{icon}</div>
+      <div style={{ ...styles.statIcon, backgroundColor: color, color: iColor }}><Icon name={icon} size={24} /></div>
       <div style={{ marginLeft: 16 }}>
         <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>{label}</div>
         <div style={{ fontSize: 18, fontWeight: 800 }}>{val}</div>
@@ -399,20 +402,21 @@ function getRoleBadge(role) {
 
 /* --- STYLES --- */
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
-  sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#F5F7FB", color: "#1e293b" },
+  sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
-  logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
-  logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
+  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
+  logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
-  navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
-  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
-  avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 14, fontWeight: 600 },
-  profRole: { fontSize: 10, color: "#94a3b8" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex", transition: "all 0.2s" },
+  navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
+  avatarCircle: { width: 36, height: 36, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
+  profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
+  profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
+  logoutBtnAdmin: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 16, borderRadius: 8, padding: "4px 8px", color: "#fff", transition: "all 0.2s" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
   welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
@@ -422,9 +426,9 @@ const styles = {
   notifBadge: { position: "absolute", top: 8, right: 8, width: 8, height: 8, background: "#ef4444", borderRadius: "50%", border: "2px solid #fff" },
   topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
   statsRow: { display: "flex", gap: 20, marginBottom: 25 },
-  statCard: { flex: 1, background: "#fff", padding: "20px", borderRadius: 24, display: "flex", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.02)", cursor: "pointer" },
+  statCard: { flex: 1, background: "#fff", padding: "20px", borderRadius: 24, display: "flex", alignItems: "center", border: "1px solid #e2e8f0", cursor: "pointer" },
   statIcon: { width: 48, height: 48, borderRadius: 14, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  card: { background: "#fff", padding: "28px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", minWidth: 0 },
+  card: { background: "#fff", padding: "28px", borderRadius: 28, border: "1px solid #e2e8f0", minWidth: 0 },
   cardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
   cardTitle: { fontSize: 16, fontWeight: 600, margin: 0, color: "#1e293b" },
   select: { padding: "8px 14px", borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 12, color: "#64748b", cursor: "pointer" },

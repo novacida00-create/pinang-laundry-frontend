@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Chatbot from "../../components/chatbot/chatbot.jsx";
+import Icon from "../../utils/icons.jsx";
 
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
@@ -78,7 +79,7 @@ export default function CustomerDashboard() {
   const [testimonials, setTestimonials] = useState(() => JSON.parse(localStorage.getItem("testimonials") || "[]"));
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
 
   useEffect(() => {
     const savedOrders = localStorage.getItem("customerOrders");
@@ -288,7 +289,7 @@ export default function CustomerDashboard() {
     const cashEmail = selectedOrderForPayment.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com');
     sendEmail(cashEmail,
       `Pembayaran Lunas - ${selectedOrderForPayment.order_code}`,
-      `<h2>Halo ${customerName} 👋</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>✅ LUNAS (Tunai)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry! 🧺</p>`
+      `<h2>Halo ${customerName}</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>LUNAS (Tunai)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry!</p>`
     );
   };
 
@@ -363,39 +364,39 @@ export default function CustomerDashboard() {
 
           <nav style={styles.nav}>
             <div onClick={() => { setCurrentTab("dashboard"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "dashboard" ? styles.navActive : {}) }}>
-              🏠 Dashboard
+              <Icon name="home" /> Dashboard
             </div>
             <div onClick={() => { setCurrentTab("pesanan"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "pesanan" ? styles.navActive : {}) }}>
-              📦 Pesanan Saya {pendingOrders.length > 0 && <span style={styles.badge}>{pendingOrders.length}</span>}
+              <Icon name="package" /> Pesanan Saya {pendingOrders.length > 0 && <span style={styles.badge}>{pendingOrders.length}</span>}
             </div>
             <div onClick={() => { setCurrentTab("layanan"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "layanan" ? styles.navActive : {}) }}>
-              🏷️ Layanan
+              <Icon name="tag" /> Layanan
             </div>
             <div onClick={() => { setCurrentTab("testimoni"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "testimoni" ? styles.navActive : {}) }}>
-              💬 Testimoni
+<Icon name="message" /> Testimoni
             </div>
             <div onClick={() => { setCurrentTab("pengaturan"); closeSidebar(); }} style={{ ...styles.navItem, ...(currentTab === "pengaturan" ? styles.navActive : {}) }}>
-              ⚙️ Pengaturan
+<Icon name="settings" /> Pengaturan
             </div>
           </nav>
         </div>
 
           <div style={styles.profileWidget}>
-            <div style={styles.avatarCircle}>👤</div>
+            <div style={styles.avatarCircle}><Icon name="user" /></div>
             <div style={{ flex: 1 }}>
               <div style={styles.profName}>{customerName}</div>
               <div style={styles.profRole}>Pelanggan</div>
             </div>
-            <button onClick={() => setShowLogoutModal(true)} style={styles.logoutBtn}>Logout</button>
+            <button onClick={() => { localStorage.removeItem("customerLoggedIn"); navigate("/"); }} style={styles.logoutBtn}>Logout</button>
           </div>
       </aside>
 
       <main className="customer-main" style={styles.main}>
-        <label htmlFor="mt" className="mt-l">☰</label>
+        <label htmlFor="mt" className="mt-l"><Icon name="menu2" /></label>
         <header style={styles.header}>
-          <h2 style={styles.welcome}>Selamat datang, {customerName} 👋</h2>
+          <h2 style={styles.welcome}>Selamat datang, {customerName}</h2>
           <div style={styles.headerRight}>
-            <div style={styles.dateBox}>📅 {currentDate}</div>
+            <div style={styles.dateBox}><Icon name="calendar" /> {currentDate}</div>
           </div>
         </header>
 
@@ -403,21 +404,21 @@ export default function CustomerDashboard() {
           <div>
             <div style={styles.statsRow}>
               <div style={{ ...styles.statCard, background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
-                <div style={styles.statIcon}>⏳</div>
+                <div style={styles.statIcon}><Icon name="hourglass" /></div>
                 <div>
                   <div style={styles.statLabel}>Menunggu</div>
                   <div style={styles.statValue}>{pendingOrders.length}</div>
                 </div>
               </div>
               <div style={{ ...styles.statCard, background: "linear-gradient(135deg, #3b82f6, #2563eb)" }}>
-                <div style={styles.statIcon}>🔄</div>
+                <div style={styles.statIcon}><Icon name="refresh" /></div>
                 <div>
                   <div style={styles.statLabel}>Diproses</div>
                   <div style={styles.statValue}>{processOrders.length}</div>
                 </div>
               </div>
               <div style={{ ...styles.statCard, background: "linear-gradient(135deg, #22c55e, #16a34a)" }}>
-                <div style={styles.statIcon}>✅</div>
+                <div style={styles.statIcon}><Icon name="check" /></div>
                 <div>
                   <div style={styles.statLabel}>Selesai</div>
                   <div style={styles.statValue}>{completedOrders.length}</div>
@@ -429,13 +430,13 @@ export default function CustomerDashboard() {
               <h3 style={styles.cardTitle}>Layanan Populer</h3>
               <div style={styles.serviceGrid}>
                 {services.slice(0, 3).map((s) => {
-                  const iconMap = { "Cuci Kiloan": "👕", "Cuci Satuan": "👔", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Sepatu": "👟", "Cuci Boneka": "🧸" };
+                  const iconMap = { "Cuci Kiloan": <Icon name="tshirt" />, "Cuci Satuan": <Icon name="shirt" />, "Express": <Icon name="bolt" />, "Cuci Karpet": <Icon name="rectangle" />, "Cuci Sepatu": <Icon name="shoe" />, "Cuci Boneka": <Icon name="toy" /> };
                   return (
                     <div key={s.no} style={styles.serviceCard}>
                       <div style={styles.serviceIcon}>{iconMap[s.name] || "🧺"}</div>
                       <div style={styles.serviceName}>{s.name}</div>
                       <div style={styles.servicePrice}>Rp {parseInt(s.harga).toLocaleString('id-ID')}/{s.jenis === "Satuan" ? "pcs" : "kg"}</div>
-                      <div style={styles.serviceTime}><span>⏱️</span> <span>{s.waktu}</span></div>
+                      <div style={styles.serviceTime}><span><Icon name="clock" /></span> <span>{s.waktu}</span></div>
                       <button onClick={() => { setSelectedService(s); setOrderForm({ weight: "", phone: "", address: "", email: "" }); setShowOrderModal(true); }} style={styles.pesanBtn}>Pesan Sekarang</button>
                     </div>
                   );
@@ -462,11 +463,11 @@ export default function CustomerDashboard() {
                           <span>Rp {order.total.toLocaleString('id-ID')}</span>
                         </div>
                         <div style={styles.orderDetailRow}>
-                          {order.address && <span style={{ color: "#94a3b8", fontSize: 12 }}>📍 {order.address}</span>}
+                          {order.address && <span style={{ color: "#94a3b8", fontSize: 12 }}><Icon name="mapPin" /> {order.address}</span>}
                         </div>
                       </div>
                       <div style={styles.orderDate}>
-                        <span>📅 {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span><Icon name="calendar" /> {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         {order.payment_status !== "Lunas" && (
                           <button onClick={() => handlePayment(order)} style={styles.bayarBtn}>Bayar</button>
                         )}
@@ -489,7 +490,7 @@ export default function CustomerDashboard() {
             </div>
             {orders.length === 0 ? (
               <div style={{ textAlign: "center", padding: "50px 0" }}>
-                <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.5 }}>📦</div>
+                <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.5 }}><Icon name="package" size={48} /></div>
                 <p style={{ color: "#94a3b8", fontSize: 14, margin: 0 }}>Belum ada pesanan</p>
                 <p style={{ color: "#94a3b8", fontSize: 12, margin: "4px 0 20px" }}>Pilih layanan untuk memesan</p>
                 <button onClick={() => setCurrentTab("layanan")} style={{ ...styles.submitBtn, width: "auto", padding: "12px 24px" }}>Lihat Layanan</button>
@@ -526,21 +527,21 @@ export default function CustomerDashboard() {
                           </span>
                         </div>
                         <div style={styles.orderDetailRow}>
-                          {order.address && <span style={{ color: "#94a3b8", fontSize: 12 }}>📍 {order.address}</span>}
-                          {order.phone && <span style={{ color: "#94a3b8", fontSize: 12 }}>📞 {order.phone}</span>}
+                          {order.address && <span style={{ color: "#94a3b8", fontSize: 12 }}><Icon name="mapPin" /> {order.address}</span>}
+                          {order.phone && <span style={{ color: "#94a3b8", fontSize: 12 }}><Icon name="phone" /> {order.phone}</span>}
                         </div>
                       </div>
                       <div style={styles.orderDate}>
-                        <span>📅 {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                        <span><Icon name="calendar" /> {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                         <div style={{ display: "flex", gap: 8 }}>
                           {!isPaid && order.status !== "Selesai" && (
-                            <button onClick={() => handlePayment(order)} style={styles.bayarBtn}>💳 Bayar</button>
+                            <button onClick={() => handlePayment(order)} style={styles.bayarBtn}><Icon name="creditCard" /> Bayar</button>
                           )}
                           {isPaid && (
                             <button 
                               onClick={() => { setReceiptOrder(order); setShowReceiptModal(true); }} 
                               style={{ ...styles.cancelBtn, fontSize: 12, padding: "8px 14px" }}
-                            >🧾 Struk</button>
+                            ><Icon name="receipt" /> Struk</button>
                           )}
                         </div>
                       </div>
@@ -560,21 +561,21 @@ export default function CustomerDashboard() {
             </div>
             <div style={styles.serviceGridFull}>
               {services.map((s) => {
-                const iconMap = { "Cuci Kiloan": "👕", "Cuci Satuan": "👔", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Sepatu": "👟", "Cuci Boneka": "🧸" };
+                const iconMap = { "Cuci Kiloan": <Icon name="tshirt" />, "Cuci Satuan": <Icon name="shirt" />, "Express": <Icon name="bolt" />, "Cuci Karpet": <Icon name="rectangle" />, "Cuci Sepatu": <Icon name="shoe" />, "Cuci Boneka": <Icon name="toy" /> };
                 const categoryColors = {
                   "Kiloan": { border: "#3b82f6", badge: "#dbeafe", badgeText: "#2563eb" },
                   "Satuan": { border: "#8b5cf6", badge: "#ede9fe", badgeText: "#7c3aed" },
                   "Express": { border: "#f59e0b", badge: "#fef3c7", badgeText: "#d97706" },
                   "Spesial": { border: "#ec4899", badge: "#fce7f3", badgeText: "#db2777" },
                 };
-                const cc = categoryColors[s.jenis] || { border: "#64748b", badge: "#f1f5f9", badgeText: "#64748b", icon: "🧺" };
+                const cc = categoryColors[s.jenis] || { border: "#64748b", badge: "#f1f5f9", badgeText: "#64748b" };
                 return (
                   <div key={s.no} style={{ ...styles.serviceCardFull, borderTopColor: cc.border }}>
                     <div style={styles.serviceIconFull}>{iconMap[s.name] || "🧺"}</div>
                     <div style={{ ...styles.serviceBadge, background: cc.badge, color: cc.badgeText }}>{s.jenis}</div>
                     <div style={styles.serviceNameFull}>{s.name}</div>
                     <div style={styles.servicePriceFull}>Rp {parseInt(s.harga).toLocaleString('id-ID')}</div>
-                    <div style={styles.serviceTimeFull}><span>⏱️</span> <span>Estimasi: {s.waktu}</span></div>
+                    <div style={styles.serviceTimeFull}><span><Icon name="clock" /></span> <span>Estimasi: {s.waktu}</span></div>
                     <button onClick={() => handlePesan(s)} style={styles.pesanBtnFull}>Pesan Sekarang</button>
                   </div>
                 );
@@ -585,7 +586,7 @@ export default function CustomerDashboard() {
 
         {currentTab === "testimoni" && (
           <section style={styles.card}>
-            <h3 style={styles.cardTitle}>💬 Testimoni</h3>
+            <h3 style={styles.cardTitle}><Icon name="message" /> Testimoni</h3>
 
             {testimonials.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
@@ -625,7 +626,7 @@ export default function CustomerDashboard() {
 
         {currentTab === "pengaturan" && (
           <section style={styles.card}>
-            <h3 style={styles.cardTitle}>⚙️ Pengaturan</h3>
+            <h3 style={styles.cardTitle}><Icon name="settings" /> Pengaturan</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {[
                 { key: "username", label: "Username", value: localStorage.getItem("customerLoggedIn") || "-" },
@@ -851,7 +852,7 @@ export default function CustomerDashboard() {
                   onClick={() => setPaymentMethod("qris")}
                   style={{ ...styles.paymentOption, ...(paymentMethod === "qris" ? styles.paymentOptionActive : {}) }}
                 >
-                  <span style={styles.paymentIcon}>📱</span>
+                  <span style={styles.paymentIcon}><Icon name="deviceMobile" /></span>
                   <span>QRIS</span>
                   <span style={styles.paymentDesc}>Scan QR Code</span>
                 </div>
@@ -901,7 +902,7 @@ export default function CustomerDashboard() {
                           const qEmail = selectedOrderForPayment.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com');
                           sendEmail(qEmail,
                             `Pembayaran Lunas - ${selectedOrderForPayment.order_code}`,
-                            `<h2>Halo ${customerName} 👋</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>✅ LUNAS (QRIS)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry! 🧺</p>`
+                            `<h2>Halo ${customerName}</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>LUNAS (QRIS)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry!</p>`
                           );
                         }}
                       >
@@ -987,7 +988,7 @@ export default function CustomerDashboard() {
             <div style={{ textAlign: "center", fontSize: 11, color: "#94a3b8", marginBottom: 16 }}>
               Terima kasih telah memilih Pinang Laundry!<br />
               Bersih, Cepat, Terpercaya.<br />
-              Sampai jumpa di cucian bersih berikutnya, ya! 👋
+              Sampai jumpa di cucian bersih berikutnya, ya!
             </div>
             <div style={{ display: "flex", gap: 12 }}>
               <button style={styles.cancelBtn} onClick={() => setShowReceiptModal(false)}>Tutup</button>
@@ -1038,12 +1039,12 @@ export default function CustomerDashboard() {
   <div class="footer">
     Terima kasih telah memilih Pinang Laundry!<br/>
     Bersih, Cepat, Terpercaya.<br/>
-    Sampai jumpa di cucian bersih berikutnya, ya! 👋
+    Sampai jumpa di cucian bersih berikutnya, ya!
   </div>
   <script>window.print()</script>
 </body></html>`);
                 pw.document.close();
-              }}>🖨️ Cetak</button>
+              }}><Icon name="printer" /> Cetak</button>
             </div>
           </div>
         </div>
@@ -1053,40 +1054,13 @@ export default function CustomerDashboard() {
 
       <Chatbot />
 
-      {showLogoutModal && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)",
-          display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000
-        }} onClick={() => setShowLogoutModal(false)}>
-          <div style={{
-            background: "white", borderRadius: 28, padding: 32, width: 360,
-            textAlign: "center", boxShadow: "0 25px 50px rgba(0,0,0,0.25)"
-          }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🚪</div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 8px 0" }}>Yakin ingin logout?</h3>
-            <p style={{ fontSize: 14, color: "#64748b", margin: "0 0 24px 0" }}>
-              Anda akan keluar dari akun ini.
-            </p>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => setShowLogoutModal(false)} style={{
-                flex: 1, padding: 14, borderRadius: 14, border: "2px solid #e2e8f0",
-                background: "white", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#64748b"
-              }}>Batal</button>
-              <button onClick={() => { localStorage.removeItem("customerLoggedIn"); navigate("/"); }} style={{
-                flex: 1, padding: 14, borderRadius: 14, border: "none",
-                background: "#ef4444", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#fff"
-              }}>Logout</button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </>
   );
 }
 
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#F5F7FB", color: "#1e293b" },
 
   sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
@@ -1095,14 +1069,14 @@ const styles = {
   logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
   logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.2s" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "flex", gap: 10, alignItems: "center", transition: "all 0.2s" },
   navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
   badge: { backgroundColor: "#ef4444", color: "#fff", padding: "2px 8px", borderRadius: 10, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
   profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
   avatarCircle: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18 },
   profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
   profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
-  logoutBtn: { background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#fca5a5", display: "flex", alignItems: "center", gap: 4, padding: "6px 10px", borderRadius: 10, transition: "all 0.2s", ":hover": { background: "rgba(255,255,255,0.2)", color: "#fff" } },
+  logoutBtn: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#fff", padding: "10px 16px", borderRadius: 10, transition: "all 0.2s" },
 
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
@@ -1111,12 +1085,12 @@ const styles = {
   dateBox: { padding: "10px 18px", background: "#fff", borderRadius: 14, fontSize: 14, fontWeight: 400, border: "1px solid #f1f5f9", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", letterSpacing: "+0.3px" },
 
   statsRow: { display: "flex", gap: 20, marginBottom: 25 },
-  statCard: { flex: 1, padding: "20px 24px", borderRadius: 20, display: "flex", alignItems: "center", gap: 16, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", position: "relative", overflow: "hidden" },
+  statCard: { flex: 1, padding: "20px 24px", borderRadius: 20, display: "flex", alignItems: "center", gap: 16, border: "1px solid #e2e8f0", position: "relative", overflow: "hidden" },
   statIcon: { fontSize: 32, width: 56, height: 56, borderRadius: 16, display: "flex", justifyContent: "center", alignItems: "center", background: "rgba(255,255,255,0.9)" },
   statLabel: { fontSize: 14, color: "#fff", fontWeight: 400, opacity: 0.9, letterSpacing: "+0.3px" },
   statValue: { fontSize: 28, fontWeight: 700, color: "#fff" },
 
-  card: { background: "#fff", padding: 28, borderRadius: 28, boxShadow: "0 4px 16px rgba(0,0,0,0.04)", minWidth: 0, marginBottom: 24 },
+  card: { background: "#fff", padding: 28, borderRadius: 28, border: "1px solid #e2e8f0", minWidth: 0, marginBottom: 24 },
   cardTitle: { fontSize: 22, fontWeight: 600, margin: "0 0 20px 0", display: "flex", alignItems: "center", gap: 8, letterSpacing: "-0.5px" },
 
   serviceGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 },

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Icon from "../utils/icons.jsx";
 
 export default function KontakPage() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function KontakPage() {
             <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
           </div>
           <button style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
-            {mobileMenu ? "✕" : "☰"}
+            {mobileMenu ? <Icon name="x" /> : <Icon name="menu2" />}
           </button>
         </div>
         {mobileMenu && (
@@ -58,37 +59,37 @@ export default function KontakPage() {
       <section style={styles.contactSection}>
         <div style={styles.contactGrid}>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>📞</span>
+            <span style={styles.contactIcon}><Icon name="phone" size={48} /></span>
             <h3 style={styles.contactLabel}>Telepon / WhatsApp</h3>
             <p style={styles.contactValue}>0812-3456-7890</p>
             <p style={styles.contactDesc}>Senin - Sabtu (08.00 - 20.00)</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>📍</span>
+            <span style={styles.contactIcon}><Icon name="mapPin" size={48} /></span>
             <h3 style={styles.contactLabel}>Alamat</h3>
             <p style={styles.contactValue}>Jl. Pinang Raya No. 123</p>
             <p style={styles.contactDesc}>Margonda, Depok 16423</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>📧</span>
+            <span style={styles.contactIcon}><Icon name="mail" size={48} /></span>
             <h3 style={styles.contactLabel}>Email</h3>
             <p style={styles.contactValue}>info@pinanglaundry.com</p>
             <p style={styles.contactDesc}>Kami akan membalas dalam 1x24 jam</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>🕐</span>
+            <span style={styles.contactIcon}><Icon name="clock" size={48} /></span>
             <h3 style={styles.contactLabel}>Jam Operasional</h3>
             <p style={styles.contactValue}>Senin - Sabtu</p>
             <p style={styles.contactDesc}>08.00 - 20.00 WIB</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>🚗</span>
+            <span style={styles.contactIcon}><Icon name="car" size={48} /></span>
             <h3 style={styles.contactLabel}>Layanan Jemput</h3>
             <p style={styles.contactValue}>Gratis Ongkir</p>
             <p style={styles.contactDesc}>Area Depok dan sekitarnya</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>💬</span>
+            <span style={styles.contactIcon}><Icon name="message" size={48} /></span>
             <h3 style={styles.contactLabel}>Media Sosial</h3>
             <p style={styles.contactValue}>@pinanglaundry</p>
             <p style={styles.contactDesc}>Instagram / Facebook / TikTok</p>
@@ -167,7 +168,7 @@ const styles = {
 
   contactSection: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", maxWidth: 1200, margin: "0 auto" },
   contactGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 },
-  contactCard: { padding: 32, background: "#f8fafc", borderRadius: 20, textAlign: "center" },
+  contactCard: { padding: 32, background: "#f8fafc", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0" },
   contactIcon: { fontSize: 48, marginBottom: 16 },
   contactLabel: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 8 },
   contactValue: { fontSize: 16, color: "#3b82f6", fontWeight: 400, marginBottom: 4 },

@@ -1,72 +1,73 @@
 import { useState, useEffect, useRef } from "react";
+import Icon from "../../utils/icons.jsx";
 
 const faqData = [
   // Salam
   { keywords: ["halo", "hello", "hi", "hai", "hey", "assalam", "pagi", "siang", "sore", "malam"], 
-    answer: "Halo! 👋\nSelamat datang di Pinang Laundry.\nAda yang bisa saya bantu?" },
+    answer: "Halo!\nSelamat datang di Pinang Laundry.\nAda yang bisa saya bantu?" },
   
   // Harga
   { keywords: ["harga", "biaya", "tarif", "cost", "price", "berapa", "rpm", "rp"], 
-    answer: "💰 Harga Layanan Kami:\n\n• Cuci Kiloan: Rp 8.000/kg\n• Cuci Satuan: Rp 15.000/pcs\n• Express: Rp 25.000/kg\n• Cuci Karpet: Rp 50.000/pcs\n• Cuci Sepatu: Rp 30.000/pcs\n• Cuci Boneka: Rp 10.000/pcs\n• Setrika Saja: Rp 5.000/kg" },
+    answer: "Harga Layanan Kami:\n\n• Cuci Kiloan: Rp 8.000/kg\n• Cuci Satuan: Rp 15.000/pcs\n• Express: Rp 25.000/kg\n• Cuci Karpet: Rp 50.000/pcs\n• Cuci Sepatu: Rp 30.000/pcs\n• Cuci Boneka: Rp 10.000/pcs\n• Setrika Saja: Rp 5.000/kg" },
   
   // Layanan
   { keywords: ["layanan", "service", "jasa", "apa saja", "jenis"], 
-    answer: "🧺 Layanan Kami:\n\n✓ Cuci Kiloan (per kg)\n✓ Cuci Satuan (per pcs)\n✓ Express (4 jam jadi)\n✓ Cuci Karpet\n✓ Cuci Sepatu\n✓ Cuci Boneka\n✓ Cuci Jaket\n✓ Cuci Jas\n✓ Setrika Saja" },
+    answer: "Layanan Kami:\n\n✓ Cuci Kiloan (per kg)\n✓ Cuci Satuan (per pcs)\n✓ Express (4 jam jadi)\n✓ Cuci Karpet\n✓ Cuci Sepatu\n✓ Cuci Boneka\n✓ Cuci Jaket\n✓ Cuci Jas\n✓ Setrika Saja" },
   
   // Waktu
   { keywords: ["waktu", "lama", "proses", "selesai", "jam", "hari", "durasi", "estimasi"], 
-    answer: "⏱️ Waktu Proses:\n\n• Cuci Kiloan: 24 jam\n• Cuci Satuan: 12 jam\n• Express: 4 jam\n• Cuci Karpet: 48 jam\n• Cuci Sepatu: 24 jam\n• Cuci Boneka: 24 jam\n• Cuci Jas: 48 jam" },
+    answer: "Waktu Proses:\n\n• Cuci Kiloan: 24 jam\n• Cuci Satuan: 12 jam\n• Express: 4 jam\n• Cuci Karpet: 48 jam\n• Cuci Sepatu: 24 jam\n• Cuci Boneka: 24 jam\n• Cuci Jas: 48 jam" },
   
   // Cara Pesan
   { keywords: ["cara", "cara pesan", "cara order", "order", "booking", "pesanan", "Bagaimana"], 
-    answer: "📝 Cara Memesan:\n\n1. Login di halaman customer\n2. Pilih menu \"Layanan\"\n3. Klik \"Pesan\" pada layanan yang diinginkan\n4. Isi formulir (berat, telepon, alamat)\n5. Klik \"Kirim Pesanan\"\n6. Tunggu konfirmasi dari admin" },
+    answer: "Cara Memesan:\n\n1. Login di halaman customer\n2. Pilih menu \"Layanan\"\n3. Klik \"Pesan\" pada layanan yang diinginkan\n4. Isi formulir (berat, telepon, alamat)\n5. Klik \"Kirim Pesanan\"\n6. Tunggu konfirmasi dari admin" },
   
   // Pembayaran
   { keywords: ["bayar", "pembayaran", "bayar bagaimana", "cash", "qris", "transfer", "tunai"], 
-    answer: "💳 Metode Pembayaran:\n\n✓ Cash - Bayar langsung di tempat\n✓ QRIS - Scan QR Code untuk pembayaran digital\n\nPembayaran dilakukan saat:\n• Setelah laundry selesai (pickup)\n• Atau saat penjemputan laundry" },
+    answer: "Metode Pembayaran:\n\n✓ Cash - Bayar langsung di tempat\n✓ QRIS - Scan QR Code untuk pembayaran digital\n\nPembayaran dilakukan saat:\n• Setelah laundry selesai (pickup)\n• Atau saat penjemputan laundry" },
   
   // Status Pesanan
   { keywords: ["status", "cek status", "cek pesanan", "tracking", "kemana", "dimana"], 
-    answer: "🔍 Cara Cek Status Pesanan:\n\n1. Login ke halaman customer\n2. Buka menu \"Pesanan Saya\"\n3. Lihat status pesanan Anda\n\n📋 Status Pesanan:\n• Menunggu - Pesanan baru, menunggu konfirmasi\n• Diproses - Laundry sedang dikerjakan\n• Selesai - Laundry siap diambil" },
+    answer: "Cara Cek Status Pesanan:\n\n1. Login ke halaman customer\n2. Buka menu \"Pesanan Saya\"\n3. Lihat status pesanan Anda\n\nStatus Pesanan:\n• Menunggu - Pesanan baru, menunggu konfirmasi\n• Diproses - Laundry sedang dikerjakan\n• Selesai - Laundry siap diambil" },
   
   // Login
   { keywords: ["login", "masuk", "signin", "akun", "registrasi", "daftar"], 
-    answer: "🔐 Login Customer:\n\n• Buka /customer/login\n• Masukkan nama dan password\n• Jika belum punya akun, hubungi admin" },
+    answer: "Login Customer:\n\n• Buka /customer/login\n• Masukkan nama dan password\n• Jika belum punya akun, hubungi admin" },
   
   // Alamat
   { keywords: ["alamat", "location", "lokasi", "alamat dimana", "alamat jalan"], 
-    answer: "📍 Pinang Laundry\n\nJl. Braga No. 56, Bandung\n\n🕐 Jam Buka:\nSenin - Minggu: 07.00 - 20.00" },
+    answer: "Pinang Laundry\n\nJl. Braga No. 56, Bandung\n\nJam Buka:\nSenin - Minggu: 07.00 - 20.00" },
   
   // Kontak
   { keywords: ["kontak", "hubungi", "telepon", "hp", "wa", "whatsapp", "email"], 
-    answer: "📞 Hubungi Kami:\n\n• Telepon: 0812-3456-7890\n• WhatsApp: 0812-3456-7890\n• Email: pinanglaundry@gmail.com" },
+    answer: "Hubungi Kami:\n\n• Telepon: 0812-3456-7890\n• WhatsApp: 0812-3456-7890\n• Email: pinanglaundry@gmail.com" },
   
   // Complaint/Keluhan
   { keywords: ["complaint", "keluhan", "masalah", "kesal", "marah", "kecewa", "tidak puas"], 
-    answer: "😔 Mohon maaf atas ketidaknyamanan.\nSilakan hubungi kami:\n📞 0812-3456-7890\nKami akan segera membantu menyelesaikan masalah Anda." },
+    answer: "Mohon maaf atas ketidaknyamanan.\nSilakan hubungi kami:\n0812-3456-7890\nKami akan segera membantu menyelesaikan masalah Anda." },
   
   // Tentang Aplikasi
   { keywords: ["aplikasi", "app", "website", "sistem", "platform", "web", "program"], 
-    answer: "🌐 Sistem Pinang Laundry:\n\n• Website untuk customer memesan layanan\n• Admin mengelola pesanan dan pelanggan\n• Chatbot ini untuk bantuan Anda\n\nMenu di Customer:\n- Dashboard: Ringkasan pesanan\n- Pesanan Saya: Riwayat & status\n- Layanan: Pilih layanan & pesan" },
+    answer: "Sistem Pinang Laundry:\n\n• Website untuk customer memesan layanan\n• Admin mengelola pesanan dan pelanggan\n• Chatbot ini untuk bantuan Anda\n\nMenu di Customer:\n- Dashboard: Ringkasan pesanan\n- Pesanan Saya: Riwayat & status\n- Layanan: Pilih layanan & pesan" },
   
   // FAQ
   { keywords: ["faq", "pertanyaan", "tanya", "bantuan", "help", "bantu"], 
-    answer: "❓ FAQ - Pertanyaan Umum:\n\n• Cara memesan layanan?\n• Berapa harga laundry?\n• Berapa lama waktu proses?\n• Bagaimana cara pembayaran?\n• Bagaimana cek status pesanan?\n\nKetik pertanyaan di atas untuk jawaban!" },
+    answer: "FAQ - Pertanyaan Umum:\n\n• Cara memesan layanan?\n• Berapa harga laundry?\n• Berapa lama waktu proses?\n• Bagaimana cara pembayaran?\n• Bagaimana cek status pesanan?\n\nKetik pertanyaan di atas untuk jawaban!" },
   
   // Penjemputan
   { keywords: ["jemput", "pickup", "antar", "delivery", "kirim"], 
-    answer: "🚗 Layanan Penjemputan:\n\nYa, kami menyediakan layanan penjemputan laundry ke alamat Anda.\n\nSaat memesan, masukkan alamat lengkap pada formulir pesanan.\nTim kami akan menjemput laundry sesuai jadwal." },
+    answer: "Layanan Penjemputan:\n\nYa, kami menyediakan layanan penjemputan laundry ke alamat Anda.\n\nSaat memesan, masukkan alamat lengkap pada formulir pesanan.\nTim kami akan menjemput laundry sesuai jadwal." },
   
   // Diskon
   { keywords: ["diskon", "promo", "promosi", "potongan", "bonus"], 
-    answer: "🎁 Promo & Diskon:\n\nUntuk saat ini belum ada promo khusus.\nNantikan informasi promo di website kami!\n\nuntuk info promo, hubungi admin." },
+    answer: "Promo & Diskon:\n\nUntuk saat ini belum ada promo khusus.\nNantikan informasi promo di website kami!\n\nuntuk info promo, hubungi admin." },
 ];
 
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState("");
   const [list, setList] = useState([
-    { from: "bot", text: "Halo! 👋\nSelamat datang di Pinang Laundry.\nKetik pertanyaan Anda atau pilih dari menu:\n\n• Cara pesan\n• Harga layanan\n• Status pesanan\n• Pembayaran" }
+    { from: "bot", text: "Halo!\nSelamat datang di Pinang Laundry.\nKetik pertanyaan Anda atau pilih dari menu:\n\n• Cara pesan\n• Harga layanan\n• Status pesanan\n• Pembayaran" }
   ]);
   const chatEndRef = useRef(null);
 
@@ -103,15 +104,15 @@ export default function Chatbot() {
   return (
     <div style={styles.container}>
       <button style={styles.button} onClick={() => setOpen(!open)}>
-        💬
+        <Icon name="message" size={30} />
         <span style={styles.badge}>Chat</span>
       </button>
 
       {open && (
         <div style={styles.chatbox}>
           <div style={styles.header}>
-            <span>🤖 Asisten Pinang Laundry</span>
-            <button style={styles.closeBtn} onClick={() => setOpen(false)}>✕</button>
+            <span><Icon name="robot" size={18} /> Asisten Pinang Laundry</span>
+            <button style={styles.closeBtn} onClick={() => setOpen(false)}><Icon name="x" size={18} /></button>
           </div>
           
           <div style={styles.messages}>
@@ -133,7 +134,7 @@ export default function Chatbot() {
               onKeyPress={handleKeyPress}
               placeholder="Ketik pertanyaan..."
             />
-            <button style={styles.sendBtn} onClick={send}>Kirim</button>
+            <button style={styles.sendBtn} onClick={send}><Icon name="upload" size={16} /> Kirim</button>
           </div>
         </div>
       )}

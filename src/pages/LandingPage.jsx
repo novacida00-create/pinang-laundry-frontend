@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Chatbot from "../components/chatbot/chatbot.jsx";
+import Icon from "../utils/icons.jsx";
 
 const testimonials = [
   { name: "Siti Aminah", text: "Pelayanannya cepat dan cucian selalu bersih! Servis excelente!", rating: 5 },
@@ -9,15 +10,15 @@ const testimonials = [
 ];
 
 const allServices = [
-  { icon: "👕", name: "Cuci Kiloan", price: "Rp 6.000/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian" },
-  { icon: "👔", name: "Cuci Satuan", price: "Rp 15.000/pcs", waktu: "12 jam", desc: "Cuci per item, cocok untuk jas, gaun, rok" },
-  { icon: "⚡", name: "Express", price: "Rp 15.000/kg", waktu: "4 jam", desc: "Laundry selesai dalam 4 jam" },
-  { icon: "📦", name: "Cuci Lipat", price: "Rp 10.000/kg", waktu: "24 jam", desc: "Cuci + lipat rapi, siap pakai" },
-  { icon: "🔥", name: "Cuci Setrika", price: "Rp 15.000/kg", waktu: "6 jam", desc: "Cuci + setrika cepat, wangi dan rapi" },
-  { icon: "🧶", name: "Cuci Karpet", price: "Rp 50.000/pcs", waktu: "48 jam", desc: "Cuci karpet besar dan tebal" },
-  { icon: "🧥", name: "Cuci Jaket", price: "Rp 12.000/kg", waktu: "24 jam", desc: "Cuci jaket dan outerwear" },
-  { icon: "👔", name: "Cuci Jas", price: "Rp 35.000/pcs", waktu: "48 jam", desc: "Cuci jas profesional" },
-  { icon: "🔥", name: "Setrika Saja", price: "Rp 5.000/kg", waktu: "6 jam", desc: "Hanya setrika, tanpa cucian" },
+  { icon: "tshirt", name: "Cuci Kiloan", price: "Rp 6.000/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian" },
+  { icon: "shirt", name: "Cuci Satuan", price: "Rp 15.000/pcs", waktu: "12 jam", desc: "Cuci per item, cocok untuk jas, gaun, rok" },
+  { icon: "bolt", name: "Express", price: "Rp 15.000/kg", waktu: "4 jam", desc: "Laundry selesai dalam 4 jam" },
+  { icon: "package", name: "Cuci Lipat", price: "Rp 10.000/kg", waktu: "24 jam", desc: "Cuci + lipat rapi, siap pakai" },
+  { icon: "flame", name: "Cuci Setrika", price: "Rp 15.000/kg", waktu: "6 jam", desc: "Cuci + setrika cepat, wangi dan rapi" },
+  { icon: "yarn", name: "Cuci Karpet", price: "Rp 50.000/pcs", waktu: "48 jam", desc: "Cuci karpet besar dan tebal" },
+  { icon: "jacket", name: "Cuci Jaket", price: "Rp 12.000/kg", waktu: "24 jam", desc: "Cuci jaket dan outerwear" },
+  { icon: "shirt", name: "Cuci Jas", price: "Rp 35.000/pcs", waktu: "48 jam", desc: "Cuci jas profesional" },
+  { icon: "flame", name: "Setrika Saja", price: "Rp 5.000/kg", waktu: "6 jam", desc: "Hanya setrika, tanpa cucian" },
 ];
 
 export default function LandingPage() {
@@ -32,10 +33,10 @@ export default function LandingPage() {
   }, []);
 
   const benefits = [
-    { icon: "⏱️", title: "Cepat", desc: "Proses cepat dengan layanan express 4 jam" },
-    { icon: "💎", title: "Bersih", desc: "Hasil cucian bersih dan wangi" },
-    { icon: "🚗", title: "Antar & Jemput", desc: "Jasa layanan antar & jemput ini sangat memudahkan" },
-    { icon: "💰", title: "Terjangkau", desc: "Harga kompetitif dan transparan" },
+    { icon: "clock", title: "Cepat", desc: "Proses cepat dengan layanan express 4 jam" },
+    { icon: "diamond", title: "Bersih", desc: "Hasil cucian bersih dan wangi" },
+    { icon: "car", title: "Antar & Jemput", desc: "Jasa layanan antar & jemput ini sangat memudahkan" },
+    { icon: "moneybag", title: "Terjangkau", desc: "Harga kompetitif dan transparan" },
   ];
 
   return (
@@ -64,7 +65,7 @@ export default function LandingPage() {
           </div>
 
           <button className="mobile-toggle" style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
-            {mobileMenu ? "✕" : "☰"}
+            {mobileMenu ? <Icon name="x" /> : <Icon name="menu2" />}
           </button>
         </div>
 
@@ -115,13 +116,13 @@ export default function LandingPage() {
           <div style={styles.heroVisualCard}>
             <div style={styles.heroVisualIcon}>🧺</div>
             <div style={styles.heroVisualIconSmallRow}>
-              <span style={styles.heroVisualIconSmall}>👕</span>
-              <span style={styles.heroVisualIconSmall}>👖</span>
-              <span style={styles.heroVisualIconSmall}>🧥</span>
+              <span style={styles.heroVisualIconSmall}><Icon name="tshirt" size={32} /></span>
+              <span style={styles.heroVisualIconSmall}><Icon name="shirt" size={32} /></span>
+              <span style={styles.heroVisualIconSmall}><Icon name="jacket" size={32} /></span>
             </div>
-            <div style={styles.heroVisualBadge1}>✨ Bersih & Wangi</div>
-            <div style={styles.heroVisualBadge2}>🚗 Antar & Jemput</div>
-            <div style={styles.heroVisualBadge3}>⏱️ 4 Jam Express</div>
+            <div style={styles.heroVisualBadge1}><Icon name="star" size={14} /> Bersih & Wangi</div>
+            <div style={styles.heroVisualBadge2}><Icon name="car" size={14} /> Antar & Jemput</div>
+            <div style={styles.heroVisualBadge3}><Icon name="clock" size={14} /> 4 Jam Express</div>
           </div>
         </div>
         </div>
@@ -139,7 +140,7 @@ export default function LandingPage() {
           {allServices.map((s, i) => (
             <div key={i} style={styles.serviceCard}>
               <div style={styles.serviceCardTop}>
-                <div style={styles.serviceIcon}>{s.icon}</div>
+                <div style={styles.serviceIcon}><Icon name={s.icon} size={40} /></div>
                 <div style={styles.serviceTime}>{s.waktu}</div>
               </div>
               <h3 style={styles.serviceName}>{s.name}</h3>
@@ -165,7 +166,7 @@ export default function LandingPage() {
           {benefits.map((b, i) => (
             <div key={i} style={styles.benefitCard}>
               <div style={styles.benefitIconBg}>
-                <span style={styles.benefitIcon}>{b.icon}</span>
+                <span style={styles.benefitIcon}><Icon name={b.icon} size={32} /></span>
               </div>
               <h3 style={styles.benefitTitle}>{b.title}</h3>
               <p style={styles.benefitDesc}>{b.desc}</p>
@@ -206,7 +207,7 @@ export default function LandingPage() {
           {testimonials.map((t, i) => (
             <div key={i} style={styles.testimonialCard}>
               <div style={styles.testimonialStars}>
-                {Array(t.rating).fill("⭐").map((s, j) => <span key={j}>{s}</span>)}
+                {Array(t.rating).fill().map((_, j) => <Icon key={j} name="star" size={16} />)}
               </div>
               <p style={styles.testimonialText}>"{t.text}"</p>
               <div style={styles.testimonialAuthor}>
@@ -235,17 +236,17 @@ export default function LandingPage() {
         </div>
         <div style={styles.contactGrid} className="contact-grid">
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>📞</span>
+            <span style={styles.contactIcon}><Icon name="phone" size={40} /></span>
             <h4 style={styles.contactLabel}>Telepon / WA</h4>
             <p style={styles.contactValue}>0895-4293-50001</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>📍</span>
+            <span style={styles.contactIcon}><Icon name="mapPin" size={40} /></span>
             <h4 style={styles.contactLabel}>Alamat</h4>
             <p style={styles.contactValue}>Jl. Pinang Raya, Margonda Depok</p>
           </div>
           <div style={styles.contactCard}>
-            <span style={styles.contactIcon}>🕐</span>
+            <span style={styles.contactIcon}><Icon name="clock" size={40} /></span>
             <h4 style={styles.contactLabel}>Jam Operasional</h4>
             <p style={styles.contactValue}>Senin-Sabtu (08.00-20.00)</p>
           </div>
@@ -330,7 +331,7 @@ export default function LandingPage() {
 }
 
 const styles = {
-  container: { background: "linear-gradient(180deg, #f0f7ff 0%, #ffffff 30%, #f8fafc 60%, #f0f7ff 100%)", minHeight: "100vh", paddingTop: 72 },
+  container: { background: "linear-gradient(180deg, #F5F7FB 0%, #ffffff 30%, #f8fafc 60%, #F5F7FB 100%)", minHeight: "100vh", paddingTop: 72 },
   
   navbar: { position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(10px)", transition: "all 0.3s ease", borderBottom: "1px solid rgba(241,245,249,0.8)" },
   navbarScrolled: { boxShadow: "0 4px 20px rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(10px)" },
@@ -380,7 +381,7 @@ const styles = {
   sectionSubtitle: { fontSize: 16, color: "#64748b", margin: "0 auto", lineHeight: 1.65, letterSpacing: 0, whiteSpace: "nowrap" },
 
   servicesGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 },
-  serviceCard: { padding: 24, background: "#fff", borderRadius: 20, border: "1px solid #f1f5f9", transition: "all 0.3s ease", cursor: "default", boxShadow: "0 4px 16px rgba(0,0,0,0.05)" },
+  serviceCard: { padding: 24, background: "#fff", borderRadius: 20, border: "1px solid #e2e8f0", transition: "all 0.3s ease", cursor: "default" },
   serviceCardTop: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
   serviceIcon: { fontSize: 40 },
   serviceTime: { padding: "4px 10px", background: "#dcfce7", color: "#22c55e", borderRadius: 8, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
@@ -392,13 +393,13 @@ const styles = {
 
   benefits: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #e8f4f8 100%)" },
   benefitsGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, maxWidth: 1000, margin: "0 auto" },
-  benefitCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.04)", transition: "all 0.3s ease" },
+  benefitCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0", transition: "all 0.3s ease" },
   benefitIconBg: { width: 64, height: 64, background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
   benefitIcon: { fontSize: 32 },
   benefitTitle: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 8 },
   benefitDesc: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },
 
-  howToOrder: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)" },
+  howToOrder: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #ffffff 0%, #F5F7FB 100%)" },
   steps: { display: "flex", justifyContent: "center", gap: 48, flexWrap: "wrap", marginTop: 40 },
   stepItem: { textAlign: "center", flex: "0 0 auto" },
   stepCircle: { width: 60, height: 60, background: "#3b82f6", color: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, margin: "0 auto 16px" },
@@ -407,7 +408,7 @@ const styles = {
 
   testimonials: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)" },
   testimonialGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, maxWidth: 1000, margin: "0 auto" },
-  testimonialCard: { padding: 24, background: "#fff", borderRadius: 20, boxShadow: "0 4px 16px rgba(0,0,0,0.04)", border: "1px solid #f1f5f9" },
+  testimonialCard: { padding: 24, background: "#fff", borderRadius: 20, border: "1px solid #e2e8f0" },
   testimonialStars: { marginBottom: 12 },
   testimonialText: { fontSize: 16, color: "#64748b", lineHeight: 1.65, marginBottom: 16, fontStyle: "italic", letterSpacing: 0 },
   testimonialAuthor: { display: "flex", alignItems: "center", gap: 12 },
@@ -420,9 +421,9 @@ const styles = {
   ctaSubtitle: { fontSize: 16, color: "rgba(255,255,255,0.9)", marginBottom: 28, lineHeight: 1.65, letterSpacing: 0 },
   ctaButton: { display: "inline-block", padding: "16px 32px", borderRadius: 14, border: "none", background: "#fff", color: "#3b82f6", fontSize: 16, fontWeight: 700, cursor: "pointer" },
 
-  contact: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #f0f7ff 100%)" },
+  contact: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #F5F7FB 100%)" },
   contactGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, maxWidth: 900, margin: "0 auto" },
-  contactCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.04)", border: "1px solid #f1f5f9" },
+  contactCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0" },
   contactIcon: { fontSize: 40, marginBottom: 12 },
   contactLabel: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 4 },
   contactValue: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },

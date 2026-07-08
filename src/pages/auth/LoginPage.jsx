@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Icon from "../../utils/icons.jsx";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,9 +25,9 @@ export default function LoginPage() {
           <h2 style={styles.cardLeftTitle}>Pinang Laundry</h2>
           <p style={styles.cardLeftSub}>Bersih, Cepat, Terpercaya</p>
           <div style={styles.cardLeftIcons}>
-            <span style={styles.cardLeftIconSmall}>👕</span>
-            <span style={styles.cardLeftIconSmall}>👖</span>
-            <span style={styles.cardLeftIconSmall}>🧥</span>
+            <span style={styles.cardLeftIconSmall}><Icon name="tshirt" size={28} /></span>
+            <span style={styles.cardLeftIconSmall}><Icon name="shirt" size={28} /></span>
+            <span style={styles.cardLeftIconSmall}><Icon name="jacket" size={28} /></span>
           </div>
           <div style={styles.cardLeftStats}>
             <div><span style={styles.cardLeftStatNum}>Admin</span><span style={styles.cardLeftStatLabel}>Panel</span></div>
@@ -37,7 +38,7 @@ export default function LoginPage() {
           <h2 style={styles.title}>Login Admin</h2>
           <p style={styles.subtitle}>Selamat datang kembali!</p>
 
-          <label style={styles.label}>Username</label>
+          <label style={styles.label}><Icon name="user" size={14} /> Username</label>
           <input
             type="email"
             placeholder="Email"
@@ -46,7 +47,7 @@ export default function LoginPage() {
             style={styles.input}
           />
 
-          <label style={styles.label}>Password</label>
+          <label style={styles.label}><Icon name="lock" size={14} /> Password</label>
           <input
             type="password"
             placeholder="Password"
@@ -65,10 +66,10 @@ export default function LoginPage() {
 }
 
   const styles = {
-  container: { minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", fontFamily: "sans-serif", position: "relative", overflow: "hidden", backgroundColor: "#f0f7ff" },
+  container: { minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", fontFamily: "sans-serif", position: "relative", overflow: "hidden", backgroundColor: "#F5F7FB" },
   leftBg: { position: "absolute", left: "-10%", top: "-20%", width: 500, height: 500, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%" },
   rightBg: { position: "absolute", right: "-10%", bottom: "-10%", width: 500, height: 500, background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)", borderRadius: "50%" },
-  card: { width: 780, background: "#ffffff", borderRadius: 32, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", display: "flex", flexDirection: "row", position: "relative", zIndex: 1, overflow: "hidden" },
+  card: { width: 780, background: "#ffffff", borderRadius: 32, border: "1px solid #e2e8f0", display: "flex", flexDirection: "row", position: "relative", zIndex: 1, overflow: "hidden" },
   cardLeft: { width: 300, background: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)", padding: "40px 32px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, color: "#fff" },
   cardLeftIcon: { fontSize: 64, marginBottom: 4 },
   cardLeftTitle: { fontSize: 24, fontWeight: 700, margin: 0, textAlign: "center" },

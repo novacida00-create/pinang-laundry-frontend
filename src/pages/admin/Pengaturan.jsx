@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import Icon from "../../utils/icons.jsx";
 
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -24,10 +25,12 @@ const defaultSettings = {
 };
 
 export default function Pengaturan() {
+  const navigate = useNavigate();
   const currentDate = formatTanggalIndonesia();
   const [editingProfil, setEditingProfil] = useState(false);
   const [editingApp, setEditingApp] = useState(false);
   
+
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem("pengaturanData");
     return saved ? JSON.parse(saved) : defaultSettings;
@@ -71,28 +74,28 @@ export default function Pengaturan() {
 
           <nav style={styles.nav}>
             <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🏠" label="Dashboard" />
+              <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🧾" label="Orderan" />
+              <NavItem icon="receipt" label="Orderan" />
             </NavLink>
             <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="👥" label="Pelanggan" />
+              <NavItem icon="users" label="Pelanggan" />
             </NavLink>
             <div style={styles.navItem} onClick={() => window.location.href='/transaksi'}>
-              <NavItem icon="💳" label="Transaksi" />
+              <NavItem icon="creditCard" label="Transaksi" />
             </div>
             <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="👨‍💼" label="Karyawan" />
+              <NavItem icon="idBadge2" label="Karyawan" />
             </NavLink>
             <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="🏷️" label="Layanan" />
+              <NavItem icon="tag" label="Layanan" />
             </NavLink>
             <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="📊" label="Laporan" />
+              <NavItem icon="chartBar" label="Laporan" />
             </NavLink>
             <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
-              <NavItem icon="⚙️" label="Pengaturan" />
+              <NavItem icon="settings" label="Pengaturan" />
             </NavLink>
           </nav>
         </div>
@@ -108,15 +111,16 @@ export default function Pengaturan() {
             <div style={styles.profName}>Alex</div>
             <div style={styles.profRole}>Admin</div>
           </div>
+          <button onClick={() => navigate("/")} style={styles.logoutBtnAdmin}><Icon name="doorExit" /></button>
         </div>
       </aside>
 
       <main className="admin-main" style={styles.main}>
-        <label htmlFor="mt" className="mt-l">☰</label>
+        <label htmlFor="mt" className="mt-l"><Icon name="menu2" /></label>
         <header style={styles.header}>
           <h2 style={styles.welcome}>Pengaturan</h2>
           <div style={styles.headerRight}>
-            <div style={styles.dateBox}>📅 {currentDate}</div>
+            <div style={styles.dateBox}><Icon name="calendar" /> {currentDate}</div>
             <div style={styles.topAvatar}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -130,7 +134,7 @@ export default function Pengaturan() {
             <div style={styles.card}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <h3 style={{ ...styles.cardTitle, margin: 0 }}>Profil Toko</h3>
-                {!editingProfil && <button style={styles.btnEdit} onClick={() => setEditingProfil(true)}>✏️ Edit</button>}
+                {!editingProfil && <button style={styles.btnEdit} onClick={() => setEditingProfil(true)}><Icon name="edit" /> Edit</button>}
               </div>
               {editingProfil ? (
                 <>
@@ -177,7 +181,7 @@ export default function Pengaturan() {
             <div style={styles.card}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <h3 style={{ ...styles.cardTitle, margin: 0 }}>Pengaturan Aplikasi</h3>
-                {!editingApp && <button style={styles.btnEdit} onClick={() => setEditingApp(true)}>✏️ Edit</button>}
+                {!editingApp && <button style={styles.btnEdit} onClick={() => setEditingApp(true)}><Icon name="edit" /> Edit</button>}
               </div>
               {editingApp ? (
                 <>
@@ -233,7 +237,7 @@ export default function Pengaturan() {
                 <div style={styles.toggleDesc}>Terima notifikasi transaksi via email</div>
               </div>
               <div style={settings.notifEmail ? styles.toggleOn : styles.toggleOff}>
-                {settings.notifEmail ? "🔔" : "🔕"}
+                {settings.notifEmail ? <Icon name="bell" /> : <Icon name="bellOff" />}
               </div>
             </div>
             <div style={styles.toggleItem} onClick={() => toggleSetting("notifSMS")}>
@@ -242,7 +246,7 @@ export default function Pengaturan() {
                 <div style={styles.toggleDesc}>Terima notifikasi via WhatsApp</div>
               </div>
               <div style={settings.notifSMS ? styles.toggleOn : styles.toggleOff}>
-                {settings.notifSMS ? "🔔" : "🔕"}
+                {settings.notifSMS ? <Icon name="bell" /> : <Icon name="bellOff" />}
               </div>
             </div>
             <div style={styles.toggleItem} onClick={() => toggleSetting("autoReminder")}>
@@ -251,7 +255,7 @@ export default function Pengaturan() {
                 <div style={styles.toggleDesc}>Pengingat otomatis ke pelanggan</div>
               </div>
               <div style={settings.autoReminder ? styles.toggleOn : styles.toggleOff}>
-                {settings.autoReminder ? "🔔" : "🔕"}
+                {settings.autoReminder ? <Icon name="bell" /> : <Icon name="bellOff" />}
               </div>
             </div>
           </div>
@@ -275,7 +279,7 @@ export default function Pengaturan() {
                 <div style={styles.toggleDesc}>Kirim notifikasi otomatis ke pelanggan & admin</div>
               </div>
               <div style={settings.waNotif ? styles.toggleOn : styles.toggleOff}>
-                {settings.waNotif ? "🔔" : "🔕"}
+                {settings.waNotif ? <Icon name="bell" /> : <Icon name="bellOff" />}
               </div>
             </div>
           </div>
@@ -287,25 +291,26 @@ export default function Pengaturan() {
 
 const NavItem = ({ icon, label }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-    <span>{icon}</span> {label}
+    <Icon name={icon} /> {label}
   </div>
 );
 
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
-  sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#F5F7FB", color: "#1e293b" },
+  sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
-  logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
-  logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
+  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
+  logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
-  navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
-  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
-  avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 14, fontWeight: 600 },
-  profRole: { fontSize: 10, color: "#94a3b8" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex", transition: "all 0.2s" },
+  navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
+  avatarCircle: { width: 36, height: 36, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
+  profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
+  profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
+  logoutBtnAdmin: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 16, borderRadius: 8, padding: "4px 8px", color: "#fff", transition: "all 0.2s" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto" },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
   welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
@@ -313,7 +318,7 @@ const styles = {
   dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9" },
   topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
   gridRow: { display: "flex", gap: 24, marginBottom: 25, flexWrap: "wrap" },
-  card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", flex: "1 1 300px" },
+  card: { background: "#fff", padding: "25px", borderRadius: 28, border: "1px solid #e2e8f0", flex: "1 1 300px" },
   cardTitle: { fontSize: 16, fontWeight: 600, margin: "0 0 20px 0" },
   formGroup: { marginBottom: 16 },
   label: { display: "block", fontSize: 12, fontWeight: 700, color: "#64748b", marginBottom: 6 },

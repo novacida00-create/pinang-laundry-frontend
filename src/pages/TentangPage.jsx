@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Icon from "../utils/icons.jsx";
 
 export default function TentangPage() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function TentangPage() {
             <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
           </div>
           <button style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
-            {mobileMenu ? "✕" : "☰"}
+            {mobileMenu ? <Icon name="x" /> : <Icon name="menu2" />}
           </button>
         </div>
         {mobileMenu && (
@@ -58,17 +59,17 @@ export default function TentangPage() {
       <section style={styles.aboutSection}>
         <div style={styles.aboutGrid}>
           <div style={styles.aboutCard}>
-            <span style={styles.aboutIcon}>🎯</span>
+            <span style={styles.aboutIcon}><Icon name="target" size={48} /></span>
             <h3 style={styles.aboutTitle}>Visi</h3>
             <p style={styles.aboutDesc}>Menjadi penyedia jasa laundry terdepan di Indonesia dengan pelayanan cepat, bersih, dan ramah lingkungan.</p>
           </div>
           <div style={styles.aboutCard}>
-            <span style={styles.aboutIcon}>⭐</span>
+            <span style={styles.aboutIcon}><Icon name="star" size={48} /></span>
             <h3 style={styles.aboutTitle}>Misi</h3>
             <p style={styles.aboutDesc}>Memberikan layanan laundry berkualitas tinggi dengan harga terjangkau, tepat waktu, dan kepuasan pelanggan sebagai prioritas utama.</p>
           </div>
           <div style={styles.aboutCard}>
-            <span style={styles.aboutIcon}>💪</span>
+            <span style={styles.aboutIcon}><Icon name="bolt" size={48} /></span>
             <h3 style={styles.aboutTitle}>Nilai Kami</h3>
             <p style={styles.aboutDesc}>Integritas, profesionalisme, dan inovasi dalam setiap layanan yang kami berikan kepada pelanggan.</p>
           </div>
@@ -161,7 +162,7 @@ const styles = {
 
   aboutSection: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", maxWidth: 1200, margin: "0 auto" },
   aboutGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 },
-  aboutCard: { padding: 32, background: "#f8fafc", borderRadius: 20, textAlign: "center" },
+  aboutCard: { padding: 32, background: "#f8fafc", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0" },
   aboutIcon: { fontSize: 48, marginBottom: 16 },
   aboutTitle: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 12 },
   aboutDesc: { fontSize: 16, color: "#64748b", lineHeight: 1.65 },

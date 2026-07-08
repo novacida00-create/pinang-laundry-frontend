@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import Icon from "../../utils/icons.jsx";
 
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -13,6 +14,7 @@ const formatRupiah = (num) => {
 };
 
 export default function Transaksi() {
+  const navigate = useNavigate();
   const currentDate = formatTanggalIndonesia();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,6 +22,7 @@ export default function Transaksi() {
   const [orders, setOrders] = useState([]);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [receiptOrder, setReceiptOrder] = useState(null);
+
 
   useEffect(() => {
     migratePaymentData();
@@ -114,7 +117,6 @@ export default function Transaksi() {
   .belum { background: #fef3c7; color: #92400e; }
 </style></head><body>
   <div class="header">
-    <div>🧺</div>
     <h2>PINANG LAUNDRY</h2>
     <p>Bersih, Cepat, Terpercaya</p>
     <p>Jl. Pinang Raya, Margonda Depok</p>
@@ -162,14 +164,14 @@ export default function Transaksi() {
             </div>
           </div>
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="🏠" label="Dashboard" /></NavLink>
-            <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="🧾" label="Orderan" /></NavLink>
-            <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="👥" label="Pelanggan" /></NavLink>
-            <div style={{ ...styles.navItem, background: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" }}><NavItem icon="💳" label="Transaksi" /></div>
-            <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="👨‍💼" label="Karyawan" /></NavLink>
-            <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="🏷️" label="Layanan" /></NavLink>
-            <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="📊" label="Laporan" /></NavLink>
-            <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="⚙️" label="Pengaturan" /></NavLink>
+            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="dashboard" label="Dashboard" /></NavLink>
+            <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="receipt" label="Orderan" /></NavLink>
+            <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="users" label="Pelanggan" /></NavLink>
+            <div style={{ ...styles.navItem, background: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" }}><NavItem icon="creditCard" label="Transaksi" /></div>
+            <NavLink to="/karyawan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="idBadge2" label="Karyawan" /></NavLink>
+            <NavLink to="/admin/layanan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="tag" label="Layanan" /></NavLink>
+            <NavLink to="/laporan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="chartBar" label="Laporan" /></NavLink>
+            <NavLink to="/pengaturan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="settings" label="Pengaturan" /></NavLink>
           </nav>
         </div>
         <div style={styles.profileWidget}>
@@ -179,15 +181,16 @@ export default function Transaksi() {
             </svg>
           </div>
           <div style={{ flex: 1 }}> <div style={styles.profName}>Alex</div> <div style={styles.profRole}>Admin</div> </div>
+          <button onClick={() => navigate("/")} style={styles.logoutBtnAdmin}><Icon name="doorExit" /></button>
         </div>
       </aside>
 
       <main className="admin-main" style={styles.main}>
-        <label htmlFor="mt" className="mt-l">☰</label>
+        <label htmlFor="mt" className="mt-l"><Icon name="menu2" /></label>
         <header style={styles.header}>
           <h2 style={styles.welcome}>Transaksi Customer</h2>
           <div style={styles.headerRight}>
-            <div style={styles.dateBox}>📅 {currentDate}</div>
+            <div style={styles.dateBox}><Icon name="calendar" /> {currentDate}</div>
             <div style={styles.topAvatar}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -198,28 +201,28 @@ export default function Transaksi() {
 
         <div style={styles.statsRow}>
           <div style={styles.statCard}>
-            <div style={{ ...styles.statIcon, backgroundColor: "#e0f2fe", color: "#0ea5e9" }}>💰</div>
+            <div style={{ ...styles.statIcon, backgroundColor: "#e0f2fe", color: "#0ea5e9" }}><Icon name="moneybag" /></div>
             <div style={{ marginLeft: 16 }}>
               <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Total Pendapatan</div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{formatRupiah(totalPendapatan)}</div>
             </div>
           </div>
           <div style={styles.statCard}>
-            <div style={{ ...styles.statIcon, backgroundColor: "#dcfce7", color: "#22c55e" }}>📅</div>
+            <div style={{ ...styles.statIcon, backgroundColor: "#dcfce7", color: "#22c55e" }}><Icon name="calendar" /></div>
             <div style={{ marginLeft: 16 }}>
               <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Pendapatan Hari Ini</div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{formatRupiah(totalPendapatanHariIni)}</div>
             </div>
           </div>
           <div style={styles.statCard}>
-            <div style={{ ...styles.statIcon, backgroundColor: "#f3e8ff", color: "#a855f7" }}>📋</div>
+            <div style={{ ...styles.statIcon, backgroundColor: "#f3e8ff", color: "#a855f7" }}><Icon name="clipboard" /></div>
             <div style={{ marginLeft: 16 }}>
               <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Total Transaksi</div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{orders.length}</div>
             </div>
           </div>
           <div style={styles.statCard}>
-            <div style={{ ...styles.statIcon, backgroundColor: "#ffedd5", color: "#f97316" }}>✅</div>
+            <div style={{ ...styles.statIcon, backgroundColor: "#ffedd5", color: "#f97316" }}><Icon name="check" /></div>
             <div style={{ marginLeft: 16 }}>
               <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Lunas</div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{orders.filter(o => o.payment_status === "Lunas").length}</div>
@@ -256,7 +259,7 @@ export default function Transaksi() {
                 return (
                   <tr key={o.id || o.no} style={styles.tr}>
                     <td style={styles.td}><span style={styles.invoiceCode}>{o.order_code || "-"}</span></td>
-                    <td style={styles.td}>👤 {o.customer_name}</td>
+                    <td style={styles.td}><Icon name="user" /> {o.customer_name}</td>
                     <td style={styles.td}><span style={styles.totalPrice}>{formatRupiah(o.total)}</span></td>
                     <td style={styles.td}>
                       {o.payment === "qris" ? <span style={styles.badgeQRIS}>QRIS</span> :
@@ -265,12 +268,12 @@ export default function Transaksi() {
                     </td>
                     <td style={styles.td}>
                       <span style={o.payment_status === "Lunas" ? styles.badgeCash : styles.badgePending}>
-                        {o.payment_status === "Lunas" ? "✅ Lunas" : "⏳ Belum"}
+                        {o.payment_status === "Lunas" ? <><Icon name="check" /> Lunas</> : <><Icon name="hourglass" /> Belum</>}
                       </span>
                     </td>
                     <td style={{ ...styles.td, fontSize: 11, color: "#64748b" }}>{o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID') : "-"}</td>
                     <td style={styles.td}>
-                      <button style={styles.printBtn} onClick={() => handlePrintReceipt(o)} title="Cetak Struk">🖨️</button>
+                      <button style={styles.printBtn} onClick={() => handlePrintReceipt(o)} title="Cetak Struk"><Icon name="printer" /></button>
                     </td>
                   </tr>
                 );
@@ -294,8 +297,8 @@ export default function Transaksi() {
         <div style={styles.modalOverlay} onClick={() => setShowReceiptModal(false)}>
           <div style={styles.receiptModal} onClick={e => e.stopPropagation()}>
             <div style={styles.receiptHeader}>
-              <h3 style={{ margin: 0 }}>🧾 Struk Pembayaran</h3>
-              <button style={styles.closeBtn} onClick={() => setShowReceiptModal(false)}>✕</button>
+              <h3 style={{ margin: 0 }}><Icon name="receipt" /> Struk Pembayaran</h3>
+              <button style={styles.closeBtn} onClick={() => setShowReceiptModal(false)}><Icon name="x" /></button>
             </div>
             <div style={styles.receiptBody}>
               <div style={styles.receiptInfo}>
@@ -310,18 +313,18 @@ export default function Transaksi() {
                 {receiptOrder.ongkir ? <div style={styles.receiptRow}><span>Ongkos Kirim</span><span>{formatRupiah(receiptOrder.ongkir)}</span></div> : null}
                 <div style={styles.divider}></div>
                 <div style={{ ...styles.receiptRow, fontWeight: 800, fontSize: 16 }}><span>Total Bayar</span><span style={{ color: "#059669" }}>{formatRupiah(receiptOrder.total)}</span></div>
-                <div style={styles.receiptRow}><span>Pembayaran</span><span style={{ fontWeight: 700, color: receiptOrder.payment === "qris" ? "#7c3aed" : receiptOrder.payment === "cash" ? "#065f46" : "#94a3b8" }}>{receiptOrder.payment === "qris" ? "💳 QRIS" : receiptOrder.payment === "cash" ? "💵 Tunai" : "-"}</span></div>
+                <div style={styles.receiptRow}><span>Pembayaran</span><span style={{ fontWeight: 700, color: receiptOrder.payment === "qris" ? "#7c3aed" : receiptOrder.payment === "cash" ? "#065f46" : "#94a3b8" }}>{receiptOrder.payment === "qris" ? <><Icon name="creditCard" /> QRIS</> : receiptOrder.payment === "cash" ? <><Icon name="currencyDollar" /> Tunai</> : "-"}</span></div>
                 <div style={styles.receiptRow}>
                   <span>Status</span>
                   <span style={{ color: receiptOrder.payment_status === "Lunas" ? "#22c55e" : "#f59e0b", fontWeight: 700 }}>
-                    {receiptOrder.payment_status === "Lunas" ? "✅ Lunas" : "⏳ Belum Lunas"}
+                    {receiptOrder.payment_status === "Lunas" ? <><Icon name="check" /> Lunas</> : <><Icon name="hourglass" /> Belum Lunas</>}
                   </span>
                 </div>
               </div>
             </div>
             <div style={styles.receiptFooter}>
               <button style={styles.cancelBtn} onClick={() => setShowReceiptModal(false)}>Tutup</button>
-              <button style={styles.printReceiptBtn} onClick={printReceipt}>🖨️ Cetak Struk</button>
+              <button style={styles.printReceiptBtn} onClick={printReceipt}><Icon name="printer" /> Cetak Struk</button>
             </div>
           </div>
         </div>
@@ -332,25 +335,26 @@ export default function Transaksi() {
 
 const NavItem = ({ icon, label }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-    <span>{icon}</span> {label}
+    <Icon name={icon} /> {label}
   </div>
 );
 
 const styles = {
-  app: { display: "flex", minHeight: "100vh", backgroundColor: "#f0f7ff", color: "#1e293b" },
-  sidebar: { width: 260, backgroundColor: "#fff", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRight: "1px solid #e2e8f0" },
+  app: { display: "flex", minHeight: "100vh", backgroundColor: "#F5F7FB", color: "#1e293b" },
+  sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
-  logoIcon: { width: 40, height: 40, backgroundColor: "#eff6ff", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  logoText: { fontSize: 18, fontWeight: 700, color: "#1e40af", margin: 0 },
-  logoSub: { fontSize: 10, color: "#94a3b8", margin: 0 },
+  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
+  logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
+  logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
-  navItem: { padding: "12px 16px", borderRadius: 12, color: "#64748b", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex" },
-  navActive: { backgroundColor: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" },
-  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f8fafc", borderRadius: 18 },
-  avatarCircle: { width: 36, height: 36, background: "#e2e8f0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
-  profName: { fontSize: 14, fontWeight: 600 },
-  profRole: { fontSize: 10, color: "#94a3b8" },
+  navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex", transition: "all 0.2s" },
+  navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
+  avatarCircle: { width: 36, height: 36, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
+  profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
+  profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
+  logoutBtnAdmin: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 16, borderRadius: 8, padding: "4px 8px", color: "#fff", transition: "all 0.2s" },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
   welcome: { fontSize: 24, fontWeight: 700, margin: 0 },
@@ -358,9 +362,9 @@ const styles = {
   dateBox: { padding: "10px 15px", background: "#fff", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "1px solid #f1f5f9", cursor: "pointer" },
   topAvatar: { width: 40, height: 40, background: "#cbd5e1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
   statsRow: { display: "flex", gap: 20, marginBottom: 25 },
-  statCard: { flex: 1, background: "#fff", padding: "20px", borderRadius: 24, display: "flex", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" },
+  statCard: { flex: 1, background: "#fff", padding: "20px", borderRadius: 24, display: "flex", alignItems: "center", border: "1px solid #e2e8f0" },
   statIcon: { width: 48, height: 48, borderRadius: 14, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
-  card: { background: "#fff", padding: "25px", borderRadius: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.02)", minWidth: 0 },
+  card: { background: "#fff", padding: "25px", borderRadius: 28, border: "1px solid #e2e8f0", minWidth: 0 },
   cardHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   cardTitle: { fontSize: 16, fontWeight: 600, margin: 0 },
   actionButtons: { display: "flex", gap: 12 },
