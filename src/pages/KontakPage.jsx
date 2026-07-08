@@ -168,8 +168,8 @@ const styles = {
 
   contactSection: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", maxWidth: 1200, margin: "0 auto" },
   contactGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 },
-  contactCard: { padding: 32, background: "#f8fafc", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0" },
-  contactIcon: { fontSize: 48, marginBottom: 16 },
+  contactCard: { padding: 32, background: "#fff", borderRadius: 24, textAlign: "center", border: "1px solid #bfdbfe", transition: "all 0.3s" },
+  contactIcon: { width: 72, height: 72, background: "linear-gradient(135deg, #eff6ff, #dbeafe)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 16px", color: "#2563eb" },
   contactLabel: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 8 },
   contactValue: { fontSize: 16, color: "#3b82f6", fontWeight: 400, marginBottom: 4 },
   contactDesc: { fontSize: 14, color: "#94a3b8" },

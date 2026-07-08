@@ -244,13 +244,23 @@ export default function LandingPage() {
           <div style={styles.contactCard}>
             <span style={styles.contactIcon}><Icon name="mapPin" size={40} /></span>
             <h4 style={styles.contactLabel}>Alamat</h4>
-            <p style={styles.contactValue}>Jl. Pinang Raya, Margonda Depok</p>
+            <a href="https://www.google.com/maps/search/?api=1&query=Jl.+Pinang+Raya+Margonda+Depok" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit" }}>
+              <p style={styles.contactValue}>Jl. Pinang Raya, Margonda Depok</p>
+            </a>
           </div>
           <div style={styles.contactCard}>
             <span style={styles.contactIcon}><Icon name="clock" size={40} /></span>
             <h4 style={styles.contactLabel}>Jam Operasional</h4>
             <p style={styles.contactValue}>Senin-Sabtu (08.00-20.00)</p>
           </div>
+        </div>
+        <div style={{ width: "100%", maxWidth: 800, margin: "32px auto 0", borderRadius: 16, overflow: "hidden", border: "1px solid #e2e8f0" }}>
+          <iframe
+            src="https://maps.google.com/maps?q=Jl.+Pinang+Raya+Margonda+Depok&output=embed"
+            width="100%" height="300" style={{ border: 0, display: "block" }}
+            allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+            title="Pinang Laundry Location"
+          ></iframe>
         </div>
       </section>
 
@@ -279,7 +289,7 @@ export default function LandingPage() {
           <div style={styles.footerLinks}>
             <h4 style={styles.footerLinkTitle}>Kontak</h4>
             <span style={styles.footerLink}>0895-4293-50001</span>
-            <span style={styles.footerLink}>Jl. Pinang Raya, Margonda Depok</span>
+            <a href="https://www.google.com/maps/search/?api=1&query=Jl.+Pinang+Raya+Margonda+Depok" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "inherit" }}><span style={styles.footerLink}>Jl. Pinang Raya, Margonda Depok</span></a>
           </div>
         </div>
         <div style={styles.footerBottom}>
@@ -429,8 +439,8 @@ const styles = {
 
   contact: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #F5F7FB 100%)" },
   contactGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, maxWidth: 900, margin: "0 auto" },
-  contactCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0" },
-  contactIcon: { fontSize: 40, marginBottom: 12 },
+  contactCard: { padding: 32, background: "#fff", borderRadius: 24, textAlign: "center", border: "1px solid #bfdbfe", transition: "all 0.3s", cursor: "default" },
+  contactIcon: { width: 72, height: 72, background: "linear-gradient(135deg, #eff6ff, #dbeafe)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 16px", color: "#2563eb" },
   contactLabel: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 4 },
   contactValue: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },
 
