@@ -79,6 +79,7 @@ export default function CustomerDashboard() {
   const [testimonials, setTestimonials] = useState(() => JSON.parse(localStorage.getItem("testimonials") || "[]"));
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
 
   useEffect(() => {
@@ -109,8 +110,7 @@ export default function CustomerDashboard() {
     } else {
       setServices([
         { no: 1, name: "Cuci Kiloan", jenis: "Kiloan", harga: "6000", waktu: "24 jam" },
-        { no: 2, name: "Cuci Satuan", jenis: "Satuan", harga: "15000", waktu: "12 jam" },
-        { no: 3, name: "Express", jenis: "Express", harga: "15000", waktu: "4 jam" },
+        { no: 2, name: "Express", jenis: "Express", harga: "15000", waktu: "4 jam" },
         { no: 4, name: "Cuci Karpet", jenis: "Spesial", harga: "50000", waktu: "48 jam" },
         { no: 5, name: "Cuci Sepatu", jenis: "Spesial", harga: "30000", waktu: "24 jam" },
         { no: 6, name: "Cuci Boneka", jenis: "Satuan", harga: "10000", waktu: "24 jam" },
@@ -381,7 +381,7 @@ export default function CustomerDashboard() {
           </nav>
         </div>
 
-          <div style={styles.profileWidget}>
+          <div style={styles.profileWidget} onClick={() => setShowProfileModal(true)}>
             <div style={styles.avatarCircle}><Icon name="user" /></div>
             <div style={{ flex: 1 }}>
               <div style={styles.profName}>{customerName}</div>
@@ -430,7 +430,7 @@ export default function CustomerDashboard() {
               <h3 style={styles.cardTitle}>Layanan Populer</h3>
               <div style={styles.serviceGrid}>
                 {services.slice(0, 3).map((s) => {
-                  const iconMap = { "Cuci Kiloan": <Icon name="tshirt" />, "Cuci Satuan": <Icon name="shirt" />, "Express": <Icon name="bolt" />, "Cuci Karpet": <Icon name="rectangle" />, "Cuci Sepatu": <Icon name="shoe" />, "Cuci Boneka": <Icon name="toy" /> };
+                const iconMap = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Sepatu": "👟", "Cuci Boneka": "🧸" };
                   return (
                     <div key={s.no} style={styles.serviceCard}>
                       <div style={styles.serviceIcon}>{iconMap[s.name] || "🧺"}</div>
@@ -561,7 +561,7 @@ export default function CustomerDashboard() {
             </div>
             <div style={styles.serviceGridFull}>
               {services.map((s) => {
-                const iconMap = { "Cuci Kiloan": <Icon name="tshirt" />, "Cuci Satuan": <Icon name="shirt" />, "Express": <Icon name="bolt" />, "Cuci Karpet": <Icon name="rectangle" />, "Cuci Sepatu": <Icon name="shoe" />, "Cuci Boneka": <Icon name="toy" /> };
+                const iconMap = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Sepatu": "👟", "Cuci Boneka": "🧸" };
                 const categoryColors = {
                   "Kiloan": { border: "#3b82f6", badge: "#dbeafe", badgeText: "#2563eb" },
                   "Satuan": { border: "#8b5cf6", badge: "#ede9fe", badgeText: "#7c3aed" },
@@ -1052,6 +1052,38 @@ export default function CustomerDashboard() {
 
     </div>
 
+      {/* PROFILE MODAL */}
+      {showProfileModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowProfileModal(false)}>
+          <div style={styles.modal} onClick={e => e.stopPropagation()}>
+            <div style={styles.profileHeader}>
+              <div style={styles.profileAvatar}><Icon name="user" size={40} /></div>
+              <h3>{customerName}</h3>
+              <p style={styles.profileRole}>Pelanggan</p>
+            </div>
+            <div style={styles.profileInfo}>
+              <div style={styles.profileRow}>
+                <span style={styles.profileLabel}><Icon name="user" /> Nama</span>
+                <span>{customerName}</span>
+              </div>
+              <div style={styles.profileRow}>
+                <span style={styles.profileLabel}><Icon name="mail" /> Email</span>
+                <span>{localStorage.getItem("customerEmail") || "-"}</span>
+              </div>
+              <div style={styles.profileRow}>
+                <span style={styles.profileLabel}><Icon name="phone" /> Telepon</span>
+                <span>{orders.length > 0 ? orders[0].phone : "-"}</span>
+              </div>
+              <div style={styles.profileRow}>
+                <span style={styles.profileLabel}><Icon name="package" /> Total Pesanan</span>
+                <span>{orders.length}x</span>
+              </div>
+            </div>
+            <button style={styles.profileCloseBtn} onClick={() => setShowProfileModal(false)}>Tutup</button>
+          </div>
+        </div>
+      )}
+
       <Chatbot />
 
       
@@ -1065,15 +1097,15 @@ const styles = {
   sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
-  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
+  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20 },
   logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
   logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
   navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 13, fontWeight: 500, cursor: "pointer", display: "flex", gap: 10, alignItems: "center", transition: "all 0.2s" },
   navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
   badge: { backgroundColor: "#ef4444", color: "#fff", padding: "2px 8px", borderRadius: 10, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
-  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
-  avatarCircle: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18 },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14 },
+  avatarCircle: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18, color: "rgba(255,255,255,0.75)", flexShrink: 0, overflow: "hidden" },
   profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
   profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
   logoutBtn: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#fff", padding: "10px 16px", borderRadius: 10, transition: "all 0.2s" },
@@ -1124,6 +1156,13 @@ const styles = {
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 28, padding: 32, width: 440, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 25px 50px rgba(0,0,0,0.25)" },
   modalTitle: { fontSize: 22, fontWeight: 600, margin: "0 0 20px 0", textAlign: "center", letterSpacing: "-0.5px" },
+  profileHeader: { textAlign: "center", padding: "20px 0", borderBottom: "1px solid #e2e8f0" },
+  profileAvatar: { width: 80, height: 80, background: "#e2e8f0", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 40, margin: "0 auto 12px", color: "#64748b" },
+  profileRole: { color: "#64748b", fontSize: 14 },
+  profileInfo: { padding: "20px 0" },
+  profileRow: { display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f1f5f9", fontSize: 14 },
+  profileLabel: { color: "#64748b", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 },
+  profileCloseBtn: { width: "100%", padding: 12, background: "#3b82f6", color: "white", border: "none", borderRadius: 12, fontWeight: 700, cursor: "pointer", marginTop: 16 },
   modalContent: { display: "flex", flexDirection: "column", gap: 12 },
   label: { fontSize: 14, fontWeight: 400, color: "#64748b", letterSpacing: "+0.3px" },
   priceDisplay: { fontSize: 28, fontWeight: 700, color: "#3b82f6" },

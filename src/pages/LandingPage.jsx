@@ -9,9 +9,10 @@ const testimonials = [
   { name: "Dewi Lestari", text: "Sudah 2 tahun langganan, tidak pernah kecewa.", rating: 5 },
 ];
 
+const serviceIcons = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Lipat": "📦", "Cuci Setrika": "🔥", "Cuci Karpet": "🟤", "Cuci Jaket": "🧥", "Cuci Jas": "👔", "Setrika Saja": "🔥" };
+
 const allServices = [
   { icon: "tshirt", name: "Cuci Kiloan", price: "Rp 6.000/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian" },
-  { icon: "shirt", name: "Cuci Satuan", price: "Rp 15.000/pcs", waktu: "12 jam", desc: "Cuci per item, cocok untuk jas, gaun, rok" },
   { icon: "bolt", name: "Express", price: "Rp 15.000/kg", waktu: "4 jam", desc: "Laundry selesai dalam 4 jam" },
   { icon: "package", name: "Cuci Lipat", price: "Rp 10.000/kg", waktu: "24 jam", desc: "Cuci + lipat rapi, siap pakai" },
   { icon: "flame", name: "Cuci Setrika", price: "Rp 15.000/kg", waktu: "6 jam", desc: "Cuci + setrika cepat, wangi dan rapi" },
@@ -140,7 +141,7 @@ export default function LandingPage() {
           {allServices.map((s, i) => (
             <div key={i} style={styles.serviceCard}>
               <div style={styles.serviceCardTop}>
-                <div style={styles.serviceIcon}><Icon name={s.icon} size={40} /></div>
+                <div style={styles.serviceIcon}>{serviceIcons[s.name] || "🧺"}</div>
                 <div style={styles.serviceTime}>{s.waktu}</div>
               </div>
               <h3 style={styles.serviceName}>{s.name}</h3>
@@ -311,12 +312,17 @@ export default function LandingPage() {
           .hero-stat-label { font-size: 12px !important; }
           .hero-stat-divider { height: 32px !important; }
           .hero-visual { display: none !important; }
-          .services-grid { grid-template-columns: 1fr !important; }
+          .services-grid { grid-template-columns: repeat(2,1fr) !important; }
           .benefits-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .testimonial-grid { grid-template-columns: 1fr !important; }
           .contact-grid { grid-template-columns: 1fr !important; }
-          .steps-wrap { gap: 24px !important; }
           .footer-content { flex-direction: column !important; gap: 24px !important; }
+
+          @media (max-width: 480px) {
+            .services-grid { grid-template-columns: 1fr !important; }
+            .benefits-grid { grid-template-columns: 1fr !important; }
+          }
+          .steps-wrap { gap: 24px !important; }
           .section-subtitle { white-space: normal !important; }
         }
         @media (max-width: 480px) {

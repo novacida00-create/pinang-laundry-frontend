@@ -151,17 +151,12 @@ export default function Pelanggan() {
         </div>
 
         <div style={styles.profileWidget}>
-          <div style={styles.avatarCircle}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
+          <div style={styles.avatarCircle}><Icon name="user" /></div>
           <div style={{ flex: 1 }}>
             <div style={styles.profName}>Alex</div>
             <div style={styles.profRole}>Admin</div>
           </div>
-          <button onClick={() => navigate("/")} style={styles.logoutBtnAdmin}><Icon name="doorExit" /></button>
+          <button onClick={() => navigate("/")} style={styles.logoutBtn}>Logout</button>
         </div>
       </aside>
 
@@ -320,17 +315,17 @@ const styles = {
   sidebar: { width: 260, background: "linear-gradient(180deg, #0f2b5e, #1e40af)", padding: "30px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", zIndex: 1 },
   sidebarTop: { display: "flex", flexDirection: "column", gap: 40 },
   logoSection: { display: "flex", alignItems: "center", gap: 12 },
-  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 12, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
+  logoIcon: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, backdropFilter: "blur(4px)" },
   logoText: { fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 },
   logoSub: { fontSize: 10, color: "rgba(255,255,255,0.6)", margin: 0 },
   nav: { display: "flex", flexDirection: "column", gap: 6 },
   navItem: { padding: "12px 16px", borderRadius: 12, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 500, cursor: "pointer", textDecoration: "none", display: "flex", transition: "all 0.2s" },
   navActive: { background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700 },
-  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14, background: "rgba(255,255,255,0.1)", borderRadius: 18, backdropFilter: "blur(4px)" },
-  avatarCircle: { width: 36, height: 36, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" },
+  profileWidget: { display: "flex", alignItems: "center", gap: 12, padding: 14 },
+  avatarCircle: { width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", fontSize: 18, color: "rgba(255,255,255,0.75)" },
   profName: { fontSize: 14, fontWeight: 600, color: "#fff" },
   profRole: { fontSize: 10, color: "rgba(255,255,255,0.6)" },
-  logoutBtnAdmin: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 16, borderRadius: 8, padding: "4px 8px", color: "#fff", transition: "all 0.2s" },
+  logoutBtn: { background: "#ef4444", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#fff", padding: "10px 16px", borderRadius: 10 },
   main: { flex: 1, padding: "30px 40px", overflowY: "auto", minWidth: 0 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 30 },
   welcome: { fontSize: 24, fontWeight: 700, margin: 0 },

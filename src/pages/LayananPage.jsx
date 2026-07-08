@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../utils/icons.jsx";
 
+const serviceIcons = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Jaket": "🧥", "Cuci Jas": "👔", "Setrika Saja": "🔥" };
+
 const services = [
   { icon: "tshirt", name: "Cuci Kiloan", price: "Rp 6.000", unit: "/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian. Paket lengkap meliputi cuci, rendam, dan bilas hingga bersih." },
-  { icon: "shirt", name: "Cuci Satuan", price: "Rp 15.000", unit: "/pcs", waktu: "12 jam", desc: "Cuci per item, cocok untuk jas, gaun, rok dan pakaian khusus yang memerlukan penanganan khusus." },
   { icon: "bolt", name: "Express", price: "Rp 15.000", unit: "/kg", waktu: "4 jam", desc: "Layanan kilat! Laundry selesai dalam 4 jam saja. Cocok untuk kebutuhan mendesak." },
   { icon: "yarn", name: "Cuci Karpet", price: "Rp 50.000", unit: "/pcs", waktu: "48 jam", desc: "Cuci karpet besar dan tebal. Proses deep cleaning untuk karpet kesayangan Anda." },
   { icon: "jacket", name: "Cuci Jaket", price: "Rp 12.000", unit: "/pcs", waktu: "24 jam", desc: "Cuci jaket dan outerwear. Termasuk обработка khusus untuk материалу." },
@@ -78,7 +79,7 @@ export default function Layanan() {
           {services.map((s, i) => (
             <div key={i} style={styles.serviceCard}>
               <div style={styles.serviceCardHeader}>
-                <div style={styles.serviceIcon}><Icon name={s.icon} size={48} /></div>
+                <div style={styles.serviceIcon}>{serviceIcons[s.name] || "🧺"}</div>
                 <div style={styles.serviceTime}>{s.waktu}</div>
               </div>
               <h3 style={styles.serviceName}>{s.name}</h3>
