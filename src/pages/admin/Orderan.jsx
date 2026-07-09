@@ -40,26 +40,36 @@ export default function Orderan() {
     return () => clearInterval(interval);
   }, []);
 
-  const loadOrders = () => {
-    const savedOrders = localStorage.getItem("customerOrders");
-    setOrders(savedOrders ? JSON.parse(savedOrders).map((o, index) => ({ ...o, no: index + 1 })) : []);
+  const loadOrders = async () => {
+    try {
+      const res = await fetch("/api/orders");
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setOrders(data.map((o, index) => ({ ...o, no: index + 1 })));
+    } catch (e) {
+      console.error("Failed to load orders:", e);
+    }
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    const savedOrders = localStorage.getItem("customerOrders");
-    if (savedOrders) {
-      const allOrders = JSON.parse(savedOrders);
-      const updatedOrders = allOrders.map(o => 
-        o.id === orderId ? { ...o, status: newStatus } : o
-      );
-      localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
-      setOrders(updatedOrders.map((o, index) => ({ ...o, no: index + 1 })));
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      await loadOrders();
+    } catch (e) {
+      console.error("Failed to update status:", e);
     }
   };
 
   const handleSendWa = async (order) => {
     if (!order.phone) { alert("No. HP pelanggan tidak tersedia"); return; }
-    const settings = JSON.parse(localStorage.getItem("pengaturanData") || "{}");
+    let settings = {};
+    try { const r = await fetch("/api/pengaturan"); settings = await r.json(); } catch {}
     if (!settings.fonnteToken) { alert("Isi token Fonnte di halaman Pengaturan!"); return; }
     const cleanPhone = order.phone.replace(/[^0-9]/g, "");
     const target = cleanPhone.startsWith("62") ? cleanPhone : "62" + cleanPhone.replace(/^0+/, "");
@@ -108,9 +118,33 @@ Terima kasih telah menggunakan layanan kami!
     setShowDetailModal(true);
   };
 
-  const handleUpdateStatus = (orderId, status) => {
-    updateOrderStatus(orderId, status);
-    alert(`Status pesanan diperbarui menjadi: ${status}`);
+  const handleUpdateStatus = async (order, newStatus) => {
+    await updateOrderStatus(order.id, newStatus);
+    alert(`Status ${order.order_code} menjadi: ${newStatus}`);
+    if (newStatus === "Diproses" && order.phone) {
+      try {
+        const r = await fetch("http://localhost:3001/api/pengaturan");
+        const s = await r.json();
+        if (s.waNotif && s.fonnteToken) {
+          const cleanPhone = order.phone.replace(/[^0-9]/g, "");
+          const target = cleanPhone.startsWith("62") ? cleanPhone : "62" + cleanPhone.replace(/^0+/, "");
+          await sendWa(target,
+`*Pesanan Diproses - Pinang Laundry*
+Halo *${order.customer_name}*,
+
+Pesanan Anda sedang diproses!
+
+*Invoice:* ${order.order_code}
+*Layanan:* ${order.service_name}
+*Berat:* ${order.weight} kg
+*Total:* ${formatRupiah(order.total)}
+
+Estimasi selesai: sesuai layanan yang dipilih.
+Terima kasih telah menunggu!`
+          );
+        }
+      } catch {}
+    }
   };
 
   return (
@@ -128,7 +162,7 @@ Terima kasih telah menggunakan layanan kami!
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -234,7 +268,7 @@ Terima kasih telah menggunakan layanan kami!
                     status={t.status}
                     delivery={t.delivery_mode}
                     onView={() => handleViewDetail(t)}
-                    onStatusChange={(status) => handleUpdateStatus(t.id, status)}
+                    onStatusChange={(status) => handleUpdateStatus(t, status)}
                     onSendWa={() => handleSendWa(t)}
                     status={t.status}
                   />
@@ -274,7 +308,7 @@ Terima kasih telah menggunakan layanan kami!
                 <div style={styles.detailRow}><span style={styles.detailLabel}>Alamat:</span><span style={styles.detailValue}>{selectedOrder.address}</span></div>
                 {selectedOrder.delivery_mode && <div style={styles.detailRow}><span style={styles.detailLabel}>Pengiriman:</span><span style={styles.detailValue}>{selectedOrder.delivery_mode === "kurir" ? <><Icon name="truck" /> Antar-Jemput</> : <><Icon name="buildingStore" /> Antar Mandiri</>}{selectedOrder.ongkir ? ` (Ongkir: Rp ${(parseInt(selectedOrder.ongkir) || 0).toLocaleString('id-ID')})` : ""}</span></div>}
                 <div style={styles.detailRow}><span style={styles.detailLabel}>Status:</span>
-                  <select value={selectedOrder.status} onChange={(e) => { handleUpdateStatus(selectedOrder.id, e.target.value); setSelectedOrder({...selectedOrder, status: e.target.value}); }} style={styles.statusSelectLarge}>
+                   <select value={selectedOrder.status} onChange={(e) => { handleUpdateStatus(selectedOrder, e.target.value); setSelectedOrder({...selectedOrder, status: e.target.value}); }} style={styles.statusSelectLarge}>
                     <option value="Menunggu">Menunggu</option>
                     <option value="Diproses">Diproses</option>
                     <option value="Selesai">Selesai</option>

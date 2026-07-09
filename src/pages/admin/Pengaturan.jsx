@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Icon from "../../utils/icons.jsx";
 
@@ -29,30 +29,98 @@ export default function Pengaturan() {
   const currentDate = formatTanggalIndonesia();
   const [editingProfil, setEditingProfil] = useState(false);
   const [editingApp, setEditingApp] = useState(false);
-  
-
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem("pengaturanData");
-    return saved ? JSON.parse(saved) : defaultSettings;
-  });
+  const [settings, setSettings] = useState(defaultSettings);
+  const savedSettings = useRef(defaultSettings);
 
   useEffect(() => {
-    localStorage.setItem("pengaturanData", JSON.stringify(settings));
-  }, [settings]);
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/pengaturan");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        setSettings(data);
+        savedSettings.current = data;
+      } catch {
+        setSettings(defaultSettings);
+        savedSettings.current = defaultSettings;
+      }
+    };
+    fetchSettings();
+  }, []);
 
-  const handleSaveProfil = () => {
-    setEditingProfil(false);
-    alert("Profil berhasil disimpan!");
+  const handleSaveProfil = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/pengaturan", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      savedSettings.current = { ...settings };
+      setEditingProfil(false);
+      alert("Profil berhasil disimpan!");
+    } catch (err) {
+      alert("Gagal menyimpan profil: " + (err.message || "Unknown error"));
+    }
   };
 
-  const handleSaveApp = () => {
-    setEditingApp(false);
-    alert("Pengaturan aplikasi berhasil disimpan!");
+  const handleSaveApp = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/pengaturan", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      savedSettings.current = { ...settings };
+      setEditingApp(false);
+      alert("Pengaturan aplikasi berhasil disimpan!");
+    } catch (err) {
+      alert("Gagal menyimpan: " + (err.message || "Unknown error"));
+    }
   };
 
-  const toggleSetting = (key) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
-    alert(`${key === 'notifEmail' ? 'Notifikasi Email' : key === 'notifSMS' ? 'Notifikasi WhatsApp' : 'Auto Reminder'} ${!settings[key] ? 'diaktifkan' : 'dinonaktifkan'}!`);
+  const handleSaveWA = async () => {
+    try {
+      const waSettings = {
+        fonnteToken: settings.fonnteToken,
+        waAdmin: settings.waAdmin,
+        waNotif: settings.waNotif
+      };
+      const res = await fetch("http://localhost:3001/api/pengaturan", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(waSettings)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      savedSettings.current = { ...settings };
+      alert("Pengaturan WhatsApp berhasil disimpan!");
+    } catch (err) {
+      alert("Gagal simpan WA: " + (err?.message || JSON.stringify(err) || "Error tidak diketahui"));
+    }
+  };
+
+  const toggleSetting = async (key) => {
+    const newVal = !settings[key];
+    setSettings(prev => ({ ...prev, [key]: newVal }));
+    const label = key === 'notifEmail' ? 'Notifikasi Email' : key === 'notifSMS' ? 'Notifikasi WhatsApp' : 'Auto Reminder';
+    try {
+      const res = await fetch("http://localhost:3001/api/pengaturan", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: newVal })
+      });
+      if (!res.ok) throw new Error(((await res.json()).error) || res.statusText);
+      savedSettings.current = { ...savedSettings.current, [key]: newVal };
+    } catch (err) {
+      setSettings(prev => ({ ...prev, [key]: !newVal }));
+      alert("Gagal menyimpan " + label + ": " + (err?.message || JSON.stringify(err) || "Error"));
+      return;
+    }
+    alert(label + " " + (newVal ? "diaktifkan" : "dinonaktifkan") + "!");
   };
 
   const handleInputChange = (key, value) => {
@@ -73,7 +141,7 @@ export default function Pengaturan() {
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -158,7 +226,7 @@ export default function Pengaturan() {
                     />
                   </div>
                   <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
-                    <button style={styles.btnCancel} onClick={() => { setEditingProfil(false); setSettings(JSON.parse(localStorage.getItem("pengaturanData")) || defaultSettings); }}>Batal</button>
+                    <button style={styles.btnCancel} onClick={() => { setEditingProfil(false); setSettings({...savedSettings.current}); }}>Batal</button>
                     <button style={styles.btnSave} onClick={handleSaveProfil}>Simpan</button>
                   </div>
                 </>
@@ -207,7 +275,7 @@ export default function Pengaturan() {
                     />
                   </div>
                   <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
-                    <button style={styles.btnCancel} onClick={() => { setEditingApp(false); setSettings(JSON.parse(localStorage.getItem("pengaturanData")) || defaultSettings); }}>Batal</button>
+                    <button style={styles.btnCancel} onClick={() => { setEditingApp(false); setSettings({...savedSettings.current}); }}>Batal</button>
                     <button style={styles.btnSave} onClick={handleSaveApp}>Simpan</button>
                   </div>
                 </>
@@ -278,6 +346,7 @@ export default function Pengaturan() {
               </div>
             </div>
           </div>
+          <button style={{ ...styles.btnSave, marginTop: 20 }} onClick={handleSaveWA}>Simpan Pengaturan WA</button>
         </div>
       </main>
     </div>

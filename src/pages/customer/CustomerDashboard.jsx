@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Chatbot from "../../components/chatbot/chatbot.jsx";
 import Icon from "../../utils/icons.jsx";
+import { sendWa, formatRupiah } from "../../utils/waNotif.js";
 
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
@@ -76,47 +77,92 @@ export default function CustomerDashboard() {
   const snapRef = useRef(null);
   const [testimoniText, setTestimoniText] = useState("");
   const [testimoniRating, setTestimoniRating] = useState(0);
-  const [testimonials, setTestimonials] = useState(() => JSON.parse(localStorage.getItem("testimonials") || "[]"));
+  const [testimonials, setTestimonials] = useState([]);
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [laporanData, setLaporanData] = useState([]);
 
+
+  const loadOrders = async () => {
+    try {
+      const ordersRes = await fetch(`${API_URL}/orders`);
+      if (ordersRes.ok) {
+        const allOrders = await ordersRes.json();
+        const customerEmail = localStorage.getItem("customerEmail");
+        if (customerEmail) {
+          setOrders(allOrders.filter(o => o.email === customerEmail));
+        } else {
+          setOrders(allOrders.filter(o => o.customer_name === customerName));
+        }
+      }
+    } catch (err) {
+      console.error("Gagal load orders:", err);
+    }
+  };
 
   useEffect(() => {
-    const savedOrders = localStorage.getItem("customerOrders");
-    if (savedOrders) {
-      const parsed = JSON.parse(savedOrders);
-      const customerOrders = parsed.filter(o => o.customer_name === customerName);
-      setOrders(customerOrders);
-    }
+    const fetchData = async () => {
+      try {
+        const servicesRes = await fetch(`${API_URL}/layanan`);
+        if (servicesRes.ok) {
+          let parsed = await servicesRes.json();
+          parsed = parsed.filter(s => s.status === "Aktif" && s.name !== "Cuci Gold");
+          const seen = new Set();
+          parsed = parsed.filter(s => {
+            if (seen.has(s.name)) return false;
+            seen.add(s.name);
+            return true;
+          });
+          parsed = parsed.map(s => {
+            if (s.name === "Cuci Kiloan" && s.harga === "8000") return { ...s, harga: "6000" };
+            if (s.name === "Cuci Setrika" && s.harga === "75000") return { ...s, harga: "12000" };
+            if (s.name === "Express" && s.harga === "25000") return { ...s, harga: "7500" };
+            return s;
+          });
+          setServices(parsed);
+        } else {
+          setServices([
+            { no: 1, name: "Cuci Kiloan", jenis: "Kiloan", harga: "6000", waktu: "24 jam" },
+            { no: 2, name: "Express", jenis: "Express", harga: "15000", waktu: "4 jam" },
+            { no: 4, name: "Cuci Karpet", jenis: "Spesial", harga: "50000", waktu: "48 jam" },
+            { no: 5, name: "Cuci Sepatu", jenis: "Spesial", harga: "30000", waktu: "24 jam" },
+            { no: 6, name: "Cuci Boneka", jenis: "Satuan", harga: "10000", waktu: "24 jam" },
+            { no: 7, name: "Cuci Setrika", jenis: "Kiloan", harga: "12000", waktu: "24 jam" },
+          ]);
+        }
+      } catch (err) {
+        console.error("Gagal load layanan:", err);
+        setServices([
+          { no: 1, name: "Cuci Kiloan", jenis: "Kiloan", harga: "6000", waktu: "24 jam" },
+          { no: 2, name: "Express", jenis: "Express", harga: "15000", waktu: "4 jam" },
+          { no: 4, name: "Cuci Karpet", jenis: "Spesial", harga: "50000", waktu: "48 jam" },
+          { no: 5, name: "Cuci Sepatu", jenis: "Spesial", harga: "30000", waktu: "24 jam" },
+          { no: 6, name: "Cuci Boneka", jenis: "Satuan", harga: "10000", waktu: "24 jam" },
+          { no: 7, name: "Cuci Setrika", jenis: "Kiloan", harga: "12000", waktu: "24 jam" },
+        ]);
+      }
 
-    const savedServices = localStorage.getItem("layananData");
-    if (savedServices) {
-      let parsed = JSON.parse(savedServices).filter(s => s.status === "Aktif" && s.name !== "Cuci Gold");
-      const seen = new Set();
-      parsed = parsed.filter(s => {
-        if (seen.has(s.name)) return false;
-        seen.add(s.name);
-        return true;
-      });
-      parsed = parsed.map(s => {
-        if (s.name === "Cuci Kiloan" && s.harga === "8000") return { ...s, harga: "6000" };
-        if (s.name === "Cuci Setrika" && s.harga === "75000") return { ...s, harga: "12000" };
-        if (s.name === "Express" && s.harga === "25000") return { ...s, harga: "7500" };
-        return s;
-      });
-      localStorage.setItem("layananData", JSON.stringify(parsed));
-      setServices(parsed);
-    } else {
-      setServices([
-        { no: 1, name: "Cuci Kiloan", jenis: "Kiloan", harga: "6000", waktu: "24 jam" },
-        { no: 2, name: "Express", jenis: "Express", harga: "15000", waktu: "4 jam" },
-        { no: 4, name: "Cuci Karpet", jenis: "Spesial", harga: "50000", waktu: "48 jam" },
-        { no: 5, name: "Cuci Sepatu", jenis: "Spesial", harga: "30000", waktu: "24 jam" },
-        { no: 6, name: "Cuci Boneka", jenis: "Satuan", harga: "10000", waktu: "24 jam" },
-        { no: 7, name: "Cuci Setrika", jenis: "Kiloan", harga: "12000", waktu: "24 jam" },
-      ]);
-    }
+      try {
+        const laporanRes = await fetch(`${API_URL}/laporan`);
+        if (laporanRes.ok) {
+          setLaporanData(await laporanRes.json());
+        }
+      } catch (err) {
+        console.error("Gagal load laporan:", err);
+      }
+
+      try {
+        const testimoniRes = await fetch(`${API_URL}/testimonials`);
+        if (testimoniRes.ok) {
+          setTestimonials(await testimoniRes.json());
+        }
+      } catch (err) {
+        console.error("Gagal load testimonials:", err);
+      }
+    };
+    fetchData();
+    loadOrders();
   }, [customerName]);
 
   useEffect(() => {
@@ -139,7 +185,7 @@ export default function CustomerDashboard() {
     setShowOrderModal(true);
   };
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
     if (!orderForm.phone) {
       alert("Mohon isi nomor telepon!");
       return;
@@ -161,115 +207,170 @@ export default function CustomerDashboard() {
     const ongkir = deliveryMode === "kurir" ? getOngkir(distance) : 0;
     const total = biayaCuci + ongkir;
     const customerEmail = orderForm.email || (customerName.toLowerCase().replace(/\s+/g, '') + '@gmail.com');
-    const newOrder = {
-      id: Date.now(),
-      order_code: "INV-" + Date.now(),
-      customer_name: customerName,
-      email: customerEmail,
-      service_name: selectedService.name,
-      weight: parseFloat(orderForm.weight),
-      price: parseInt(selectedService.harga),
-      biaya_cuci: biayaCuci,
-      ongkir: ongkir,
-      delivery_mode: deliveryMode,
-      jarak: deliveryMode === "kurir" ? distance : null,
-      total: total,
-      status: "Menunggu",
-      created_at: new Date().toISOString(),
-      phone: orderForm.phone,
-      address: orderForm.address
-    };
 
-    const savedOrders = localStorage.getItem("customerOrders");
-    const allOrders = savedOrders ? JSON.parse(savedOrders) : [];
-    allOrders.push(newOrder);
-    localStorage.setItem("customerOrders", JSON.stringify(allOrders));
-
-    // Sync to pelanggan data
-    const savedPelanggan = localStorage.getItem("pelangganData");
-    let allPelanggan = savedPelanggan ? JSON.parse(savedPelanggan) : [];
-    const exists = allPelanggan.some(p => p.name === customerName);
-    if (!exists) {
-      allPelanggan.push({
-        no: allPelanggan.length + 1,
-        name: customerName,
-        email: customerEmail,
-        phone: orderForm.phone,
-        address: orderForm.address,
-        order: 1,
-        status: "Aktif"
+    try {
+      const orderRes = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order_code: "INV-" + Date.now(),
+          customer_name: customerName,
+          email: customerEmail,
+          service_name: selectedService.name,
+          weight: parseFloat(orderForm.weight),
+          price: parseInt(selectedService.harga),
+          biaya_cuci: biayaCuci,
+          ongkir: ongkir,
+          delivery_mode: deliveryMode,
+          jarak: deliveryMode === "kurir" ? distance : null,
+          total: total,
+          status: "Menunggu",
+          phone: orderForm.phone,
+          address: orderForm.address
+        })
       });
-    } else {
-      allPelanggan = allPelanggan.map(p => 
-        p.name === customerName 
-          ? { ...p, order: p.order + 1, phone: orderForm.phone, address: orderForm.address, email: customerEmail }
-          : p
-      );
+
+      if (!orderRes.ok) {
+        const errData = await orderRes.json().catch(() => ({}));
+        throw new Error(errData.error || "Gagal membuat pesanan");
+      }
+
+      const createdOrder = await orderRes.json();
+
+      const formatTanggal = () => {
+        const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const t = new Date();
+        return `${t.getDate().toString().padStart(2, "0")} ${bulan[t.getMonth()]} ${t.getFullYear()}`;
+      };
+
+      await fetch(`${API_URL}/laporan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tanggal: formatTanggal(),
+          pelanggan: customerName,
+          layanan: selectedService.name,
+          berat: orderForm.weight,
+          harga: selectedService.harga,
+          total: total.toString(),
+          ongkir: ongkir.toString(),
+          delivery_mode: deliveryMode,
+          status: "Baru"
+        })
+      });
+
+      const pelangganRes = await fetch(`${API_URL}/pelanggan?email=${encodeURIComponent(customerEmail)}`);
+      if (pelangganRes.ok) {
+        const existing = await pelangganRes.json();
+        if (Array.isArray(existing) && existing.length > 0) {
+          const p = existing[0];
+          await fetch(`${API_URL}/pelanggan/${p.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...p,
+              order: (p.order || 0) + 1,
+              phone: orderForm.phone,
+              address: orderForm.address,
+              email: customerEmail
+            })
+          });
+        } else {
+          await fetch(`${API_URL}/pelanggan`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: customerName,
+              email: customerEmail,
+              phone: orderForm.phone,
+              address: orderForm.address,
+              order: 1,
+              status: "Aktif"
+            })
+          });
+        }
+      }
+
+      setOrders([...orders, createdOrder]);
+      setShowOrderModal(false);
+      alert("Pesanan berhasil dibuat! Tim kami akan segera menghubungi Anda.");
+
+      // Auto WA notif
+      const waTarget = (orderForm.phone || "").replace(/[^0-9]/g, "");
+      if (waTarget) {
+        const cleanTarget = waTarget.startsWith("62") ? waTarget : "62" + waTarget.replace(/^0+/, "");
+        sendWa(cleanTarget,
+`*Pesanan Diterima - Pinang Laundry*
+Halo *${customerName}*,
+
+Pesanan Anda telah kami terima!
+
+*Invoice:* INV-${Date.now()}
+*Layanan:* ${selectedService.name}
+*Berat:* ${orderForm.weight} kg
+*Total:* ${formatRupiah(total)}
+*Pengiriman:* ${deliveryMode === "kurir" ? "Antar-Jemput" : "Antar Mandiri"}
+
+Kami akan segera memproses pesanan Anda.
+Terima kasih telah memilih Pinang Laundry!`
+        );
+      }
+
+      setCurrentTab("pesanan");
+    } catch (err) {
+      alert("Gagal membuat pesanan: " + err.message);
     }
-    localStorage.setItem("pelangganData", JSON.stringify(allPelanggan));
-
-    // Sync to laporan data
-    const savedLaporan = localStorage.getItem("laporanData");
-    const allLaporan = savedLaporan ? JSON.parse(savedLaporan) : [];
-    const formatTanggal = () => {
-      const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-      const t = new Date();
-      return `${t.getDate().toString().padStart(2, "0")} ${bulan[t.getMonth()]} ${t.getFullYear()}`;
-    };
-    allLaporan.push({
-      no: allLaporan.length + 1,
-      tanggal: formatTanggal(),
-      pelanggan: customerName,
-      layanan: selectedService.name,
-      berat: orderForm.weight,
-      harga: selectedService.harga,
-      total: total.toString(),
-      ongkir: ongkir.toString(),
-      delivery_mode: deliveryMode,
-      status: "Baru"
-    });
-    localStorage.setItem("laporanData", JSON.stringify(allLaporan));
-
-    setOrders([...orders, newOrder]);
-    setShowOrderModal(false);
-    alert("Pesanan berhasil dibuat! Tim kami akan segera menghubungi Anda.");
-    setCurrentTab("pesanan");
   };
 
-  const markOrderAsPaid = (order, method) => {
-    const savedOrders = localStorage.getItem("customerOrders");
-    if (!savedOrders || !order) return false;
-    const allOrders = JSON.parse(savedOrders);
-    const updatedOrders = allOrders.map(o =>
-      o.id === order.id
-        ? { ...o, status: "Selesai", payment: method, payment_status: "Lunas", paid_at: new Date().toISOString() }
-        : o
-    );
-    localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
-    setOrders(updatedOrders.filter(o => o.customer_name === customerName));
-
-    const formatTanggalFromISO = (iso) => {
-      const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-      const t = new Date(iso);
-      return `${t.getDate().toString().padStart(2, "0")} ${bulan[t.getMonth()]} ${t.getFullYear()}`;
-    };
-    const tanggalOrder = formatTanggalFromISO(order.created_at);
-    const savedLaporan = localStorage.getItem("laporanData");
-    let allLaporan = savedLaporan ? JSON.parse(savedLaporan) : [];
-    if (!allLaporan.some(l => l.pelanggan === order.customer_name && l.tanggal === tanggalOrder)) {
-      allLaporan.push({
-        tanggal: tanggalOrder,
-        pelanggan: order.customer_name,
-        layanan: order.service_name,
-        berat: order.weight.toString(),
-        harga: order.price.toString(),
-        total: order.total.toString(),
-        status: "Selesai"
+  const markOrderAsPaid = async (order, method) => {
+    try {
+      const now = new Date();
+      const pad = (n) => n.toString().padStart(2, "0");
+      const mysqlDatetime = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const updatedFields = {
+        status: "Selesai",
+        payment: method,
+        payment_status: "Lunas",
+        paid_at: mysqlDatetime
+      };
+      const res = await fetch(`${API_URL}/orders/${order.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFields)
       });
-      allLaporan = allLaporan.map((l, i) => ({ ...l, no: i + 1 }));
-      localStorage.setItem("laporanData", JSON.stringify(allLaporan));
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error("Gagal update order:", res.status, errText);
+        return false;
+      }
+
+      const formatTanggalFromISO = (iso) => {
+        const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const t = new Date(iso);
+        return `${t.getDate().toString().padStart(2, "0")} ${bulan[t.getMonth()]} ${t.getFullYear()}`;
+      };
+
+      await fetch(`${API_URL}/laporan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tanggal: formatTanggalFromISO(order.created_at),
+          pelanggan: order.customer_name,
+          layanan: order.service_name,
+          berat: order.weight.toString(),
+          harga: order.price.toString(),
+          total: order.total.toString(),
+          status: "Selesai"
+        })
+      });
+
+      await loadOrders();
+
+      return true;
+    } catch (err) {
+      console.error("Gagal update pembayaran:", err);
+      return false;
     }
-    return true;
   };
 
   const handlePayment = (order) => {
@@ -279,9 +380,12 @@ export default function CustomerDashboard() {
     setShowPaymentModal(true);
   };
 
-  const confirmCashPayment = () => {
+  const confirmCashPayment = async () => {
     if (!selectedOrderForPayment) return;
-    markOrderAsPaid(selectedOrderForPayment, "cash");
+    setPaymentLoading(true);
+    const ok = await markOrderAsPaid(selectedOrderForPayment, "cash");
+    setPaymentLoading(false);
+    if (!ok) { alert("Gagal memproses pembayaran"); return; }
     setShowPaymentModal(false);
     setReceiptOrder({ ...selectedOrderForPayment, payment: "cash", payment_status: "Lunas", paid_at: new Date().toISOString() });
     setShowReceiptModal(true);
@@ -291,6 +395,24 @@ export default function CustomerDashboard() {
       `Pembayaran Lunas - ${selectedOrderForPayment.order_code}`,
       `<h2>Halo ${customerName}</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>LUNAS (Tunai)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry!</p>`
     );
+
+    // WA notif bayar cash
+    const cashWa = (selectedOrderForPayment.phone || "").replace(/[^0-9]/g, "");
+    if (cashWa) {
+      sendWa(cashWa.startsWith("62") ? cashWa : "62" + cashWa.replace(/^0+/, ""),
+`*Pembayaran Diterima - Pinang Laundry*
+Halo *${selectedOrderForPayment.customer_name}*,
+
+Pembayaran Anda telah kami terima!
+
+*Invoice:* ${selectedOrderForPayment.order_code}
+*Layanan:* ${selectedOrderForPayment.service_name}
+*Total:* ${formatRupiah(selectedOrderForPayment.total)}
+*Status:* LUNAS (Tunai)
+
+Terima kasih telah memilih Pinang Laundry!`
+      );
+    }
   };
 
   const handleMidtransPayment = async () => {
@@ -299,7 +421,7 @@ export default function CustomerDashboard() {
     setPaymentError("");
     setQrisImageUrl("");
     try {
-      const orderId = `QRIS-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const orderId = `QRIS-${selectedOrderForPayment.order_code}`;
       const res = await fetch(`${API_URL}/midtrans/qris`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -452,9 +574,9 @@ export default function CustomerDashboard() {
                     <div key={order.id} style={styles.orderItem}>
                       <div style={styles.orderHeader}>
                         <span style={styles.orderCode}>{order.order_code}</span>
-                        <span style={{ ...styles.orderStatus, backgroundColor: "#fef3c7", color: "#d97706" }}>
-                          <span style={{ ...styles.orderStatusDot, backgroundColor: "#d97706" }}></span>
-                          Menunggu
+                        <span style={{ ...styles.orderStatus, backgroundColor: getStatusBadge(order.status).bg, color: getStatusBadge(order.status).color }}>
+                          <span style={{ ...styles.orderStatusDot, backgroundColor: getStatusBadge(order.status).color }}></span>
+                          {order.status}
                         </span>
                       </div>
                       <div style={styles.orderDetail}>
@@ -612,14 +734,25 @@ export default function CustomerDashboard() {
                 <span key={r} onClick={() => setTestimoniRating(r)} style={{ fontSize: 24, cursor: "pointer", opacity: r <= testimoniRating ? 1 : 0.3, transition: "all 0.2s" }}>⭐</span>
               ))}
             </div>
-            <button onClick={() => {
+            <button onClick={async () => {
               if (!testimoniText || !testimoniRating) { alert("Isi testimoni dan rating!"); return; }
-              const newT = { name: customerName, text: testimoniText, rating: testimoniRating };
-              const updated = [...testimonials, newT];
-              setTestimonials(updated);
-              localStorage.setItem("testimonials", JSON.stringify(updated));
-              setTestimoniText(""); setTestimoniRating(0);
-              alert("Terima kasih! Testimoni kamu sudah dikirim.");
+              try {
+                const res = await fetch(`${API_URL}/testimonials`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name: customerName, text: testimoniText, rating: testimoniRating })
+                });
+                if (res.ok) {
+                  const created = await res.json().catch(() => ({ name: customerName, text: testimoniText, rating: testimoniRating }));
+                  setTestimonials([...testimonials, created]);
+                  setTestimoniText(""); setTestimoniRating(0);
+                  alert("Terima kasih! Testimoni kamu sudah dikirim.");
+                } else {
+                  alert("Gagal mengirim testimoni.");
+                }
+              } catch (err) {
+                alert("Gagal mengirim testimoni.");
+              }
             }} style={{ ...styles.submitBtn, marginTop: 16 }}>Kirim Testimoni</button>
           </section>
         )}
@@ -670,30 +803,55 @@ export default function CustomerDashboard() {
                 />
                 <div style={styles.modalButtons}>
                   <button style={styles.cancelBtn} onClick={() => setEditField(null)}>Batal</button>
-                  <button style={styles.submitBtn} onClick={() => {
+                  <button style={styles.submitBtn} onClick={async () => {
                     if (!editValue.trim()) { alert("Mohon isi data!"); return; }
-                    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-                    const loggedInUser = localStorage.getItem("customerLoggedIn");
-                    const idx = customers.findIndex(c => c.username === loggedInUser);
-                    if (idx === -1) { alert("Data tidak ditemukan!"); return; }
-                    const updated = [...customers];
-                    if (editField === "name") {
-                      updated[idx].name = editValue.trim();
-                      localStorage.setItem("customerName", editValue.trim());
-                    } else if (editField === "username") {
-                      const exists = customers.some((c, i) => i !== idx && c.username === editValue.trim());
-                      if (exists) { alert("Username sudah digunakan!"); return; }
-                      updated[idx].username = editValue.trim();
-                      localStorage.setItem("customerLoggedIn", editValue.trim());
-                    } else if (editField === "email") {
-                      updated[idx].email = editValue.trim();
-                      localStorage.setItem("customerEmail", editValue.trim());
-                    } else if (editField === "password") {
-                      updated[idx].password = editValue.trim();
+                    try {
+                      const loggedInUser = localStorage.getItem("customerLoggedIn");
+
+                      if (editField === "username") {
+                        const checkRes = await fetch(`${API_URL}/customers?username=${encodeURIComponent(editValue.trim())}`);
+                        if (checkRes.ok) {
+                          const existing = await checkRes.json();
+                          if (Array.isArray(existing) && existing.length > 0 && existing[0].username !== loggedInUser) {
+                            alert("Username sudah digunakan!");
+                            return;
+                          }
+                        }
+                      }
+
+                      const getRes = await fetch(`${API_URL}/customers?username=${encodeURIComponent(loggedInUser)}`);
+                      if (!getRes.ok) { alert("Data tidak ditemukan!"); return; }
+                      const customers = await getRes.json();
+                      if (!Array.isArray(customers) || customers.length === 0) { alert("Data tidak ditemukan!"); return; }
+                      const customer = customers[0];
+
+                      const updateData = {};
+                      if (editField === "name") {
+                        updateData.name = editValue.trim();
+                        localStorage.setItem("customerName", editValue.trim());
+                      } else if (editField === "username") {
+                        updateData.username = editValue.trim();
+                        localStorage.setItem("customerLoggedIn", editValue.trim());
+                      } else if (editField === "email") {
+                        updateData.email = editValue.trim();
+                        localStorage.setItem("customerEmail", editValue.trim());
+                      } else if (editField === "password") {
+                        updateData.password = editValue.trim();
+                      }
+
+                      const updateRes = await fetch(`${API_URL}/customers/${customer.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ ...customer, ...updateData })
+                      });
+
+                      if (!updateRes.ok) { alert("Gagal menyimpan data!"); return; }
+
+                      setEditField(null);
+                      window.location.reload();
+                    } catch (err) {
+                      alert("Gagal menyimpan data!");
                     }
-                    localStorage.setItem("customers", JSON.stringify(updated));
-                    setEditField(null);
-                    window.location.reload();
                   }}>Simpan</button>
                 </div>
               </div>
@@ -852,7 +1010,7 @@ export default function CustomerDashboard() {
                   onClick={() => setPaymentMethod("qris")}
                   style={{ ...styles.paymentOption, ...(paymentMethod === "qris" ? styles.paymentOptionActive : {}) }}
                 >
-                  <span style={styles.paymentIcon}><Icon name="deviceMobile" /></span>
+                  <span style={styles.paymentIcon}>📱</span>
                   <span>QRIS</span>
                   <span style={styles.paymentDesc}>Scan QR Code</span>
                 </div>
@@ -891,10 +1049,11 @@ export default function CustomerDashboard() {
                       </p>
                       <button
                         style={{ ...styles.submitBtn, width: "100%" }}
-                        onClick={() => {
-                          markOrderAsPaid(selectedOrderForPayment, "qris");
+                        onClick={async () => {
+                          const paid = await markOrderAsPaid(selectedOrderForPayment, "qris");
+                          if (!paid) { alert("Gagal menyimpan pembayaran, coba lagi."); return; }
                           setShowPaymentModal(false);
-                          setReceiptOrder({ ...selectedOrderForPayment, payment: "qris", payment_status: "Lunas", paid_at: new Date().toISOString(), order_code: qrisOrderId });
+                          setReceiptOrder({ ...selectedOrderForPayment, payment: "qris", payment_status: "Lunas", paid_at: new Date().toISOString() });
                           setShowReceiptModal(true);
                           setQrisImageUrl("");
                           setQrisOrderId("");
@@ -904,6 +1063,23 @@ export default function CustomerDashboard() {
                             `Pembayaran Lunas - ${selectedOrderForPayment.order_code}`,
                             `<h2>Halo ${customerName}</h2><p>Pembayaran Anda telah diterima:</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:400px"><tr><td><b>Kode</b></td><td>${selectedOrderForPayment.order_code}</td></tr><tr><td><b>Layanan</b></td><td>${selectedOrderForPayment.service_name}</td></tr><tr><td><b>Total</b></td><td>Rp ${selectedOrderForPayment.total.toLocaleString('id-ID')}</td></tr><tr><td><b>Status</b></td><td>LUNAS (QRIS)</td></tr></table><p>Terima kasih telah memilih Pinang Laundry!</p>`
                           );
+
+                          const qrWa = (selectedOrderForPayment.phone || "").replace(/[^0-9]/g, "");
+                          if (qrWa) {
+                            sendWa(qrWa.startsWith("62") ? qrWa : "62" + qrWa.replace(/^0+/, ""),
+`*Pembayaran Diterima - Pinang Laundry*
+Halo *${selectedOrderForPayment.customer_name}*,
+
+Pembayaran QRIS Anda telah dikonfirmasi!
+
+*Invoice:* ${selectedOrderForPayment.order_code}
+*Layanan:* ${selectedOrderForPayment.service_name}
+*Total:* ${formatRupiah(selectedOrderForPayment.total)}
+*Status:* LUNAS (QRIS)
+
+Terima kasih telah memilih Pinang Laundry!`
+                            );
+                          }
                         }}
                       >
                         Saya Sudah Bayar
@@ -1143,6 +1319,7 @@ const styles = {
   orderDate: { marginTop: 14, fontSize: 14, color: "#94a3b8", display: "flex", justifyContent: "space-between", alignItems: "center", letterSpacing: "+0.3px" },
   orderPaymentPill: { padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 400, letterSpacing: "+0.3px" },
   bayarBtn: { background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#fff", border: "none", padding: "10px 20px", borderRadius: 10, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 12px rgba(245,158,11,0.3)" },
+
 
   serviceGridFull: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 },
   serviceCardFull: { padding: 24, background: "#f8fafc", borderRadius: 20, textAlign: "center", borderTop: "4px solid #3b82f6", transition: "all 0.3s", display: "flex", flexDirection: "column", ":hover": { transform: "translateY(-6px)", boxShadow: "0 12px 30px rgba(0,0,0,0.08)" } },

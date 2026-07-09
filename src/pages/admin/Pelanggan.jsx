@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Icon from "../../utils/icons.jsx";
 
+const API = "/api";
 
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -9,8 +10,6 @@ const formatTanggalIndonesia = () => {
   const today = new Date();
   return `${today.getDate()} ${bulan[today.getMonth()]} ${today.getFullYear()}, ${hari[today.getDay()]}`;
 };
-
-const initialData = [];
 
 export default function Pelanggan() {
   const navigate = useNavigate();
@@ -20,9 +19,11 @@ export default function Pelanggan() {
   const [showModal, setShowModal] = useState(false);
   const [editingPelanggan, setEditingPelanggan] = useState(null);
   const [newPelanggan, setNewPelanggan] = useState({ name: "", phone: "", address: "" });
-  
+  const [allPelanggan, setAllPelanggan] = useState([]);
   const [showNotifModal, setShowNotifModal] = useState(false);
 
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedPelanggan, setSelectedPelanggan] = useState(null);
   const [notifications] = useState([
     { id: 1, title: "Pelanggan Baru", message: "ACA mendaftar sebagai pelanggan", time: "5 menit lalu", read: false },
     { id: 2, title: "Pesanan Baru", message: "SINDI memesan Cuci Kiloan", time: "1 jam lalu", read: false },
@@ -30,20 +31,73 @@ export default function Pelanggan() {
   ]);
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const [allPelanggan, setAllPelanggan] = useState(() => {
-    const saved = localStorage.getItem("pelangganData");
-    let data = saved ? JSON.parse(saved) : [];
-    data = data.map(p => {
-      if (!p.email) return { ...p, email: p.name.toLowerCase().replace(/\s+/g, '') + '@gmail.com' };
-      return p;
-    });
-    if (saved) localStorage.setItem("pelangganData", JSON.stringify(data));
-    return data;
-  });
+  const fetchPelanggan = async () => {
+    try {
+      const [ordersRes, pelRes] = await Promise.all([
+        fetch(`${API}/orders`),
+        fetch(`${API}/pelanggan`)
+      ]);
+      const ordersData = await ordersRes.json();
+      const pelData = await pelRes.json();
+
+      // Extract unique customers from orders
+      const orderMap = new Map();
+      (ordersData || []).forEach(o => {
+        const key = (o.email || o.customer_name || "").toLowerCase();
+        if (!orderMap.has(key)) {
+          orderMap.set(key, {
+            name: o.customer_name || "Unknown",
+            email: o.email || "",
+            phone: o.phone || "",
+            address: o.address || "",
+            order_count: 0,
+            total_spent: 0,
+            status: "Aktif"
+          });
+        }
+        const c = orderMap.get(key);
+        c.order_count++;
+        c.total_spent += parseInt(o.total) || 0;
+      });
+
+      // Merge with pelanggan table data (pelanggan table data takes precedence)
+      (pelData || []).forEach(p => {
+        const key = (p.email || p.name || "").toLowerCase();
+        if (orderMap.has(key)) {
+          const c = orderMap.get(key);
+          c.phone = p.phone || c.phone;
+          c.address = p.address || c.address;
+          c.status = p.status || "Aktif";
+        } else {
+          orderMap.set(key, {
+            name: p.name,
+            email: p.email || "",
+            phone: p.phone || "",
+            address: p.address || "",
+            order_count: p.order_count || 0,
+            total_spent: 0,
+            status: p.status || "Aktif"
+          });
+        }
+      });
+
+      const combined = Array.from(orderMap.values()).map(c => ({
+        ...c,
+        order: c.order_count,
+        email: c.email || c.name.toLowerCase().replace(/\s+/g, '') + '@gmail.com'
+      }));
+
+      setAllPelanggan(combined);
+    } catch (err) {
+      console.error("Gagal memuat pelanggan:", err);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("pelangganData", JSON.stringify(allPelanggan));
-  }, [allPelanggan]);
+    fetchPelanggan();
+    const interval = setInterval(fetchPelanggan, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const filteredPelanggan = allPelanggan.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -51,40 +105,56 @@ export default function Pelanggan() {
     (p.email || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
   const totalPages = Math.ceil(filteredPelanggan.length / itemsPerPage);
   const paginatedPelanggan = filteredPelanggan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleTambahPelanggan = () => {
+  const handleTambahPelanggan = async () => {
     if (newPelanggan.name && newPelanggan.phone) {
-      if (editingPelanggan) {
-        const updated = allPelanggan.map(p => 
-          p.no === editingPelanggan.no 
-            ? { ...p, name: newPelanggan.name, email: newPelanggan.name.toLowerCase().replace(/\s+/g, '') + '@gmail.com', phone: newPelanggan.phone, address: newPelanggan.address }
-            : p
-        );
-        setAllPelanggan(updated);
-        localStorage.setItem("pelangganData", JSON.stringify(updated));
-        setEditingPelanggan(null);
-        alert("Pelanggan berhasil diupdate!");
-      } else {
-        const newNo = allPelanggan.length + 1;
-        const newData = {
-          no: newNo,
-          name: newPelanggan.name,
-          email: newPelanggan.name.toLowerCase().replace(/\s+/g, '') + '@gmail.com',
-          phone: newPelanggan.phone,
-          address: newPelanggan.address,
-          order: 0,
-          status: "Aktif"
-        };
-        const updatedData = [...allPelanggan, newData];
-        setAllPelanggan(updatedData);
-        localStorage.setItem("pelangganData", JSON.stringify(updatedData));
-        alert(`Pelanggan berhasil ditambahkan!\nNama: ${newData.name}\nHP: ${newData.phone}`);
+      try {
+        const email = newPelanggan.name.toLowerCase().replace(/\s+/g, '') + '@gmail.com';
+
+        if (editingPelanggan) {
+          const res = await fetch(`${API}/pelanggan/${editingPelanggan.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: newPelanggan.name,
+              email: email,
+              phone: newPelanggan.phone,
+              address: newPelanggan.address,
+              order_count: editingPelanggan.order_count ?? editingPelanggan.order ?? 0,
+              status: editingPelanggan.status
+            })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          setEditingPelanggan(null);
+          alert("Pelanggan berhasil diupdate!");
+        } else {
+          const res = await fetch(`${API}/pelanggan`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: newPelanggan.name,
+              email: email,
+              phone: newPelanggan.phone,
+              address: newPelanggan.address,
+              order_count: 0,
+              status: "Aktif"
+            })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          alert(`Pelanggan berhasil ditambahkan!\nNama: ${newPelanggan.name}\nHP: ${newPelanggan.phone}`);
+        }
+
+        setNewPelanggan({ name: "", phone: "", address: "" });
+        setShowModal(false);
+        fetchPelanggan();
+      } catch (err) {
+        alert("Gagal menyimpan pelanggan: " + err.message);
       }
-      setNewPelanggan({ name: "", phone: "", address: "" });
-      setShowModal(false);
     } else {
       alert("Mohon isi nama dan nomor HP!");
     }
@@ -102,10 +172,22 @@ export default function Pelanggan() {
     setShowModal(true);
   };
 
-  const handleDeletePelanggan = (no) => {
+  const handleViewDetail = (pelanggan) => {
+    setSelectedPelanggan(pelanggan);
+    setShowDetailModal(true);
+  };
+
+  const handleDeletePelanggan = async (id) => {
     if (confirm("Yakin ingin menghapus pelanggan ini?")) {
-      setAllPelanggan(allPelanggan.filter(p => p.no !== no));
-      alert("Pelanggan berhasil dihapus!");
+      try {
+        const res = await fetch(`${API}/pelanggan/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        alert("Pelanggan berhasil dihapus!");
+        fetchPelanggan();
+      } catch (err) {
+        alert("Gagal menghapus pelanggan: " + err.message);
+      }
     }
   };
 
@@ -123,7 +205,7 @@ export default function Pelanggan() {
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -177,10 +259,10 @@ export default function Pelanggan() {
         </header>
 
         <div style={styles.statsRow}>
-          <StatCard label="Total Pelanggan" val={allPelanggan.length.toString()} color="#f3e8ff" iColor="#a855f7" icon="users" growth="5.7%" />
-          <StatCard label="Pelanggan Baru" val="28" color="#dcfce7" iColor="#22c55e" icon="plus" growth="12.3%" />
-          <StatCard label="Aktif Bulan Ini" val={allPelanggan.filter(p => p.status === "Aktif").length.toString()} color="#e0f2fe" iColor="#0ea5e9" icon="chartLine" growth="8.1%" />
-          <StatCard label="Priority" val="15" color="#ffedd5" iColor="#f97316" icon="star" growth="2.4%" />
+          <StatCard label="Total Pelanggan" val={allPelanggan.length.toString()} color="#f3e8ff" iColor="#a855f7" icon="users" growth="Semua" />
+          <StatCard label="Pelanggan Baru" val={allPelanggan.filter(p => (p.order || 0) === 0).length.toString()} color="#dcfce7" iColor="#22c55e" icon="plus" growth="Baru" />
+          <StatCard label="Aktif" val={allPelanggan.filter(p => p.status === "Aktif").length.toString()} color="#e0f2fe" iColor="#0ea5e9" icon="chartLine" growth="Aktif" />
+          <StatCard label="Total Order" val={allPelanggan.reduce((s, p) => s + (p.order || 0), 0).toString()} color="#ffedd5" iColor="#f97316" icon="star" growth="Semua" />
         </div>
 
         <section style={styles.card}>
@@ -200,13 +282,14 @@ export default function Pelanggan() {
                 <th style={styles.th}>No. Telepon</th>
                 <th style={styles.th}>Alamat</th>
                 <th style={styles.th}>Total Order</th>
+                <th style={styles.th}>Total Pengeluaran</th>
                 <th style={styles.th}>Status</th>
                 <th style={styles.th}>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedPelanggan.map((p) => (
-                <PelangganRow key={p.no} no={p.no} name={p.name} email={p.email} phone={p.phone} address={p.address} order={p.order} status={p.status} onEdit={() => handleEditPelanggan(p)} onDelete={() => handleDeletePelanggan(p.no)} />
+              {paginatedPelanggan.map((p, idx) => (
+                <PelangganRow key={idx} no={(currentPage - 1) * itemsPerPage + idx + 1} name={p.name} email={p.email} phone={p.phone} address={p.address} order={p.order} totalSpent={p.total_spent} status={p.status} onEdit={() => handleEditPelanggan(p)} onDelete={() => handleDeletePelanggan(p.id)} onView={() => handleViewDetail(p)} />
               ))}
             </tbody>
           </table>
@@ -219,6 +302,26 @@ export default function Pelanggan() {
           </div>
         </section>
       </main>
+
+      {showDetailModal && selectedPelanggan && (
+        <div style={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Detail Pelanggan</h3>
+            <div style={styles.detailContent}>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>Nama:</span><span style={styles.detailValue}>{selectedPelanggan.name}</span></div>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>Email:</span><span style={styles.detailValue}>{selectedPelanggan.email}</span></div>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>No. Telepon:</span><span style={styles.detailValue}>{selectedPelanggan.phone}</span></div>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>Alamat:</span><span style={styles.detailValue}>{selectedPelanggan.address}</span></div>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>Total Order:</span><span style={styles.detailValue}>{selectedPelanggan.order || 0}</span></div>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>Total Pengeluaran:</span><span style={styles.detailValue}>Rp {(selectedPelanggan.total_spent || 0).toLocaleString('id-ID')}</span></div>
+              <div style={styles.detailRow}><span style={styles.detailLabel}>Status:</span><span style={styles.detailValue}>{selectedPelanggan.status}</span></div>
+            </div>
+            <div style={styles.modalButtons}>
+              <button style={styles.modalClose} onClick={() => setShowDetailModal(false)}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div style={styles.modalOverlay} onClick={() => { setShowModal(false); setEditingPelanggan(null); }}>
@@ -294,7 +397,7 @@ function getStatusBadge(status) {
   return { color: "#94a3b8", fontWeight: 800, padding: "4px 8px", background: "#f1f5f9", borderRadius: 6 };
 }
 
-const PelangganRow = ({ no, name, email, phone, address, order, status, onEdit, onDelete }) => (
+const PelangganRow = ({ no, name, email, phone, address, order, totalSpent, status, onEdit, onDelete, onView }) => (
   <tr style={styles.tr}>
     <td style={styles.td}>{no}</td>
     <td style={styles.td}><Icon name="user" /> {toTitleCase(name)}</td>
@@ -302,10 +405,12 @@ const PelangganRow = ({ no, name, email, phone, address, order, status, onEdit, 
     <td style={styles.td}>{phone}</td>
     <td style={styles.td}>{address}</td>
     <td style={styles.td}>{order}</td>
+    <td style={styles.td}>Rp {(totalSpent || 0).toLocaleString('id-ID')}</td>
     <td style={styles.td}><span style={getStatusBadge(status)}>{status}</span></td>
     <td style={styles.td}>
+      <button style={styles.actionBtn} onClick={onView} title="Lihat Detail"><Icon name="eye" /></button>
       <button style={styles.actionBtn} onClick={onEdit}><Icon name="edit" /></button>
-      <button style={styles.actionBtn} onClick={onDelete}><Icon name="trash" /></button>
+      <button style={styles.deleteBtn} onClick={onDelete}><Icon name="trash" /></button>
     </td>
   </tr>
 );
@@ -351,6 +456,7 @@ const styles = {
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
   actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
+  deleteBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14, color: "#ef4444" },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
   modalTitle: { fontSize: 20, fontWeight: 700, margin: 0, textAlign: "center" },
@@ -363,5 +469,10 @@ const styles = {
   closeBtn: { background: "none", border: "none", fontSize: 18, cursor: "pointer", padding: 0, lineHeight: 1 },
   notifList: { overflow: "auto", maxHeight: 400 },
   notifItem: { padding: "14px 20px", borderBottom: "1px solid #f1f5f9", cursor: "pointer" },
-  notifDot: { width: 8, height: 8, background: "#3b82f6", borderRadius: "50%", flexShrink: 0 }
+  notifDot: { width: 8, height: 8, background: "#3b82f6", borderRadius: "50%", flexShrink: 0 },
+  detailContent: { display: "flex", flexDirection: "column", gap: 12 },
+  detailRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f1f5f9" },
+  detailLabel: { color: "#64748b", fontSize: 13 },
+  detailValue: { fontWeight: 700, fontSize: 13 },
+  modalClose: { flex: 1, padding: 12, borderRadius: 12, border: "none", background: "#3b82f6", color: "white", cursor: "pointer", fontSize: 14, fontWeight: 700 }
 };

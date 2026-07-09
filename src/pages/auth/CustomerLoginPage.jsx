@@ -45,48 +45,52 @@ export default function CustomerLoginPage() {
     return () => style.remove();
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     if (!username || !password) {
       setError("Masukkan username dan password!");
       return;
     }
-    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    const user = customers.find(c => c.username === username);
-    if (!user) {
-      setError("Username belum terdaftar!");
-      return;
+    try {
+      const res = await fetch("/api/customers/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: username, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      localStorage.setItem("customerName", data.name);
+      localStorage.setItem("customerEmail", data.email);
+      localStorage.setItem("customerLoggedIn", data.username || username);
+      navigate("/customer/dashboard");
+    } catch (err) {
+      setError(err.message);
     }
-    if (user.password !== password) {
-      setError("Kata sandi salah!");
-      return;
-    }
-    localStorage.setItem("customerName", user.name);
-    localStorage.setItem("customerEmail", user.email);
-    localStorage.setItem("customerLoggedIn", user.username);
-    navigate("/customer/dashboard");
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     setError("");
     if (!resetUsername || !resetNewPass) {
       setError("Mohon isi username dan kata sandi baru!");
       return;
     }
-    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    const idx = customers.findIndex(c => c.username === resetUsername);
-    if (idx === -1) {
-      setError("Username tidak ditemukan!");
-      return;
+    try {
+      const res = await fetch("/api/customers/reset-password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: resetUsername, newPassword: resetNewPass })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      alert("Kata sandi berhasil diubah! Silakan login.");
+      setShowReset(false);
+      setResetUsername("");
+      setResetNewPass("");
+      setError("");
+    } catch (err) {
+      setError(err.message);
     }
-    customers[idx].password = resetNewPass;
-    localStorage.setItem("customers", JSON.stringify(customers));
-    alert("Kata sandi berhasil diubah! Silakan login.");
-    setShowReset(false);
-    setResetUsername("");
-    setResetNewPass("");
-    setError("");
   };
 
   return (

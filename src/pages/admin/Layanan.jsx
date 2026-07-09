@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Icon from "../../utils/icons.jsx";
 
+const API = "/api";
+
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
   const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -9,49 +11,30 @@ const formatTanggalIndonesia = () => {
   return `${today.getDate()} ${bulan[today.getMonth()]} ${today.getFullYear()}, ${hari[today.getDay()]}`;
 };
 
-const initialData = [
-  { no: 1, name: "Cuci Kiloan", jenis: "Kiloan", harga: "6000", waktu: "24 jam", status: "Aktif" },
-  { no: 2, name: "Express", jenis: "Express", harga: "15000", waktu: "4 jam", status: "Aktif" },
-  { no: 4, name: "Cuci Karpet", jenis: "Spesial", harga: "50000", waktu: "48 jam", status: "Aktif" },
-  { no: 5, name: "Cuci Sepatu", jenis: "Spesial", harga: "30000", waktu: "24 jam", status: "Tidak Aktif" },
-  { no: 6, name: "Cuci Boneka", jenis: "Satuan", harga: "10000", waktu: "24 jam", status: "Aktif" },
-  { no: 7, name: "Cuci Jaket", jenis: "Kiloan", harga: "12000", waktu: "24 jam", status: "Aktif" },
-  { no: 8, name: "Cuci Jas", jenis: "Satuan", harga: "35000", waktu: "48 jam", status: "Aktif" },
-  { no: 9, name: "Setrika Saja", jenis: "Kiloan", harga: "5000", waktu: "6 jam", status: "Aktif" },
-  { no: 10, name: "Cuci Setrika", jenis: "Kiloan", harga: "12000", waktu: "24 jam", status: "Aktif" },
-];
-
 export default function Layanan() {
   const navigate = useNavigate();
   const currentDate = formatTanggalIndonesia();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
-
+  const [editingLayanan, setEditingLayanan] = useState(null);
   const [newLayanan, setNewLayanan] = useState({ name: "", jenis: "Kiloan", harga: "", waktu: "" });
-  
-  const [allLayanan, setAllLayanan] = useState(() => {
-    const saved = localStorage.getItem("layananData");
-    let data = saved ? JSON.parse(saved) : initialData;
-    data = data.filter(l => l.name !== "Cuci Gold");
-    const seen = new Set();
-    data = data.filter(l => {
-      if (seen.has(l.name)) return false;
-      seen.add(l.name);
-      return true;
-    });
-    data = data.map(l => {
-      if (l.name === "Cuci Kiloan" && l.harga === "8000") return { ...l, harga: "6000" };
-      if (l.name === "Express" && (l.harga === "25000" || l.harga === "7500")) return { ...l, harga: "15000" };
-      if (l.name === "Cuci Setrika" && l.harga === "75000") return { ...l, harga: "12000" };
-      return l;
-    });
-    return data;
-  });
+  const [allLayanan, setAllLayanan] = useState([]);
+
+  const fetchLayanan = async () => {
+    try {
+      const res = await fetch(`${API}/layanan`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setAllLayanan(data);
+    } catch (err) {
+      console.error("Gagal memuat layanan:", err);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("layananData", JSON.stringify(allLayanan));
-  }, [allLayanan]);
+    fetchLayanan();
+  }, []);
 
   const filteredLayanan = allLayanan.filter(l => 
     l.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -62,22 +45,45 @@ export default function Layanan() {
   const totalPages = Math.ceil(filteredLayanan.length / itemsPerPage);
   const paginatedLayanan = filteredLayanan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleTambahLayanan = () => {
+  const handleTambahLayanan = async () => {
     if (newLayanan.name && newLayanan.harga && newLayanan.waktu) {
-      const harga = parseInt(newLayanan.harga);
-      const newNo = allLayanan.length + 1;
-      const newData = {
-        no: newNo,
-        name: newLayanan.name,
-        jenis: newLayanan.jenis,
-        harga: harga.toString(),
-        waktu: newLayanan.waktu,
-        status: "Aktif"
-      };
-      setAllLayanan([...allLayanan, newData]);
-      setNewLayanan({ name: "", jenis: "Kiloan", harga: "", waktu: "" });
-      setShowModal(false);
-      alert(`Layanan berhasil ditambahkan!\nNama: ${newData.name}\nJenis: ${newData.jenis}\nHarga: Rp ${harga.toLocaleString('id-ID')}`);
+      try {
+        const harga = parseInt(newLayanan.harga);
+        const payload = {
+          name: newLayanan.name,
+          jenis: newLayanan.jenis,
+          harga: harga.toString(),
+          waktu: newLayanan.waktu,
+          status: editingLayanan ? editingLayanan.status : "Aktif"
+        };
+
+        if (editingLayanan) {
+          const res = await fetch(`${API}/layanan/${editingLayanan.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          alert(`Layanan berhasil diupdate!`);
+        } else {
+          const res = await fetch(`${API}/layanan`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, status: "Aktif" })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          alert(`Layanan berhasil ditambahkan!\nNama: ${newLayanan.name}\nJenis: ${newLayanan.jenis}\nHarga: Rp ${harga.toLocaleString('id-ID')}`);
+        }
+
+        setNewLayanan({ name: "", jenis: "Kiloan", harga: "", waktu: "" });
+        setEditingLayanan(null);
+        setShowModal(false);
+        fetchLayanan();
+      } catch (err) {
+        alert("Gagal menyimpan layanan: " + err.message);
+      }
     } else {
       alert("Mohon isi nama, harga, dan waktu!");
     }
@@ -90,14 +96,22 @@ export default function Layanan() {
   };
 
   const handleEditLayanan = (layanan) => {
+    setEditingLayanan(layanan);
     setNewLayanan({ name: layanan.name, jenis: layanan.jenis, harga: layanan.harga, waktu: layanan.waktu });
     setShowModal(true);
   };
 
-  const handleDeleteLayanan = (no) => {
+  const handleDeleteLayanan = async (id) => {
     if (confirm("Yakin ingin menghapus layanan ini?")) {
-      setAllLayanan(allLayanan.filter(l => l.no !== no));
-      alert("Layanan berhasil dihapus!");
+      try {
+        const res = await fetch(`${API}/layanan/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        alert("Layanan berhasil dihapus!");
+        fetchLayanan();
+      } catch (err) {
+        alert("Gagal menghapus layanan: " + err.message);
+      }
     }
   };
 
@@ -115,7 +129,7 @@ export default function Layanan() {
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -196,8 +210,8 @@ export default function Layanan() {
               </tr>
             </thead>
             <tbody>
-              {paginatedLayanan.map((l) => (
-                <LayananRow key={l.no} no={l.no} name={l.name} jenis={l.jenis} harga={l.harga} waktu={l.waktu} status={l.status} onEdit={() => handleEditLayanan(l)} onDelete={() => handleDeleteLayanan(l.no)} />
+              {paginatedLayanan.map((l, idx) => (
+                <LayananRow key={l.id} no={(currentPage - 1) * itemsPerPage + idx + 1} name={l.name} jenis={l.jenis} harga={l.harga} waktu={l.waktu} status={l.status} onEdit={() => handleEditLayanan(l)} onDelete={() => handleDeleteLayanan(l.id)} />
               ))}
             </tbody>
           </table>
@@ -212,7 +226,7 @@ export default function Layanan() {
       </main>
 
       {showModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
+        <div style={styles.modalOverlay} onClick={() => { setShowModal(false); setEditingLayanan(null); }}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <h3 style={styles.modalTitle}>Tambah Layanan</h3>
             <input style={styles.modalInput} placeholder="Nama Layanan" value={newLayanan.name} onChange={(e) => setNewLayanan({...newLayanan, name: e.target.value})} />
@@ -225,7 +239,7 @@ export default function Layanan() {
             <input style={styles.modalInput} placeholder="Harga" type="number" value={newLayanan.harga} onChange={(e) => setNewLayanan({...newLayanan, harga: e.target.value})} />
             <input style={styles.modalInput} placeholder="Waktu (contoh: 24 jam)" value={newLayanan.waktu} onChange={(e) => setNewLayanan({...newLayanan, waktu: e.target.value})} />
             <div style={styles.modalButtons}>
-              <button style={styles.modalCancel} onClick={() => setShowModal(false)}>Batal</button>
+              <button style={styles.modalCancel} onClick={() => { setShowModal(false); setEditingLayanan(null); }}>Batal</button>
               <button style={styles.modalSave} onClick={handleTambahLayanan}>Simpan</button>
             </div>
           </div>
@@ -274,7 +288,7 @@ const LayananRow = ({ no, name, jenis, harga, waktu, status, onEdit, onDelete })
     <td style={styles.td}><span style={getStatusBadge(status)}>{status}</span></td>
     <td style={styles.td}>
       <button style={styles.actionBtn} onClick={onEdit}><Icon name="edit" /></button>
-      <button style={styles.actionBtn} onClick={onDelete}><Icon name="trash" /></button>
+      <button style={styles.deleteBtn} onClick={onDelete}><Icon name="trash" /></button>
     </td>
   </tr>
 );
@@ -320,6 +334,7 @@ const styles = {
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
   actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
+  deleteBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14, color: "#ef4444" },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
   modalTitle: { fontSize: 20, fontWeight: 700, margin: 0, textAlign: "center" },

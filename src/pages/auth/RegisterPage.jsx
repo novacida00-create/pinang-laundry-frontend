@@ -41,25 +41,25 @@ export default function RegisterPage() {
     return () => style.remove();
   }, []);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     setError("");
     if (!regUsername || !regEmail || !regPassword) {
       setError("Mohon isi semua data!");
       return;
     }
-    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    if (customers.find(c => c.username === regUsername)) {
-      setError("Username sudah digunakan!");
-      return;
+    try {
+      const res = await fetch("/api/customers/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: regUsername, username: regUsername, email: regEmail, password: regPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      alert("Pendaftaran berhasil! Silakan login.");
+      navigate("/customer/login");
+    } catch (err) {
+      setError(err.message);
     }
-    if (customers.find(c => c.email === regEmail)) {
-      setError("Email sudah terdaftar!");
-      return;
-    }
-    customers.push({ name: regUsername, username: regUsername, email: regEmail, password: regPassword });
-    localStorage.setItem("customers", JSON.stringify(customers));
-    alert("Pendaftaran berhasil! Silakan login.");
-    navigate("/customer/login");
   };
 
   return (

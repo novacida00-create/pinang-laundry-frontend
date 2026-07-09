@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Icon from "../../utils/icons.jsx";
 
+const API = "/api";
+
 const formatTanggalIndonesia = () => {
   const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
   const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -9,36 +11,30 @@ const formatTanggalIndonesia = () => {
   return `${today.getDate()} ${bulan[today.getMonth()]} ${today.getFullYear()}, ${hari[today.getDay()]}`;
 };
 
-const initialData = [
-  { no: 1, name: "Siti Aisyah", role: "Kasir", phone: "0812-3456-7890", order: 120, status: "Aktif" },
-  { no: 2, name: "Budi Setiawan", role: "Staff Laundry", phone: "0813-2345-6789", order: 98, status: "Aktif" },
-  { no: 3, name: "Dewi Lestari", role: "Staff Laundry", phone: "0814-1234-5678", order: 85, status: "Aktif" },
-  { no: 4, name: "Andi Saputra", role: "Delivery", phone: "0815-9876-5432", order: 55, status: "Aktif" },
-  { no: 5, name: "Rina Susilowati", role: "Staff Laundry", phone: "0816-4567-8901", order: 42, status: "Cuti" },
-  { no: 6, name: "Joko Widodo", role: "Staff Laundry", phone: "0817-1111-2222", order: 38, status: "Aktif" },
-  { no: 7, name: "Siti Rahayu", role: "Kasir", phone: "0818-3333-4444", order: 35, status: "Aktif" },
-  { no: 8, name: "Budi Hermawan", role: "Delivery", phone: "0819-5555-6666", order: 30, status: "Aktif" },
-  { no: 9, name: "Dewi Anjani", role: "Staff Laundry", phone: "0820-7777-8888", order: 25, status: "Aktif" },
-  { no: 10, name: "Alex Alex", role: "Admin", phone: "0821-9999-0000", order: 20, status: "Aktif" },
-];
-
 export default function Karyawan() {
   const navigate = useNavigate();
   const currentDate = formatTanggalIndonesia();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [editingKaryawan, setEditingKaryawan] = useState(null);
   const [newKaryawan, setNewKaryawan] = useState({ name: "", role: "Staff Laundry", phone: "" });
+  const [allKaryawan, setAllKaryawan] = useState([]);
 
-  
-  const [allKaryawan, setAllKaryawan] = useState(() => {
-    const saved = localStorage.getItem("karyawanData");
-    return saved ? JSON.parse(saved) : initialData;
-  });
+  const fetchKaryawan = async () => {
+    try {
+      const res = await fetch(`${API}/karyawan`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setAllKaryawan(data.map(k => ({ ...k, order: k.order_count ?? k.order ?? 0 })));
+    } catch (err) {
+      console.error("Gagal memuat karyawan:", err);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("karyawanData", JSON.stringify(allKaryawan));
-  }, [allKaryawan]);
+    fetchKaryawan();
+  }, []);
 
   const filteredKaryawan = allKaryawan.filter(k => 
     k.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -49,21 +45,44 @@ export default function Karyawan() {
   const totalPages = Math.ceil(filteredKaryawan.length / itemsPerPage);
   const paginatedKaryawan = filteredKaryawan.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const handleTambahKaryawan = () => {
+  const handleTambahKaryawan = async () => {
     if (newKaryawan.name && newKaryawan.phone) {
-      const newNo = allKaryawan.length + 1;
-      const newData = {
-        no: newNo,
-        name: newKaryawan.name,
-        role: newKaryawan.role,
-        phone: newKaryawan.phone,
-        order: 0,
-        status: "Aktif"
-      };
-      setAllKaryawan([...allKaryawan, newData]);
-      setNewKaryawan({ name: "", role: "Staff Laundry", phone: "" });
-      setShowModal(false);
-      alert(`Karyawan berhasil ditambahkan!\nNama: ${newData.name}\nRole: ${newData.role}`);
+      try {
+        const payload = {
+          name: newKaryawan.name,
+          role: newKaryawan.role,
+          phone: newKaryawan.phone,
+          order_count: editingKaryawan ? (editingKaryawan.order_count ?? editingKaryawan.order ?? 0) : 0,
+          status: editingKaryawan ? editingKaryawan.status : "Aktif"
+        };
+
+        if (editingKaryawan) {
+          const res = await fetch(`${API}/karyawan/${editingKaryawan.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          alert(`Karyawan berhasil diupdate!`);
+        } else {
+          const res = await fetch(`${API}/karyawan`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, order_count: 0, status: "Aktif" })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          alert(`Karyawan berhasil ditambahkan!\nNama: ${newKaryawan.name}\nRole: ${newKaryawan.role}`);
+        }
+
+        setNewKaryawan({ name: "", role: "Staff Laundry", phone: "" });
+        setEditingKaryawan(null);
+        setShowModal(false);
+        fetchKaryawan();
+      } catch (err) {
+        alert("Gagal menyimpan karyawan: " + err.message);
+      }
     } else {
       alert("Mohon isi nama dan nomor HP!");
     }
@@ -76,14 +95,22 @@ export default function Karyawan() {
   };
 
   const handleEditKaryawan = (karyawan) => {
+    setEditingKaryawan(karyawan);
     setNewKaryawan({ name: karyawan.name, role: karyawan.role, phone: karyawan.phone });
     setShowModal(true);
   };
 
-  const handleDeleteKaryawan = (no) => {
+  const handleDeleteKaryawan = async (id) => {
     if (confirm("Yakin ingin menghapus karyawan ini?")) {
-      setAllKaryawan(allKaryawan.filter(k => k.no !== no));
-      alert("Karyawan berhasil dihapus!");
+      try {
+        const res = await fetch(`${API}/karyawan/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        alert("Karyawan berhasil dihapus!");
+        fetchKaryawan();
+      } catch (err) {
+        alert("Gagal menghapus karyawan: " + err.message);
+      }
     }
   };
 
@@ -101,7 +128,7 @@ export default function Karyawan() {
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -182,8 +209,8 @@ export default function Karyawan() {
               </tr>
             </thead>
             <tbody>
-              {paginatedKaryawan.map((k) => (
-                <KaryawanRow key={k.no} no={k.no} name={k.name} role={k.role} phone={k.phone} order={k.order} status={k.status} onEdit={() => handleEditKaryawan(k)} onDelete={() => handleDeleteKaryawan(k.no)} />
+              {paginatedKaryawan.map((k, idx) => (
+                <KaryawanRow key={k.id} no={(currentPage - 1) * itemsPerPage + idx + 1} name={k.name} role={k.role} phone={k.phone} order={k.order} status={k.status} onEdit={() => handleEditKaryawan(k)} onDelete={() => handleDeleteKaryawan(k.id)} />
               ))}
             </tbody>
           </table>
@@ -198,7 +225,7 @@ export default function Karyawan() {
       </main>
 
       {showModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
+        <div style={styles.modalOverlay} onClick={() => { setShowModal(false); setEditingKaryawan(null); }}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <h3 style={styles.modalTitle}>Tambah Karyawan</h3>
             <input style={styles.modalInput} placeholder="Nama Karyawan" value={newKaryawan.name} onChange={(e) => setNewKaryawan({...newKaryawan, name: e.target.value})} />
@@ -210,7 +237,7 @@ export default function Karyawan() {
             </select>
             <input style={styles.modalInput} placeholder="Nomor HP" value={newKaryawan.phone} onChange={(e) => setNewKaryawan({...newKaryawan, phone: e.target.value})} />
             <div style={styles.modalButtons}>
-              <button style={styles.modalCancel} onClick={() => setShowModal(false)}>Batal</button>
+              <button style={styles.modalCancel} onClick={() => { setShowModal(false); setEditingKaryawan(null); }}>Batal</button>
               <button style={styles.modalSave} onClick={handleTambahKaryawan}>Simpan</button>
             </div>
           </div>
@@ -259,7 +286,7 @@ const KaryawanRow = ({ no, name, role, phone, order, status, onEdit, onDelete })
     <td style={styles.td}><span style={getStatusBadge(status)}>{status}</span></td>
     <td style={styles.td}>
       <button style={styles.actionBtn} onClick={onEdit}><Icon name="edit" /></button>
-      <button style={styles.actionBtn} onClick={onDelete}><Icon name="trash" /></button>
+      <button style={styles.deleteBtn} onClick={onDelete}><Icon name="trash" /></button>
     </td>
   </tr>
 );
@@ -305,6 +332,7 @@ const styles = {
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
   actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
+  deleteBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14, color: "#ef4444" },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
   modalTitle: { fontSize: 20, fontWeight: 700, margin: 0, textAlign: "center" },

@@ -8,15 +8,15 @@ const faqData = [
   
   // Harga
   { keywords: ["harga", "biaya", "tarif", "cost", "price", "berapa", "rpm", "rp"], 
-    answer: "Harga Layanan Kami:\n\n• Cuci Kiloan: Rp 8.000/kg\n• Cuci Satuan: Rp 15.000/pcs\n• Express: Rp 25.000/kg\n• Cuci Karpet: Rp 50.000/pcs\n• Cuci Sepatu: Rp 30.000/pcs\n• Cuci Boneka: Rp 10.000/pcs\n• Setrika Saja: Rp 5.000/kg" },
+    answer: "Harga Layanan Kami:\n\n• Cuci Kiloan: Rp 8.000/kg\n• Express: Rp 25.000/kg\n• Cuci Karpet: Rp 50.000/pcs\n• Cuci Sepatu: Rp 30.000/pcs\n• Cuci Boneka: Rp 10.000/pcs\n• Setrika Saja: Rp 5.000/kg" },
   
   // Layanan
   { keywords: ["layanan", "service", "jasa", "apa saja", "jenis"], 
-    answer: "Layanan Kami:\n\n✓ Cuci Kiloan (per kg)\n✓ Cuci Satuan (per pcs)\n✓ Express (4 jam jadi)\n✓ Cuci Karpet\n✓ Cuci Sepatu\n✓ Cuci Boneka\n✓ Cuci Jaket\n✓ Cuci Jas\n✓ Setrika Saja" },
+    answer: "Layanan Kami:\n\n✓ Cuci Kiloan (per kg)\n✓ Express (4 jam jadi)\n✓ Cuci Karpet\n✓ Cuci Sepatu\n✓ Cuci Boneka\n✓ Cuci Jaket\n✓ Cuci Jas\n✓ Setrika Saja" },
   
   // Waktu
   { keywords: ["waktu", "lama", "proses", "selesai", "jam", "hari", "durasi", "estimasi"], 
-    answer: "Waktu Proses:\n\n• Cuci Kiloan: 24 jam\n• Cuci Satuan: 12 jam\n• Express: 4 jam\n• Cuci Karpet: 48 jam\n• Cuci Sepatu: 24 jam\n• Cuci Boneka: 24 jam\n• Cuci Jas: 48 jam" },
+    answer: "Waktu Proses:\n\n• Cuci Kiloan: 24 jam\n• Express: 4 jam\n• Cuci Karpet: 48 jam\n• Cuci Sepatu: 24 jam\n• Cuci Boneka: 24 jam\n• Cuci Jas: 48 jam" },
   
   // Cara Pesan
   { keywords: ["cara", "cara pesan", "cara order", "order", "booking", "pesanan", "Bagaimana"], 

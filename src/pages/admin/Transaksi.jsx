@@ -25,38 +25,19 @@ export default function Transaksi() {
 
 
   useEffect(() => {
-    migratePaymentData();
     loadOrders();
     const interval = setInterval(loadOrders, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  const migratePaymentData = () => {
-    const migrated = localStorage.getItem("paymentMigrated");
-    if (migrated) return;
-    const laporanRaw = localStorage.getItem("laporanData");
-    const ordersRaw = localStorage.getItem("customerOrders");
-    if (!laporanRaw || !ordersRaw) return;
-    const laporan = JSON.parse(laporanRaw);
-    const orders = JSON.parse(ordersRaw);
-    let changed = false;
-    const updatedOrders = orders.map(o => {
-      if (o.payment) return o;
-      const match = laporan.find(l => l.pelanggan === o.customer_name && l.layanan === o.service_name && l.payment);
-      if (match) { changed = true; return { ...o, payment: match.payment }; }
-      return o;
-    });
-    if (changed) {
-      localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
-    }
-    localStorage.setItem("paymentMigrated", "true");
-  };
-
-  const loadOrders = () => {
-    const saved = localStorage.getItem("customerOrders");
-    if (saved) {
-      const allOrders = JSON.parse(saved).map((o, i) => ({ ...o, no: i + 1 }));
-      setOrders(allOrders);
+  const loadOrders = async () => {
+    try {
+      const res = await fetch("/api/orders");
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setOrders(data.map((o, i) => ({ ...o, no: i + 1 })));
+    } catch (e) {
+      console.error("Failed to load orders:", e);
     }
   };
 
@@ -164,7 +145,7 @@ export default function Transaksi() {
             </div>
           </div>
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="dashboard" label="Dashboard" /></NavLink>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="dashboard" label="Dashboard" /></NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="receipt" label="Orderan" /></NavLink>
             <NavLink to="/pelanggan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}><NavItem icon="users" label="Pelanggan" /></NavLink>
             <div style={{ ...styles.navItem, background: "#3b82f6", color: "#fff", boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.3)" }}><NavItem icon="creditCard" label="Transaksi" /></div>

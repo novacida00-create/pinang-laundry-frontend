@@ -9,7 +9,7 @@ const testimonials = [
   { name: "Dewi Lestari", text: "Sudah 2 tahun langganan, tidak pernah kecewa.", rating: 5 },
 ];
 
-const serviceIcons = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Lipat": "📦", "Cuci Setrika": "🔥", "Cuci Karpet": "🟤", "Cuci Jaket": "🧥", "Cuci Jas": "👔", "Setrika Saja": "🔥" };
+const serviceIcons = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Lipat": "📦", "Cuci Setrika": "🔥", "Cuci Karpet": "🟤", "Cuci Jaket": "🧥", "Cuci Jas": "🤵", "Setrika Saja": "👔" };
 
 const allServices = [
   { icon: "tshirt", name: "Cuci Kiloan", price: "Rp 6.000/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian" },
@@ -27,6 +27,7 @@ export default function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
 
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
@@ -37,7 +38,7 @@ export default function LandingPage() {
     { icon: "clock", title: "Cepat", desc: "Proses cepat dengan layanan express 4 jam" },
     { icon: "diamond", title: "Bersih", desc: "Hasil cucian bersih dan wangi" },
     { icon: "car", title: "Antar & Jemput", desc: "Jasa layanan antar & jemput ini sangat memudahkan" },
-    { icon: "moneybag", title: "Terjangkau", desc: "Harga kompetitif dan transparan" },
+    { icon: "moneybag", title: "Terjangkau", desc: "Harga murah dan terjangkau" },
   ];
 
   return (
@@ -86,7 +87,6 @@ export default function LandingPage() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.2) 100%)", zIndex: 1 }}></div>
         <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 60, width: "100%", maxWidth: 1200, margin: "0 auto" }}>
         <div style={styles.heroContent} className="hero-content">
-          <div style={styles.heroBadge} className="hero-badge">🧺 Promo Terbatas!</div>
           <h1 style={styles.heroTitle} className="hero-title">Pinang Laundry</h1>
           <p style={styles.heroSubtitle} className="hero-subtitle">Kilat Hasilnya, Bersih Bajunya.</p>
           <div style={styles.heroButtons} className="hero-buttons">
@@ -116,11 +116,6 @@ export default function LandingPage() {
         <div style={styles.heroVisual} className="hero-visual">
           <div style={styles.heroVisualCard}>
             <div style={styles.heroVisualIcon}>🧺</div>
-            <div style={styles.heroVisualIconSmallRow}>
-              <span style={styles.heroVisualIconSmall}><Icon name="tshirt" size={32} /></span>
-              <span style={styles.heroVisualIconSmall}><Icon name="shirt" size={32} /></span>
-              <span style={styles.heroVisualIconSmall}><Icon name="jacket" size={32} /></span>
-            </div>
             <div style={styles.heroVisualBadge1}><Icon name="star" size={14} /> Bersih & Wangi</div>
             <div style={styles.heroVisualBadge2}><Icon name="car" size={14} /> Antar & Jemput</div>
             <div style={styles.heroVisualBadge3}><Icon name="clock" size={14} /> 4 Jam Express</div>
@@ -311,7 +306,7 @@ export default function LandingPage() {
           .container-wrap { padding-top: 64px !important; }
           .hero-wrap { flex-direction: column !important; padding: 0 24px !important; text-align: center !important; min-height: 90vh !important; }
           .hero-content { padding-left: 0 !important; }
-          .hero-badge { font-size: 13px !important; margin-bottom: 20px !important; }
+
           .hero-title { font-size: 36px !important; margin-bottom: 16px !important; }
           .hero-subtitle { font-size: 15px !important; margin-bottom: 28px !important; max-width: 100% !important; }
           .hero-buttons { flex-direction: column !important; gap: 12px !important; align-items: center !important; margin-bottom: 32px !important; }
@@ -368,14 +363,14 @@ const styles = {
 
   hero: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 10%", backgroundImage: "url('/store-bg.png')", backgroundSize: "cover", backgroundPosition: "center", position: "relative", minHeight: "100vh", width: "100%" },
   heroContent: { flex: 1, paddingLeft: 120 },
-  heroBadge: { display: "inline-block", padding: "10px 24px", background: "rgba(255,255,255,0.2)", color: "#ffffff", borderRadius: 24, fontSize: 16, fontWeight: 400, letterSpacing: "+0.3px", marginBottom: 36 },
+
   heroTitle: { fontSize: 72, fontWeight: 700, color: "#ffffff", marginBottom: 32, lineHeight: 1.1, letterSpacing: "-1.5px" },
   heroHighlight: { color: "#93c5fd" },
   heroSubtitle: { fontSize: 20, color: "#ffffff", marginBottom: 48, maxWidth: 700, lineHeight: 1.8, letterSpacing: 0 },
   heroButtons: { display: "flex", gap: 24, marginBottom: 56 },
-  heroCtaBtn: { display: "flex", alignItems: "center", gap: 10, padding: "18px 40px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "#fff", fontSize: 18, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 20px rgba(59,130,246,0.4)" },
+  heroCtaBtn: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "18px 40px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "#fff", fontSize: 18, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 20px rgba(59,130,246,0.4)" },
   heroCtaArrow: { fontSize: 22 },
-  heroSecondaryBtn: { padding: "18px 40px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "transparent", color: "#ffffff", fontSize: 18, fontWeight: 400, cursor: "pointer", textDecoration: "none" },
+  heroSecondaryBtn: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "18px 40px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "#fff", fontSize: 18, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "0 6px 20px rgba(59,130,246,0.4)" },
   heroStats: { display: "flex", gap: 56 },
   heroStat: { display: "flex", flexDirection: "column", textAlign: "center", minWidth: 100 },
   heroStatNumber: { fontSize: 40, fontWeight: 700, color: "#ffffff" },
@@ -384,8 +379,6 @@ const styles = {
   heroVisual: { flex: 1, display: "flex", justifyContent: "center", alignItems: "center" },
   heroVisualCard: { position: "relative", width: 280, height: 280, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(12px)", borderRadius: 40, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" },
   heroVisualIcon: { fontSize: 80, lineHeight: 1 },
-  heroVisualIconSmallRow: { display: "flex", gap: 8 },
-  heroVisualIconSmall: { fontSize: 32, lineHeight: 1 },
   heroVisualBadge1: { position: "absolute", top: -10, right: -20, padding: "8px 16px", background: "#22c55e", color: "#fff", borderRadius: 16, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(34,197,94,0.4)" },
   heroVisualBadge2: { position: "absolute", bottom: 30, left: -30, padding: "8px 16px", background: "#3b82f6", color: "#fff", borderRadius: 16, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(59,130,246,0.4)" },
   heroVisualBadge3: { position: "absolute", bottom: -10, right: -10, padding: "8px 16px", background: "#f59e0b", color: "#fff", borderRadius: 16, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px rgba(245,158,11,0.4)" },
@@ -409,9 +402,9 @@ const styles = {
 
   benefits: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", textAlign: "center", padding: "40px 24px", background: "linear-gradient(135deg, #f8fafc 0%, #e8f4f8 100%)" },
   benefitsGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, maxWidth: 1000, margin: "0 auto" },
-  benefitCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", border: "1px solid #e2e8f0", transition: "all 0.3s ease" },
-  benefitIconBg: { width: 64, height: 64, background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
-  benefitIcon: { fontSize: 32 },
+  benefitCard: { padding: 28, background: "#fff", borderRadius: 20, textAlign: "center", border: "1px solid #bfdbfe", transition: "all 0.3s ease" },
+  benefitIconBg: { width: 72, height: 72, background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
+  benefitIcon: { fontSize: 32, color: "#2563eb" },
   benefitTitle: { fontSize: 20, fontWeight: 600, color: "#1e293b", marginBottom: 8 },
   benefitDesc: { fontSize: 16, color: "#64748b", lineHeight: 1.65, letterSpacing: 0 },
 

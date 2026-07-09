@@ -1,5 +1,6 @@
 export const sendWa = async (target, message) => {
-  const settings = JSON.parse(localStorage.getItem("pengaturanData") || "{}");
+  let settings = {};
+  try { const r = await fetch("/api/pengaturan"); settings = await r.json(); } catch {}
   if (!settings.waNotif || !settings.fonnteToken) return false;
   try {
     const formData = new URLSearchParams();

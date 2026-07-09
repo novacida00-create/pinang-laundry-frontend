@@ -33,46 +33,49 @@ export default function Laporan() {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [printPeriod, setPrintPeriod] = useState("harian");
   const [allLaporan, setAllLaporan] = useState([]);
+  const [layananOptions, setLayananOptions] = useState([]);
 
-  const loadData = () => {
-    const formatTanggalDariISO = (iso) => {
-      const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-      const t = new Date(iso);
-      return `${t.getDate().toString().padStart(2, "0")} ${bulan[t.getMonth()]} ${t.getFullYear()}`;
-    };
-
+  const loadLayanan = async () => {
     try {
-      let data = [];
-      const saved = localStorage.getItem("laporanData");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          data = parsed;
-        }
+      const res = await fetch("/api/layanan");
+      const data = await res.json();
+      if (!data.error && Array.isArray(data)) {
+        setLayananOptions(data);
       }
-      data = data.filter(l => l.layanan && l.layanan !== "");
+    } catch (e) {
+      console.error("Failed to load layanan:", e);
+    }
+  };
 
-      const ordersSaved = localStorage.getItem("customerOrders");
-      if (ordersSaved) {
-        const orders = JSON.parse(ordersSaved);
-        orders.forEach(o => {
-          const exists = data.some(l => l.pelanggan === o.customer_name && l.tanggal === formatTanggalDariISO(o.created_at));
-          if (!exists) {
-            data.push({
-              tanggal: formatTanggalDariISO(o.created_at),
-              pelanggan: o.customer_name,
-              layanan: o.service_name,
-              berat: o.weight.toString(),
-              harga: o.price.toString(),
-              total: o.total.toString(),
-              status: o.status || "Baru"
-            });
-          }
-        });
-      }
+  const formatTanggalDariISO = (iso) => {
+    const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const t = new Date(iso);
+    return `${t.getDate().toString().padStart(2, "0")} ${bulan[t.getMonth()]} ${t.getFullYear()}`;
+  };
 
-      data = data.map((l, i) => ({ ...l, no: i + 1 }));
-      setAllLaporan(data.length > 0 ? data : initialData);
+  const loadData = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/orders");
+      const data = await res.json();
+      if (data.error || !Array.isArray(data)) throw new Error(data.error);
+      const mapped = data
+        .filter(o => o.customer_name)
+        .map((o, i) => ({
+          no: i + 1,
+          id: o.id,
+          tanggal: formatTanggalDariISO(o.created_at),
+          tanggalISO: o.created_at,
+          pelanggan: o.customer_name,
+          layanan: o.service_name || "-",
+          berat: (o.weight || 0).toString(),
+          harga: o.price?.toString() || "0",
+          total: o.total?.toString() || "0",
+          status: o.status || "Baru",
+          payment_status: o.payment_status || "",
+          payment: o.payment || "",
+          phone: o.phone || ""
+        }));
+      setAllLaporan(mapped.length > 0 ? mapped : initialData);
     } catch (e) {
       console.error("Error loading data:", e);
       setAllLaporan(initialData);
@@ -81,15 +84,10 @@ export default function Laporan() {
 
   useEffect(() => {
     loadData();
+    loadLayanan();
     const interval = setInterval(loadData, 3000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (allLaporan.length > 0) {
-      localStorage.setItem("laporanData", JSON.stringify(allLaporan));
-    }
-  }, [allLaporan]);
 
   const getDateFromString = (dateStr) => {
     const months = { "Januari": 0, "Februari": 1, "Maret": 2, "April": 3, "Mei": 4, "Juni": 5, "Juli": 6, "Agustus": 7, "September": 8, "Oktober": 9, "November": 10, "Desember": 11, "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "Jun": 5, "Jul": 6, "Agt": 7, "Sep": 8, "Okt": 9, "Nov": 10, "Des": 11 };
@@ -105,7 +103,7 @@ export default function Laporan() {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
     return allLaporan.filter(l => {
-      const itemDate = getDateFromString(l.tanggal);
+      const itemDate = l.tanggalISO ? new Date(l.tanggalISO) : getDateFromString(l.tanggal);
       
       if (filterPeriod === "harian") {
         return itemDate.toDateString() === today.toDateString();
@@ -142,64 +140,72 @@ export default function Laporan() {
     setShowModal(true);
   };
 
-  const handleDeleteLaporan = (no) => {
-    if (window.confirm("Yakin ingin menghapus laporan ini?")) {
-      setAllLaporan(allLaporan.filter(l => l.no !== no));
-      alert("Laporan berhasil dihapus!");
+  const handleDeleteLaporan = async (no) => {
+    if (window.confirm("Yakin ingin menghapus pesanan ini?")) {
+      try {
+        const item = allLaporan.find(l => l.no === no);
+        if (item?.id) {
+          const res = await fetch(`http://localhost:3001/api/orders/${item.id}`, { method: "DELETE" });
+          const result = await res.json();
+          if (result.error) throw new Error(result.error);
+        }
+        await loadData();
+        alert("Pesanan berhasil dihapus!");
+      } catch (e) {
+        console.error("Failed to delete pesanan:", e);
+        alert("Gagal menghapus pesanan");
+      }
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editData.pelanggan || !editData.layanan || !editData.berat) {
       alert("Mohon isi semua data!");
       return;
     }
     
-    const layananList = JSON.parse(localStorage.getItem("layananData") || "[]");
-    const found = layananList.find(l => l.name === editData.layanan);
-    const harga = found ? parseInt(found.harga) : 8000;
-    const total = parseInt(editData.berat) * harga;
-    
-    const updatedData = {
-      ...editData,
-      harga: harga.toString(),
-      total: total.toString(),
-    };
-    
-    setAllLaporan(allLaporan.map(l => l.no === editData.no ? updatedData : l));
+    try {
+      const total = parseInt(editData.berat) * (parseInt(editData.harga) || 8000);
+      const body = {
+        customer_name: editData.pelanggan,
+        service_name: editData.layanan,
+        weight: parseFloat(editData.berat),
+        price: parseInt(editData.harga) || 8000,
+        total,
+        status: editData.status,
+        payment_status: editData.payment_status === "Lunas" ? "Lunas" : null,
+        payment: editData.payment || null,
+        paid_at: editData.status === "Selesai" ? new Date().toISOString().slice(0, 19).replace("T", " ") : null
+      };
 
-    const savedOrders = localStorage.getItem("customerOrders");
-    if (savedOrders) {
-      const orders = JSON.parse(savedOrders);
-      const updatedOrders = orders.map(o =>
-        o.customer_name === editData.pelanggan && o.service_name === editData.layanan
-          ? {
-              ...o,
-              status: editData.status === "Selesai" ? "Selesai" : o.status,
-              payment_status: editData.payment_status || o.payment_status,
-              payment: editData.payment || o.payment,
-              paid_at: editData.status === "Selesai" && o.status !== "Selesai" ? new Date().toISOString() : o.paid_at
-            }
-          : o
-      );
-      localStorage.setItem("customerOrders", JSON.stringify(updatedOrders));
+      if (editData.id) {
+        const res = await fetch(`http://localhost:3001/api/orders/${editData.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+      }
+
+      await loadData();
+      setShowModal(false);
+      setEditData(null);
+      alert("Data berhasil diubah!");
+    } catch (e) {
+      console.error("Failed to save:", e);
+      alert("Gagal menyimpan data");
     }
-
-    setShowModal(false);
-    setEditData(null);
-    alert("Data berhasil diubah!");
   };
 
-  const totalKg = filteredLaporan
-    .filter(l => l.status === "Selesai")
-    .reduce((sum, l) => {
-      const num = parseInt(l.berat.replace(/kg|pcs/g, "").trim());
-      return sum + (isNaN(num) ? 0 : num);
-    }, 0);
+  const totalKg = filteredLaporan.reduce((sum, l) => {
+    const num = parseFloat(l.berat.toString().replace(/kg|pcs/g, "").trim());
+    return sum + (isNaN(num) ? 0 : num);
+  }, 0);
 
-  const totalPendapatan = filteredLaporan
-    .filter(l => l.status === "Selesai")
-    .reduce((sum, l) => sum + parseInt(l.total), 0);
+  const totalPendapatan = filteredLaporan.reduce((sum, l) => sum + (parseInt(l.total) || 0), 0);
+
+  const totalLunas = filteredLaporan.filter(l => l.payment_status === "Lunas" || l.status === "Selesai").reduce((sum, l) => sum + (parseInt(l.total) || 0), 0);
 
   return (
     <div className="admin-layout" style={styles.app}>
@@ -215,7 +221,7 @@ export default function Laporan() {
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -283,17 +289,17 @@ export default function Laporan() {
             </div>
           </div>
           <div style={styles.statCard}>
-            <div style={{ ...styles.statIcon, backgroundColor: "#f3e8ff", color: "#a855f7" }}><Icon name="check" /></div>
+            <div style={{ ...styles.statIcon, backgroundColor: "#fef2f2", color: "#ef4444" }}><Icon name="receipt" /></div>
             <div style={{ marginLeft: 16 }}>
-              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Selesai</div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{allLaporan.filter(l => l.status === "Selesai").length}</div>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Total Transaksi</div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{filteredLaporan.length}</div>
             </div>
           </div>
           <div style={styles.statCard}>
-            <div style={{ ...styles.statIcon, backgroundColor: "#ffedd5", color: "#f97316" }}><Icon name="settings" /></div>
+            <div style={{ ...styles.statIcon, backgroundColor: "#dcfce7", color: "#22c55e" }}><Icon name="check" /></div>
             <div style={{ marginLeft: 16 }}>
-              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Proses</div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{allLaporan.filter(l => l.status === "Proses").length}</div>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Total Pendapatan</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#166534" }}>{formatRupiah(totalLunas)}</div>
             </div>
           </div>
         </div>
@@ -350,7 +356,7 @@ export default function Laporan() {
                     ><Icon name="edit" /> Edit</button>
                     <button 
                       type="button"
-                      style={styles.actionBtn} 
+                      style={styles.deleteBtn} 
                       onClick={() => handleDeleteLaporan(l.no)}
                     ><Icon name="trash" /> Hapus</button>
                   </td>
@@ -379,8 +385,8 @@ export default function Laporan() {
             <div style={styles.formGroup}>
               <label style={styles.label}>Layanan</label>
               <select style={styles.input} value={editData?.layanan || ""} onChange={(e) => setEditData({ ...editData, layanan: e.target.value })}>
-                {(JSON.parse(localStorage.getItem("layananData") || "[]")).map(s => (
-                  <option key={s.name} value={s.name}>{s.name}</option>
+                {layananOptions.map(s => (
+                  <option key={s.id || s.name} value={s.name}>{s.name}</option>
                 ))}
               </select>
             </div>
@@ -461,26 +467,13 @@ export default function Laporan() {
                   return `${t.getDate().toString().padStart(2, "0")} ${bulanList[t.getMonth()]} ${t.getFullYear()}`;
                 };
 
-                const orders = JSON.parse(localStorage.getItem("customerOrders") || "[]");
-
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-                const filteredOrders = orders.filter(o => {
-                  const d = new Date(o.created_at);
-                  const itemDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                  if (printPeriod === "harian") return itemDate.toDateString() === today.toDateString();
-                  if (printPeriod === "mingguan") { const wa = new Date(today); wa.setDate(wa.getDate() - 7); return itemDate >= wa && itemDate <= today; }
-                  if (printPeriod === "bulanan") return itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
-                  if (printPeriod === "tahunan") return itemDate.getFullYear() === today.getFullYear();
-                  return true;
-                });
-
-                const selesaiOrders = filteredOrders.filter(o => o.status === "Selesai" || o.payment_status === "Lunas");
-                const totalTransaksi = filteredOrders.length;
-                const totalSelesai = selesaiOrders.length;
-                const totalKg = selesaiOrders.reduce((sum, o) => sum + (parseFloat(o.weight) || 0), 0);
-                const totalPend = selesaiOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+                const printData = filteredLaporan;
+                const totalTransaksi = printData.length;
+                const totalKg = printData.reduce((sum, l) => {
+                  const num = parseFloat(l.berat.toString().replace(/kg|pcs/g, "").trim());
+                  return sum + (isNaN(num) ? 0 : num);
+                }, 0);
+                const totalLunasPeriod = printData.filter(l => l.payment_status === "Lunas" || l.status === "Selesai").reduce((sum, l) => sum + (parseInt(l.total) || 0), 0);
 
                 const label = { harian: "Harian", mingguan: "Mingguan", bulanan: "Bulanan", tahunan: "Tahunan" }[printPeriod] || "Semua";
                 setShowPrintModal(false);
@@ -530,28 +523,29 @@ export default function Laporan() {
   <div class="summary">
     <div class="summary-item"><div class="val">${totalTransaksi}</div><div class="lbl">Total Transaksi</div></div>
     <div class="summary-item"><div class="val">${totalKg.toFixed(1)} kg</div><div class="lbl">Total Berat</div></div>
-    <div class="summary-item"><div class="val">${totalSelesai}</div><div class="lbl">Selesai</div></div>
-    <div class="summary-item"><div class="val">Rp ${totalPend.toLocaleString('id-ID')}</div><div class="lbl">Total Pendapatan</div></div>
+    <div class="summary-item"><div class="val">Rp ${totalLunasPeriod.toLocaleString('id-ID')}</div><div class="lbl">Total Pendapatan</div></div>
+    <div class="summary-item"><div class="val">${printData.filter(l => l.status === "Selesai").length}</div><div class="lbl">Selesai</div></div>
   </div>
   <table>
-    <thead><tr><th>No</th><th>Tanggal</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th></tr></thead>
+    <thead><tr><th>No</th><th>Tanggal</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Harga</th><th>Total</th><th>Status</th></tr></thead>
     <tbody>
-      ${filteredOrders.map((o, i) => `
+      ${printData.map((l, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td>${formatDate(o.created_at)}</td>
-          <td>${o.customer_name}</td>
-          <td>${o.service_name}</td>
-          <td>${o.weight} kg</td>
-          <td>Rp ${parseFloat(o.total).toLocaleString('id-ID')}</td>
-          <td>${o.status}</td>
+          <td>${l.tanggal}</td>
+          <td>${l.pelanggan}</td>
+          <td>${l.layanan}</td>
+          <td>${l.berat} kg</td>
+          <td>Rp ${parseInt(l.harga).toLocaleString('id-ID')}</td>
+          <td>Rp ${parseInt(l.total).toLocaleString('id-ID')}</td>
+          <td>${l.status}</td>
         </tr>
       `).join('')}
     </tbody>
   </table>
   <div class="total-section">
-    <div class="label">Total Pendapatan (Selesai / Lunas)</div>
-    <div class="amount">Rp ${totalPend.toLocaleString('id-ID')}</div>
+    <div class="label">Total Pendapatan (Lunas / Selesai)</div>
+    <div class="amount">Rp ${totalLunasPeriod.toLocaleString('id-ID')}</div>
   </div>
   <div class="ttd">
     <div class="ttd-box">
@@ -626,6 +620,7 @@ const styles = {
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
   actionBtn: { background: "#3b82f6", color: "white", border: "none", borderRadius: 6, padding: "8px 12px", cursor: "pointer", marginRight: 5, fontSize: 12, fontWeight: 600, display: "inline-block" },
+  deleteBtn: { background: "#ef4444", color: "white", border: "none", borderRadius: 6, padding: "8px 12px", cursor: "pointer", marginRight: 5, fontSize: 12, fontWeight: 600, display: "inline-block" },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
   formGroup: { marginBottom: 16 },

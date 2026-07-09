@@ -54,24 +54,43 @@ export default function Dashboard() {
     loadStats();
   }, [refreshKey]);
 
-  const loadStats = () => {
-    const orders = JSON.parse(localStorage.getItem("customerOrders") || "[]");
-    const pelanggan = JSON.parse(localStorage.getItem("pelangganData") || "[]");
-    const laporan = JSON.parse(localStorage.getItem("laporanData") || "[]");
+  const loadStats = async () => {
+    try {
+      const [ordersRes, pelangganRes] = await Promise.all([
+        fetch("/api/orders"),
+        fetch("/api/pelanggan")
+      ]);
 
-    const totalPendapatan = orders
-      .filter(o => o.status === "Selesai")
-      .reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+      const ordersData = await ordersRes.json();
+      const pelangganData = await pelangganRes.json();
 
-    const totalPelanggan = pelanggan.length;
-    const orderSelesai = orders.filter(o => o.status === "Selesai").length;
+      if (!ordersRes.ok) throw new Error(ordersData.error);
+      if (!pelangganRes.ok) throw new Error(pelangganData.error);
 
-    setStats({
-      pendapatan: `Rp ${totalPendapatan.toLocaleString("id-ID")}`,
-      transaksi: orders.length.toString(),
-      pelanggan: totalPelanggan.toString(),
-      selesai: orderSelesai.toString()
-    });
+      const orders = Array.isArray(ordersData) ? ordersData : (ordersData.data || []);
+      const pelanggan = Array.isArray(pelangganData) ? pelangganData : (pelangganData.data || []);
+
+      const totalPendapatan = orders
+        .filter(o => o.status === "Selesai")
+        .reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+
+      const totalPelanggan = pelanggan.length;
+      const orderSelesai = orders.filter(o => o.status === "Selesai").length;
+
+      setStats({
+        pendapatan: `Rp ${totalPendapatan.toLocaleString("id-ID")}`,
+        transaksi: orders.length.toString(),
+        pelanggan: totalPelanggan.toString(),
+        selesai: orderSelesai.toString()
+      });
+    } catch {
+      setStats({
+        pendapatan: "Rp 0",
+        transaksi: "0",
+        pelanggan: "0",
+        selesai: "0"
+      });
+    }
   };
 
   const [users, setUsers] = useState([
@@ -134,7 +153,7 @@ export default function Dashboard() {
           </div>
 
           <nav style={styles.nav}>
-            <NavLink to="/" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
+            <NavLink to="/admin" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
               <NavItem icon="dashboard" label="Dashboard" />
             </NavLink>
             <NavLink to="/orderan" style={({ isActive }) => ({ ...styles.navItem, ...(isActive ? styles.navActive : {}) })}>
@@ -253,7 +272,7 @@ export default function Dashboard() {
                   <td style={styles.td}><span style={styles.statusAktif}>Aktif</span></td>
                   <td style={styles.td}>
                     <button style={styles.actionBtn} onClick={() => handleEditUser(user)}><Icon name="edit" /></button>
-                    <button style={styles.actionBtn} onClick={() => handleDeleteUser(user.no)}><Icon name="trash" /></button>
+                    <button style={styles.deleteBtn} onClick={() => handleDeleteUser(user.no)}><Icon name="trash" /></button>
                   </td>
                 </tr>
               ))}
@@ -441,6 +460,7 @@ const styles = {
   pagination: { display: "flex", justifyContent: "center", gap: 12, marginTop: 20, alignItems: "center", color: "#94a3b8", fontSize: 12 },
   pageActive: { width: 28, height: 28, background: "#3b82f6", color: "#fff", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: 8, fontWeight: 700 },
   actionBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14 },
+  deleteBtn: { background: "none", border: "none", cursor: "pointer", marginRight: 8, fontSize: 14, color: "#ef4444" },
   modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 },
   modal: { background: "white", borderRadius: 20, padding: 30, width: 400, display: "flex", flexDirection: "column", gap: 16 },
   modalTitle: { fontSize: 20, fontWeight: 700, margin: 0, textAlign: "center" },

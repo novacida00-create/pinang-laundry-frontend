@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../utils/icons.jsx";
 
-const serviceIcons = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Jaket": "🧥", "Cuci Jas": "👔", "Setrika Saja": "🔥" };
+const serviceIcons = { "Cuci Kiloan": "👕", "Express": "⚡", "Cuci Karpet": "🟤", "Cuci Jaket": "🧥", "Cuci Jas": "🤵", "Setrika Saja": "👔" };
 
 const services = [
   { icon: "tshirt", name: "Cuci Kiloan", price: "Rp 6.000", unit: "/kg", waktu: "24 jam", desc: "Cuci berdasarkan berat, cocok untuk baju harian. Paket lengkap meliputi cuci, rendam, dan bilas hingga bersih." },
@@ -142,7 +142,7 @@ export default function Layanan() {
 }
 
 const styles = {
-  container: { fontFamily: "'Segoe UI', -apple-system, sans-serif", background: "#ffffff", minHeight: "100vh" },
+  container: { fontFamily: "'Segoe UI', -apple-system, sans-serif", background: "#FFF8F0", minHeight: "100vh" },
   
   navbar: { position: "sticky", top: 0, zIndex: 1000, background: "#ffffff", transition: "all 0.3s ease", borderBottom: "1px solid #f1f5f9" },
   navbarScrolled: { boxShadow: "0 4px 20px rgba(0,0,0,0.08)" },

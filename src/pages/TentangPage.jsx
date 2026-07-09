@@ -135,7 +135,7 @@ export default function TentangPage() {
 }
 
 const styles = {
-  container: { fontFamily: "'Segoe UI', -apple-system, sans-serif", background: "#ffffff", minHeight: "100vh" },
+  container: { fontFamily: "'Segoe UI', -apple-system, sans-serif", background: "#F0FAFA", minHeight: "100vh" },
 
   navbar: { position: "sticky", top: 0, zIndex: 1000, background: "#ffffff", transition: "all 0.3s ease", borderBottom: "1px solid #f1f5f9" },
   navbarScrolled: { boxShadow: "0 4px 20px rgba(0,0,0,0.08)" },
