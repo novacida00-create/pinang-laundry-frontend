@@ -55,7 +55,7 @@ export default function Laporan() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/orders");
+      const res = await fetch("/api/orders");
       const data = await res.json();
       if (data.error || !Array.isArray(data)) throw new Error(data.error);
       const mapped = data
@@ -145,7 +145,7 @@ export default function Laporan() {
       try {
         const item = allLaporan.find(l => l.no === no);
         if (item?.id) {
-          const res = await fetch(`http://localhost:3001/api/orders/${item.id}`, { method: "DELETE" });
+          const res = await fetch(`/api/orders/${item.id}`, { method: "DELETE" });
           const result = await res.json();
           if (result.error) throw new Error(result.error);
         }
@@ -179,7 +179,7 @@ export default function Laporan() {
       };
 
       if (editData.id) {
-        const res = await fetch(`http://localhost:3001/api/orders/${editData.id}`, {
+        const res = await fetch(`/api/orders/${editData.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),

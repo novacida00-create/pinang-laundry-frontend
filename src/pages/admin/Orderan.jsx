@@ -123,7 +123,7 @@ Terima kasih telah menggunakan layanan kami!
     alert(`Status ${order.order_code} menjadi: ${newStatus}`);
     if (newStatus === "Diproses" && order.phone) {
       try {
-        const r = await fetch("http://localhost:3001/api/pengaturan");
+        const r = await fetch("/api/pengaturan");
         const s = await r.json();
         if (s.waNotif && s.fonnteToken) {
           const cleanPhone = order.phone.replace(/[^0-9]/g, "");

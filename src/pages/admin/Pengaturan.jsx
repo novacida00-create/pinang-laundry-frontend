@@ -35,7 +35,7 @@ export default function Pengaturan() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/pengaturan");
+        const res = await fetch("/api/pengaturan");
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         setSettings(data);
@@ -50,7 +50,7 @@ export default function Pengaturan() {
 
   const handleSaveProfil = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/pengaturan", {
+      const res = await fetch("/api/pengaturan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings)
@@ -67,7 +67,7 @@ export default function Pengaturan() {
 
   const handleSaveApp = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/pengaturan", {
+      const res = await fetch("/api/pengaturan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings)
@@ -89,7 +89,7 @@ export default function Pengaturan() {
         waAdmin: settings.waAdmin,
         waNotif: settings.waNotif
       };
-      const res = await fetch("http://localhost:3001/api/pengaturan", {
+      const res = await fetch("/api/pengaturan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(waSettings)
@@ -108,7 +108,7 @@ export default function Pengaturan() {
     setSettings(prev => ({ ...prev, [key]: newVal }));
     const label = key === 'notifEmail' ? 'Notifikasi Email' : key === 'notifSMS' ? 'Notifikasi WhatsApp' : 'Auto Reminder';
     try {
-      const res = await fetch("http://localhost:3001/api/pengaturan", {
+      const res = await fetch("/api/pengaturan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: newVal })
