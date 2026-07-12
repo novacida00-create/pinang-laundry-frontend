@@ -25,6 +25,7 @@ export default function CustomerLoginPage() {
 .clp-wrap > div[style*="z-index: 1"] > div:last-child h2{font-size:20px!important}
 .clp-wrap > div[style*="position: fixed"] > div{width:90%!important;max-width:360px!important;padding:24px 20px!important;border-radius:24px!important;margin:0 auto!important}
 .clp-wrap > div[style*="position: fixed"]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.clp-wrap,.clp-wrap > div[style*="z-index: 1"]{overflow:visible!important}
 }
 @media (max-width: 480px) {
 .clp-wrap > div[style*="z-index: 1"] > div:first-child{padding:20px 16px 16px!important}

@@ -12,6 +12,7 @@ export default function LoginPage() {
 .alp-wrap > div[style*="z-index: 1"] > div:last-child { padding: 20px 16px 24px !important; }
 .alp-wrap input { font-size: 16px !important; padding: 14px 16px !important; width: 100% !important; border-radius: 14px !important; box-sizing: border-box !important; }
 .alp-wrap button { font-size: 16px !important; padding: 14px !important; border-radius: 14px !important; }
+.alp-wrap, .alp-wrap > div[style*="z-index: 1"] { overflow: visible !important; }
 }
 @media (max-width: 480px) {
 .alp-wrap > div[style*="z-index: 1"] { width: 94% !important; }

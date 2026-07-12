@@ -22,6 +22,7 @@ export default function RegisterPage() {
 .clp-wrap button{font-size:16px!important;padding:14px!important;border-radius:14px!important}
 .clp-wrap > div[style*="z-index: 1"] > div:last-child h2{font-size:20px!important}
 .clp-wrap > div[style*="position: fixed"]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.clp-wrap,.clp-wrap > div[style*="z-index: 1"]{overflow:visible!important}
 }
 @media (max-width: 480px) {
 .clp-wrap > div[style*="z-index: 1"] > div:first-child{padding:20px 16px 16px!important}
