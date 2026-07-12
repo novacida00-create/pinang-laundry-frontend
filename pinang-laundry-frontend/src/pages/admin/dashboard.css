@@ -1,0 +1,26 @@
+const styles = {
+  grid: {
+    display: "flex",
+    gap: 15,
+    marginTop: 20,
+    flexWrap: "wrap",
+  },
+
+  card: {
+    flex: 1,
+    minWidth: 150,
+    padding: 20,
+    borderRadius: 10,
+    background: "#f5f5f5",
+    textAlign: "center",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+
+  list: {
+    padding: 12,
+    marginTop: 10,
+    border: "1px solid #ddd",
+    borderRadius: 8,
+    background: "#fff",
+  },
+};
