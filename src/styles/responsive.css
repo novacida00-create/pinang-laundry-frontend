@@ -168,3 +168,48 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ============ PUBLIC PAGES ============ */
+
+/* Landing Page */
+@media (max-width: 768px) {
+  .landing-wrap .lp-nav-links,
+  .landing-wrap .lp-nav-btns { display: none !important; }
+  .landing-wrap .lp-mobile-toggle { display: flex !important; }
+  .landing-wrap .hero-title { font-size: 28px !important; }
+  .landing-wrap .hero-subtitle { font-size: 14px !important; }
+  .landing-wrap .services-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+  .landing-wrap .steps-wrap { flex-direction: column !important; gap: 20px !important; }
+  .landing-wrap .benefits-grid,
+  .landing-wrap .testimonial-grid { grid-template-columns: 1fr !important; }
+  .landing-wrap .contact-grid { flex-direction: column !important; }
+  .landing-wrap .footer-content { flex-direction: column !important; gap: 24px !important; }
+  .landing-wrap .hero-stats { flex-wrap: wrap !important; gap: 12px !important; }
+  .landing-wrap .hero-stat { flex: 1 1 30% !important; }
+  .landing-wrap .hero-content { max-width: 100% !important; }
+  .landing-wrap .hero-buttons { flex-direction: column !important; width: 100% !important; }
+  .landing-wrap .hero-cta,
+  .landing-wrap .hero-secondary { width: 100% !important; text-align: center !important; }
+}
+@media (max-width: 480px) {
+  .landing-wrap .hero-title { font-size: 24px !important; }
+  .landing-wrap .services-grid { grid-template-columns: 1fr !important; }
+  .landing-wrap .section-title { font-size: 22px !important; }
+}
+
+/* About Page */
+@media (max-width: 768px) {
+  .about-wrap .lp-nav-links,
+  .about-wrap .lp-nav-btns { display: none !important; }
+  .about-wrap .lp-mobile-toggle { display: flex !important; }
+  .about-wrap .footer-content { flex-direction: column !important; gap: 24px !important; }
+}
+
+/* Contact Page */
+@media (max-width: 768px) {
+  .contact-wrap .lp-nav-links,
+  .contact-wrap .lp-nav-btns { display: none !important; }
+  .contact-wrap .lp-mobile-toggle { display: flex !important; }
+  .contact-wrap .footer-content { flex-direction: column !important; gap: 24px !important; }
+  .contact-wrap .contact-grid { flex-direction: column !important; }
+}

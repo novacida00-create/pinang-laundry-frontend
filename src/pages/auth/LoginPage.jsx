@@ -1,8 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../../utils/icons.jsx";
 
 export default function LoginPage() {
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+@media (max-width: 768px) {
+.alp-wrap > div[style*="z-index: 1"] { flex-direction: column !important; width: 92% !important; max-width: 420px !important; border-radius: 24px !important; }
+.alp-wrap > div[style*="z-index: 1"] > div:first-child { width: 100% !important; min-width: unset !important; padding: 28px 20px 20px !important; border-radius: 24px 24px 0 0 !important; }
+.alp-wrap > div[style*="z-index: 1"] > div:last-child { padding: 20px 16px 24px !important; }
+.alp-wrap input { font-size: 16px !important; padding: 14px 16px !important; width: 100% !important; border-radius: 14px !important; box-sizing: border-box !important; }
+.alp-wrap button { font-size: 16px !important; padding: 14px !important; border-radius: 14px !important; }
+}
+@media (max-width: 480px) {
+.alp-wrap > div[style*="z-index: 1"] { width: 94% !important; }
+.alp-wrap > div[style*="z-index: 1"] > div:first-child { padding: 20px 16px 16px !important; }
+.alp-wrap > div[style*="z-index: 1"] > div:first-child > div:first-child { font-size: 36px !important; }
+.alp-wrap input { font-size: 15px !important; padding: 12px 14px !important; }
+.alp-wrap button { font-size: 15px !important; padding: 13px !important; }
+}
+`;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -16,7 +37,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="alp-wrap" style={styles.container}>
       <div style={styles.leftBg}></div>
       <div style={styles.rightBg}></div>
       <div style={styles.card}>

@@ -42,7 +42,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div style={styles.container} className="container-wrap">
+    <div style={styles.container} className="landing-wrap container-wrap">
       {/* STICKY NAVBAR */}
       <header style={{ ...styles.navbar, ...(isScrolled ? styles.navbarScrolled : {}) }}>
         <div style={styles.navContent} className="nav-content">
@@ -54,19 +54,19 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <nav style={styles.navLinks} className="nav-link">
+          <nav style={styles.navLinks} className="lp-nav-links nav-link">
             <a href="#home" className="nav-link" style={styles.navLink}>Home</a>
             <a href="#services" className="nav-link" style={styles.navLink}>Layanan</a>
             <a href="#about" className="nav-link" style={styles.navLink}>Tentang</a>
             <a href="#contact" className="nav-link" style={styles.navLink}>Kontak</a>
           </nav>
 
-          <div style={styles.navButtons} className="nav-btns">
+          <div style={styles.navButtons} className="lp-nav-btns nav-btns">
             <button onClick={() => navigate("/login")} style={styles.navLoginBtn}>Login Admin</button>
             <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
           </div>
 
-          <button className="mobile-toggle" style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
+          <button className="lp-mobile-toggle mobile-toggle" style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
             {mobileMenu ? <Icon name="x" /> : <Icon name="menu2" />}
           </button>
         </div>

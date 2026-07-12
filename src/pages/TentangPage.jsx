@@ -14,7 +14,7 @@ export default function TentangPage() {
   }, []);
 
   return (
-    <div style={styles.container}>
+    <div className="about-wrap" style={styles.container}>
       <header style={{ ...styles.navbar, ...(isScrolled ? styles.navbarScrolled : {}) }}>
         <div style={styles.navContent}>
           <div style={styles.navLogo}>
@@ -24,17 +24,17 @@ export default function TentangPage() {
               <span style={styles.navLogoSub}>Bersih, Cepat, Terpercaya</span>
             </div>
           </div>
-          <nav style={styles.navLinks}>
+          <nav className="lp-nav-links" style={styles.navLinks}>
             <a href="/" style={styles.navLink}>Home</a>
             <a href="/layanan" style={styles.navLink}>Layanan</a>
             <a href="/tentang" style={{ ...styles.navLink, ...styles.navLinkActive }}>Tentang</a>
             <a href="/kontak" style={styles.navLink}>Kontak</a>
           </nav>
-          <div style={styles.navButtons}>
+          <div className="lp-nav-btns" style={styles.navButtons}>
             <button onClick={() => navigate("/login")} style={styles.navLoginBtn}>Login Admin</button>
             <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
           </div>
-          <button style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
+          <button className="lp-mobile-toggle" style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
             {mobileMenu ? <Icon name="x" /> : <Icon name="menu2" />}
           </button>
         </div>
@@ -100,7 +100,7 @@ export default function TentangPage() {
       </section>
 
       <footer style={styles.footer}>
-        <div style={styles.footerContent}>
+        <div className="footer-content" style={styles.footerContent}>
           <div style={styles.footerBrand}>
             <span style={styles.footerLogo}>🧺</span>
             <div>

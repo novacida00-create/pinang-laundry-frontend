@@ -24,8 +24,33 @@ export default function Layanan() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+@media (max-width: 768px) {
+.lp-wrap .lp-nav-links,.lp-wrap .lp-nav-btns{display:none!important}
+.lp-wrap .lp-mobile-toggle{display:flex!important}
+.lp-wrap .lp-grid{grid-template-columns:repeat(2,1fr)!important;gap:16px!important}
+.lp-wrap .lp-hero-title{font-size:28px!important}
+.lp-wrap .lp-hero-sub{font-size:14px!important}
+.lp-wrap .lp-cta-title{font-size:24px!important}
+.lp-wrap .lp-cta-sub{font-size:14px!important}
+.lp-wrap .lp-service-card{padding:20px!important}
+.lp-wrap .lp-footer-content{flex-direction:column!important;gap:24px!important}
+}
+@media (max-width: 480px) {
+.lp-wrap .lp-grid{grid-template-columns:1fr!important}
+.lp-wrap .lp-hero-title{font-size:24px!important}
+.lp-wrap .lp-service-name{font-size:18px!important}
+.lp-wrap .lp-service-price{font-size:20px!important}
+}
+`;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
+
   return (
-    <div style={styles.container}>
+    <div className="lp-wrap" style={styles.container}>
       {/* STICKY NAVBAR */}
       <header style={{ ...styles.navbar, ...(isScrolled ? styles.navbarScrolled : {}) }}>
         <div style={styles.navContent}>
@@ -37,19 +62,19 @@ export default function Layanan() {
             </div>
           </div>
 
-          <nav style={styles.navLinks}>
+          <nav className="lp-nav-links" style={styles.navLinks}>
             <a href="/" style={styles.navLink}>Home</a>
             <a href="/layanan" style={{ ...styles.navLink, ...styles.navLinkActive }}>Layanan</a>
             <a href="/tentang" style={styles.navLink}>Tentang</a>
             <a href="/kontak" style={styles.navLink}>Kontak</a>
           </nav>
 
-          <div style={styles.navButtons}>
+          <div className="lp-nav-btns" style={styles.navButtons}>
             <button onClick={() => navigate("/login")} style={styles.navLoginBtn}>Login Admin</button>
             <button onClick={() => navigate("/customer/login")} style={styles.navOrderBtn}>Pesan Sekarang</button>
           </div>
 
-          <button style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
+          <button className="lp-mobile-toggle" style={styles.mobileToggle} onClick={() => setMobileMenu(!mobileMenu)}>
             {mobileMenu ? <Icon name="x" /> : <Icon name="menu2" />}
           </button>
         </div>
@@ -68,24 +93,24 @@ export default function Layanan() {
       {/* HERO */}
       <section style={styles.hero}>
         <div style={styles.heroContent}>
-          <h1 style={styles.heroTitle}>Layanan & Harga</h1>
-          <p style={styles.heroSubtitle}>Pilihan lengkap layanan laundry dengan harga transparan dan berkualitas</p>
+          <h1 className="lp-hero-title" style={styles.heroTitle}>Layanan & Harga</h1>
+          <p className="lp-hero-sub" style={styles.heroSubtitle}>Pilihan lengkap layanan laundry dengan harga transparan dan berkualitas</p>
         </div>
       </section>
 
       {/* SERVICES GRID */}
       <section style={styles.servicesSection}>
-        <div style={styles.servicesGrid}>
+        <div className="lp-grid" style={styles.servicesGrid}>
           {services.map((s, i) => (
-            <div key={i} style={styles.serviceCard}>
+            <div key={i} className="lp-service-card" style={styles.serviceCard}>
               <div style={styles.serviceCardHeader}>
                 <div style={styles.serviceIcon}>{serviceIcons[s.name] || "🧺"}</div>
                 <div style={styles.serviceTime}>{s.waktu}</div>
               </div>
-              <h3 style={styles.serviceName}>{s.name}</h3>
+              <h3 className="lp-service-name" style={styles.serviceName}>{s.name}</h3>
               <p style={styles.serviceDesc}>{s.desc}</p>
               <div style={styles.servicePriceRow}>
-                <span style={styles.servicePrice}>{s.price}</span>
+                <span className="lp-service-price" style={styles.servicePrice}>{s.price}</span>
                 <span style={styles.serviceUnit}>{s.unit}</span>
               </div>
               <button onClick={() => navigate("/customer/login")} style={styles.serviceOrderBtn}>
@@ -99,15 +124,15 @@ export default function Layanan() {
       {/* CTA */}
       <section style={styles.ctaSection}>
         <div style={styles.ctaContent}>
-          <h2 style={styles.ctaTitle}>Siap Mencuci?</h2>
-          <p style={styles.ctaSubtitle}>Hubungi kami sekarang untuk layanan terbaik!</p>
+          <h2 className="lp-cta-title" style={styles.ctaTitle}>Siap Mencuci?</h2>
+          <p className="lp-cta-sub" style={styles.ctaSubtitle}>Hubungi kami sekarang untuk layanan terbaik!</p>
           <button onClick={() => navigate("/customer/login")} style={styles.ctaButton}>Mulai Pesan Sekarang 🧺</button>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer style={styles.footer}>
-        <div style={styles.footerContent}>
+          <div className="lp-footer-content" style={styles.footerContent}>
           <div style={styles.footerBrand}>
             <span style={styles.footerLogo}>🧺</span>
             <div>
